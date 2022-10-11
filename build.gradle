@@ -1,0 +1,36 @@
+plugins {
+	id "java"
+	id "edu.wpi.first.GradleRIO" version "2022.4.1"
+	id 'com.diffplug.spotless' version '6.11.0'
+}
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+dependencies {
+	implementation wpi.java.deps.wpilib()
+	implementation wpi.java.vendor.java()
+
+	testImplementation 'junit:junit:4.13.1'
+}
+
+test {
+	testLogging.showStandardStreams = true
+}
+
+spotless {
+
+format 'misc', {
+	target '*.gradle', '*.md', '.gitignore'
+
+	trimTrailingWhitespace()
+	indentWithTabs()
+	endWithNewline()
+}
+java {
+	googleJavaFormat('1.8').aosp().reflowLongStrings()
+	formatAnnotations()
+
+	licenseHeaderFile 'licenseHeader.txt'
+}
+}
