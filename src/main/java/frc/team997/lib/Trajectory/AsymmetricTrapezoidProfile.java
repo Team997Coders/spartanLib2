@@ -74,6 +74,26 @@ public class AsymmetricTrapezoidProfile {
             this.maxAcceleration = maxAcceleration;
             this.maxDeceleration = maxDeceleration;
         }
+        @Override
+        public boolean equals(Object other) {
+            double epsilon = 0.0001;
+            if (other instanceof Constraints) {
+                Constraints rhs = (Constraints) other;
+                return Math.abs(this.maxVelocity - rhs.maxVelocity) < epsilon
+                        && Math.abs(this.maxAcceleration - rhs.maxAcceleration) < epsilon
+                        && Math.abs(this.maxDeceleration - rhs.maxDeceleration) < epsilon;
+            } else {
+                return false;
+            }
+        }
+        @Override
+        public int hashCode() {
+            return Objects.hash(maxVelocity, maxAcceleration, maxDeceleration);
+        }
+        @Override
+        public String toString() {
+            return "Constraints[maxVelocity: "+maxVelocity+", maxAcceleration: "+maxAcceleration+", maxDeceleration"+maxDeceleration+"]";
+        }
     }
     public static class State {
         final double position;
@@ -90,9 +110,11 @@ public class AsymmetricTrapezoidProfile {
         }
         @Override
         public boolean equals(Object other) {
+            double epsilon = 0.0001;
             if (other instanceof State) {
                 State rhs = (State) other;
-                return this.position == rhs.position && this.velocity == rhs.velocity;
+                return Math.abs(this.position - rhs.position) < epsilon
+                        && Math.abs(this.velocity - rhs.velocity) < epsilon;
             } else {
                 return false;
             }
@@ -129,6 +151,23 @@ public class AsymmetricTrapezoidProfile {
             this.position = position;
             this.acceleration = acceleration;
             this.initialVelocity = initialVelocity;
+        }
+        @Override
+        public boolean equals(Object other) {
+            double epsilon = 0.0001;
+            if (other instanceof Phase) {
+                Phase rhs = (Phase) other;
+                return this.time == rhs.time
+                        && Math.abs(this.position - rhs.position) < epsilon
+                        && Math.abs(this.acceleration - rhs.acceleration) < epsilon
+                        && Math.abs(this.initialVelocity - rhs.initialVelocity) < epsilon;
+            } else {
+                return false;
+            }
+        }
+        @Override
+        public int hashCode() {
+            return Objects.hash(time, position, acceleration, initialVelocity);
         }
         @Override
         public String toString() {
@@ -241,10 +280,6 @@ public class AsymmetricTrapezoidProfile {
             phases.add(coastPhase);
         if (decelPhase.time > 0)
             phases.add(decelPhase);
-
-        for (Phase phase : phases) {
-            System.out.println(phase);
-        }
     }
     /**
      * Calculate the correct position and velocity for the profile at a given time
