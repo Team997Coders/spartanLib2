@@ -20,7 +20,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 
 /** Subclass of Pose2d that also holds a time value. */
 public class TimestampedPose2d extends Pose2d {
-    private long m_timeMillis;
+    private final long timeMillis;
 
     /**
      * Creates a TimestampedPose2d out of a specified pose and timestamp.
@@ -30,7 +30,7 @@ public class TimestampedPose2d extends Pose2d {
      */
     public TimestampedPose2d(Pose2d pose, long timeMillis) {
         super(pose.getTranslation(), pose.getRotation());
-        m_timeMillis = timeMillis;
+        this.timeMillis = timeMillis;
     }
 
     /**
@@ -50,6 +50,6 @@ public class TimestampedPose2d extends Pose2d {
      * @return The value of the timestamp.
      */
     public long getTimeMillis() {
-        return m_timeMillis;
+        return timeMillis;
     }
 }

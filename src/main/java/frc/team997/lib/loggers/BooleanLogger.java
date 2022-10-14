@@ -30,14 +30,14 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
  * Shuffleboard and external log parsers.
  */
 public class BooleanLogger {
-    private DataLog m_dataLog;
-    private String m_tabName;
-    private Boolean m_putToDashboard;
-    private Boolean m_putInLog;
-    private String m_key;
-    private Boolean m_lastValue;
+    private final DataLog dataLog;
+    private final String tabName;
+    private final Boolean putToDashboard;
+    private final Boolean putInLog;
+    private final String key;
+    private Boolean lastValue;
 
-    private BooleanLogEntry m_logEntry;
+    private BooleanLogEntry logEntry;
 
     /**
      * Constructor for a BooleanLogger.
@@ -52,24 +52,19 @@ public class BooleanLogger {
      */
     public BooleanLogger(
             DataLog dataLog, String tabName, String key, Boolean putToDashboard, Boolean putInLog) {
-        m_dataLog = dataLog;
-        m_tabName = tabName;
-        m_key = key;
-        m_putToDashboard = putToDashboard;
-        m_putInLog = putInLog;
-        m_lastValue = null;
+        this.dataLog = dataLog;
+        this.tabName = tabName;
+        this.key = key;
+        this.putToDashboard = putToDashboard;
+        this.putInLog = putInLog;
+        lastValue = null;
 
-        if (m_putToDashboard && (m_tabName != null)) {
-            Shuffleboard.getTab(m_tabName)
-                    .addBoolean(
-                            m_key,
-                            () -> {
-                                return m_lastValue;
-                            });
+        if (this.putToDashboard && (this.tabName != null)) {
+            Shuffleboard.getTab(this.tabName).addBoolean(this.key, () -> lastValue);
         }
 
-        if (m_putInLog && (m_dataLog != null)) {
-            m_logEntry = new BooleanLogEntry(m_dataLog, m_key);
+        if (this.putInLog && (this.dataLog != null)) {
+            logEntry = new BooleanLogEntry(this.dataLog, this.key);
         }
     }
 
@@ -90,9 +85,9 @@ public class BooleanLogger {
      * @param value The new boolean value to update to.
      */
     public void update(Boolean value) {
-        if (m_putInLog && (m_dataLog != null) && (value != m_lastValue)) {
-            m_logEntry.append(value);
+        if (putInLog && (dataLog != null) && (value != lastValue)) {
+            logEntry.append(value);
         }
-        m_lastValue = value;
+        lastValue = value;
     }
 }

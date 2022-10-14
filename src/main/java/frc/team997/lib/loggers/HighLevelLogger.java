@@ -37,7 +37,8 @@ public class HighLevelLogger {
      * the source for this class, in the deploy directory.
      *
      * <p>These should be updated by the build.gradle of your functional robot code as specified by
-     * https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html
+     * <a
+     * href="https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html">deploy-git-data</a>
      */
     public static void startLogging() {
         if (!hasStarted) {

@@ -26,8 +26,8 @@ import java.security.InvalidParameterException;
  * over what order to organize the multiplication and division in.
  */
 public class GearRatioHelper {
-    private double m_inputRatio;
-    private double m_outputRatio;
+    private final double inputRatio;
+    private final double outputRatio;
 
     /**
      * Creates a gear ratio helper.
@@ -44,8 +44,8 @@ public class GearRatioHelper {
         if (inputRatio <= 0 || outputRatio <= 0) {
             throw new InvalidParameterException("Input/output ratios must be greater than 0!");
         }
-        m_inputRatio = inputRatio;
-        m_outputRatio = outputRatio;
+        this.inputRatio = inputRatio;
+        this.outputRatio = outputRatio;
     }
 
     /**
@@ -63,7 +63,7 @@ public class GearRatioHelper {
      * @return The double ratio as input::output.
      */
     public double toDoubleRatioInputToOutput() {
-        return m_inputRatio / m_outputRatio;
+        return inputRatio / outputRatio;
     }
 
     /**
@@ -74,7 +74,7 @@ public class GearRatioHelper {
      * @return The distance travelled by the *output* side.
      */
     public double outputFromInput(double inputSide) {
-        return (inputSide * m_inputRatio) / m_outputRatio;
+        return (inputSide * inputRatio) / outputRatio;
     }
 
     /**
@@ -85,6 +85,6 @@ public class GearRatioHelper {
      * @return The distance travelled by the *output* side.
      */
     public double inputFromOutput(double outputSide) {
-        return (outputSide * m_outputRatio) / m_inputRatio;
+        return (outputSide * outputRatio) / inputRatio;
     }
 }

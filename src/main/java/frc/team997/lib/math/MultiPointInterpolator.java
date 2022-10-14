@@ -21,7 +21,7 @@ import java.util.TreeMap;
 
 /** A class to provide linear interpolation, using a set of key/value pairs. */
 public class MultiPointInterpolator {
-    private TreeMap<Double, Double> m_points;
+    private final TreeMap<Double, Double> points;
 
     /**
      * Constructs a MultiPointInterpolator.
@@ -30,13 +30,13 @@ public class MultiPointInterpolator {
      *     (time etc.), and the second the value.
      * @throws InvalidParameterException If the map is empty.
      */
-    public MultiPointInterpolator(TreeMap<Double, Double> points) throws Exception {
+    public MultiPointInterpolator(TreeMap<Double, Double> points) throws InvalidParameterException {
         if (points.isEmpty()) {
             throw new InvalidParameterException("Length of map must not be zero!");
         }
-        m_points = points;
-        if (!m_points.containsKey(0.0)) {
-            m_points.put(
+        this.points = points;
+        if (!this.points.containsKey(0.0)) {
+            this.points.put(
                     0.0, 0.0); // prevent case where there's no starting value to interpolate from
         }
     }
@@ -47,7 +47,7 @@ public class MultiPointInterpolator {
      * @param points A TreeMap, in the same format as the one used for construction.
      */
     public void putNewPairs(TreeMap<Double, Double> points) {
-        m_points.putAll(points);
+        this.points.putAll(points);
     }
 
     /**
@@ -57,7 +57,7 @@ public class MultiPointInterpolator {
      * @param value Double value of the... value.
      */
     public void putNewPair(double key, double value) {
-        m_points.put(key, value);
+        points.put(key, value);
     }
 
     /**
@@ -67,20 +67,20 @@ public class MultiPointInterpolator {
      * @return The value at that place, linearly interpolated if not defined.
      * @throws InvalidParameterException If the key to sample is less than zero.
      */
-    public double sample(double key) throws Exception {
+    public double sample(double key) throws InvalidParameterException {
         if (key < 0) {
             throw new InvalidParameterException("Place to sample must not be less than zero!");
         }
-        if (m_points.containsKey(key)) {
-            return m_points.get(key); // return if already defined
+        if (points.containsKey(key)) {
+            return points.get(key); // return if already defined
         } else {
-            Double ceiling = m_points.ceilingKey(key);
+            Double ceiling = points.ceilingKey(key);
             if (ceiling == null) {
                 return 0; // if key after highest defined value, return 0
             }
-            double floor = m_points.floorKey(key); // interpolate otherwise
+            double floor = points.floorKey(key); // interpolate otherwise
             return UtilityMath.simpleLinearInterpolation(
-                    m_points.get(floor), floor, m_points.get(ceiling), ceiling, key);
+                    points.get(floor), floor, points.get(ceiling), ceiling, key);
         }
     }
 }

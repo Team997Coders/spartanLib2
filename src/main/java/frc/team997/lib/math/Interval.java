@@ -23,15 +23,15 @@ package frc.team997.lib.math;
  */
 public class Interval {
     /** Whether a value equal to an endpoint should be considered part of the interval. */
-    public static enum Inclusion {
+    public enum Inclusion {
         INCLUSIVE,
         NONINCLUSIVE
     }
 
-    private Inclusion m_smallSideInclusion;
-    private Inclusion m_largeSideInclusion;
-    private Double m_smallSide;
-    private Double m_largeSide;
+    private final Inclusion smallSideInclusion;
+    private final Inclusion largeSideInclusion;
+    private final Double smallSide;
+    private final Double largeSide;
 
     /**
      * Creates an interval with the specified endpoints.
@@ -50,15 +50,15 @@ public class Interval {
             Double rightSide,
             Inclusion rightSideInclusion) {
         if (leftSide <= rightSide) {
-            m_smallSideInclusion = leftSideInclusion;
-            m_smallSide = leftSide;
-            m_largeSideInclusion = rightSideInclusion;
-            m_largeSide = rightSide;
+            smallSideInclusion = leftSideInclusion;
+            smallSide = leftSide;
+            largeSideInclusion = rightSideInclusion;
+            largeSide = rightSide;
         } else {
-            m_smallSideInclusion = rightSideInclusion;
-            m_smallSide = rightSide;
-            m_largeSideInclusion = leftSideInclusion;
-            m_largeSide = leftSide;
+            smallSideInclusion = rightSideInclusion;
+            smallSide = rightSide;
+            largeSideInclusion = leftSideInclusion;
+            largeSide = leftSide;
         }
     }
 
@@ -69,13 +69,9 @@ public class Interval {
      * @return Whether the provided number is included in the interval.
      */
     public boolean includes(double number) {
-        if ((number == m_smallSide && m_smallSideInclusion == Inclusion.INCLUSIVE)
-                || (number == m_largeSide && m_largeSideInclusion == Inclusion.INCLUSIVE)) {
+        if ((number == smallSide && smallSideInclusion == Inclusion.INCLUSIVE)
+                || (number == largeSide && largeSideInclusion == Inclusion.INCLUSIVE)) {
             return true;
-        } else if (number > m_smallSide && number < m_largeSide) {
-            return true;
-        } else {
-            return false;
-        }
+        } else return number > smallSide && number < largeSide;
     }
 }
