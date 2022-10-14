@@ -11,7 +11,7 @@ dependencies {
 	implementation wpi.java.deps.wpilib()
 	implementation wpi.java.vendor.java()
 
-	testImplementation 'junit:junit:4.13.1'
+	testImplementation 'junit:junit:4.13.2'
 }
 
 test {
@@ -28,9 +28,13 @@ format 'misc', {
 	endWithNewline()
 }
 java {
-	googleJavaFormat('1.8').aosp().reflowLongStrings()
+	googleJavaFormat('1.15.0').aosp().reflowLongStrings()
 	formatAnnotations()
 
 	licenseHeaderFile 'licenseHeader.txt'
 }
+}
+
+repositories {
+	mavenCentral()
 }

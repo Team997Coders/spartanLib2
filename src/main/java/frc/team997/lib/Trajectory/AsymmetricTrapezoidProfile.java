@@ -1,17 +1,17 @@
 /**
 Copyright 2022 FRC Team 997
 
-This program is free software:
-you can redistribute it and/or modify it under the terms of the
-GNU General Public License as published by the Free Software Foundation,
+This program is free software: 
+you can redistribute it and/or modify it under the terms of the 
+GNU General Public License as published by the Free Software Foundation, 
 either version 3 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+This program is distributed in the hope that it will be useful, 
+but WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with SpartanLib2.
+You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
 package frc.team997.lib.Trajectory;
@@ -83,6 +83,7 @@ public class AsymmetricTrapezoidProfile {
             this.maxAcceleration = maxAcceleration;
             this.maxDeceleration = maxDeceleration;
         }
+
         @Override
         public boolean equals(Object other) {
             double epsilon = 0.0001;
@@ -95,18 +96,28 @@ public class AsymmetricTrapezoidProfile {
                 return false;
             }
         }
+
         @Override
         public int hashCode() {
             return Objects.hash(maxVelocity, maxAcceleration, maxDeceleration);
         }
+
         @Override
         public String toString() {
-            return "Constraints[maxVelocity: "+maxVelocity+", maxAcceleration: "+maxAcceleration+", maxDeceleration"+maxDeceleration+"]";
+            return "Constraints[maxVelocity: "
+                    + maxVelocity
+                    + ", maxAcceleration: "
+                    + maxAcceleration
+                    + ", maxDeceleration"
+                    + maxDeceleration
+                    + "]";
         }
     }
+
     public static class State {
         public final double position;
         public final double velocity;
+
         /**
          * Construct a state for a AsymmetricTrapezoidProfile.
          *
@@ -117,6 +128,7 @@ public class AsymmetricTrapezoidProfile {
             this.position = position;
             this.velocity = velocity;
         }
+
         @Override
         public boolean equals(Object other) {
             double epsilon = 0.0001;
@@ -128,13 +140,15 @@ public class AsymmetricTrapezoidProfile {
                 return false;
             }
         }
+
         @Override
         public int hashCode() {
             return Objects.hash(position, velocity);
         }
+
         @Override
         public String toString() {
-            return "State[position: "+position+", velocity: "+velocity+"]";
+            return "State[position: " + position + ", velocity: " + velocity + "]";
         }
     }
 
@@ -155,7 +169,8 @@ public class AsymmetricTrapezoidProfile {
      * @param initial The initial state (usually the current state).
      */
     public AsymmetricTrapezoidProfile(Constraints constraints, State target, State initial) {
-        // in the case the target position is before the initial, we should calculate it all positive,
+        // in the case the target position is before the initial, we should calculate it all
+        // positive,
         // and flip the sign of the resulting acceleration and position
         double targetPosition = target.position - initial.position;
         direction = targetPosition < 0 ? -1 : 1;
@@ -166,30 +181,40 @@ public class AsymmetricTrapezoidProfile {
 
         this.constraints = new Constraints(maxVelocity, maxAccel, maxDecel);
 
-        // constrain the initial and target velocities to bellow maxVelocity (this is how wpilib does it)
+        // constrain the initial and target velocities to bellow maxVelocity (this is how wpilib
+        // does it)
         // initial velocity can be in the wrong direction when starting
-        double initialVelocity = direction == 1 ? Math.min(initial.velocity, maxVelocity) : Math.max(initial.velocity, maxVelocity);
+        double initialVelocity =
+                direction == 1
+                        ? Math.min(initial.velocity, maxVelocity)
+                        : Math.max(initial.velocity, maxVelocity);
         // target velocity will always be in the correct direction
-        double targetVelocity = direction == 1 ? Math.min(target.velocity, maxVelocity) : Math.max(target.velocity, maxVelocity);
+        double targetVelocity =
+                direction == 1
+                        ? Math.min(target.velocity, maxVelocity)
+                        : Math.max(target.velocity, maxVelocity);
 
         this.initial = new State(initial.position, initialVelocity);
         this.target = new State(target.position, targetVelocity);
 
-        // calculate the time and position to reach max velocity (don't worry if we go over max position)
-        double accelTime = (maxVelocity-initialVelocity)/maxAccel;
-        double accelPos = 0.5 * maxAccel * Math.pow(accelTime, 2) + accelTime*initialVelocity;
+        // calculate the time and position to reach max velocity (don't worry if we go over max
+        // position)
+        double accelTime = (maxVelocity - initialVelocity) / maxAccel;
+        double accelPos = 0.5 * maxAccel * Math.pow(accelTime, 2) + accelTime * initialVelocity;
 
         // calculate the time and position to decelerate to target velocity
-        double decelTime = (targetVelocity-maxVelocity)/maxDecel;
-        double decelPos = -0.5 * maxDecel * Math.pow(decelTime, 2) + decelTime*initialVelocity;
+        double decelTime = (targetVelocity - maxVelocity) / maxDecel;
+        double decelPos = -0.5 * maxDecel * Math.pow(decelTime, 2) + decelTime * initialVelocity;
 
         // the remaining position is at max velocity (coasting)
         double coastPos = targetPosition - (accelPos + decelPos);
         double coastTime = coastPos / maxVelocity;
 
-        // if the coast position is a different sign then the rest of the phases, then it's not possible to speed up to
-        // the max velocity without overshooting, so we need to find the intersection of the acceleration and deceleration.
-        if (coastPos*direction < 0) {
+        // if the coast position is a different sign then the rest of the phases, then it's not
+        // possible to speed up to
+        // the max velocity without overshooting, so we need to find the intersection of the
+        // acceleration and deceleration.
+        if (coastPos * direction < 0) {
             /*
              * We calculate the time of intersection by splitting up the profile into 3 integrals: the acceleration to
              * the intersection point, the deceleration back to the initial velocity, then the deceleration to the
@@ -200,36 +225,48 @@ public class AsymmetricTrapezoidProfile {
              * endTime = -(initialVelocity - targetVelocity)/decel to put everything in terms of either accelTime or
              * constants, then we can use the quadratic formula to solve for accelTime
              */
-            double vDiff = initialVelocity-targetVelocity;
-            double a = (0.5*maxAccel) - (Math.pow(maxAccel, 2)/(2*maxDecel));
-            double b = initialVelocity - ((initialVelocity*maxAccel)/maxDecel);
-            double c = -((Math.pow(vDiff, 2)/(2*maxDecel)) + ((targetVelocity*vDiff)/maxDecel) + targetPosition);
-            // subtracting the square root will always produce a negative result with positive target positions,
+            double vDiff = initialVelocity - targetVelocity;
+            double a = (0.5 * maxAccel) - (Math.pow(maxAccel, 2) / (2 * maxDecel));
+            double b = initialVelocity - ((initialVelocity * maxAccel) / maxDecel);
+            double c =
+                    -((Math.pow(vDiff, 2) / (2 * maxDecel))
+                            + ((targetVelocity * vDiff) / maxDecel)
+                            + targetPosition);
+            // subtracting the square root will always produce a negative result with positive
+            // target positions,
             // and vice versa with negatives, so we can always add direction * sqrt.
-            accelTime = (-b + direction*Math.sqrt(Math.pow(b, 2)-(4*a*c)))/(2*a);
-            decelTime = -((maxAccel/maxDecel)*accelTime + vDiff/maxDecel);
+            accelTime = (-b + direction * Math.sqrt(Math.pow(b, 2) - (4 * a * c))) / (2 * a);
+            decelTime = -((maxAccel / maxDecel) * accelTime + vDiff / maxDecel);
 
             // recalculate accel and decel position based off new times
-            accelPos = 0.5 * maxAccel * Math.pow(accelTime, 2) + accelTime*initialVelocity;
-            decelPos = -0.5 * maxDecel * Math.pow(decelTime, 2) + decelTime*targetVelocity;
+            accelPos = 0.5 * maxAccel * Math.pow(accelTime, 2) + accelTime * initialVelocity;
+            decelPos = -0.5 * maxDecel * Math.pow(decelTime, 2) + decelTime * targetVelocity;
 
             // since we've adjusted the accel and decel we need to set the coast to 0
             coastTime = 0;
             coastPos = 0;
 
-            // if the deceleration time is negative, then our target velocity is higher than we can possibly get to
+            // if the deceleration time is negative, then our target velocity is higher than we can
+            // possibly get to
             // it's probably best to just go as fast as we can and end in the right position
             if (decelTime < 0) {
                 accelPos = targetPosition;
-                accelTime = (-initialVelocity + Math.sqrt(Math.pow(initialVelocity, 2) + 2*maxAccel*accelPos))/maxAccel;
+                accelTime =
+                        (-initialVelocity
+                                        + Math.sqrt(
+                                                Math.pow(initialVelocity, 2)
+                                                        + 2 * maxAccel * accelPos))
+                                / maxAccel;
             }
-            // if the acceleration time is negative, then our target velocity is lower than we can possibly get to,
-            // and we should decelerate faster than our maximum deceleration so that we get to our position
+            // if the acceleration time is negative, then our target velocity is lower than we can
+            // possibly get to,
+            // and we should decelerate faster than our maximum deceleration so that we get to our
+            // position
             // at the target velocity
             if (accelTime < 0) {
                 decelPos = targetPosition;
-                decelTime = (2*decelPos)/(initialVelocity+targetVelocity);
-                maxDecel = (targetVelocity-initialVelocity)/decelTime;
+                decelTime = (2 * decelPos) / (initialVelocity + targetVelocity);
+                maxDecel = (targetVelocity - initialVelocity) / decelTime;
                 // we set these so that our initial velocity in the ProfilePhase is correct
                 accelTime = -1;
                 maxAccel = 0;
@@ -238,14 +275,13 @@ public class AsymmetricTrapezoidProfile {
 
         ProfilePhase accelPhase = new ProfilePhase(accelTime, accelPos, maxAccel, initialVelocity);
         ProfilePhase coastPhase = new ProfilePhase(coastTime, coastPos, 0, maxVelocity);
-        ProfilePhase decelPhase = new ProfilePhase(decelTime, decelPos, maxDecel, accelTime*maxAccel+initialVelocity);
+        ProfilePhase decelPhase =
+                new ProfilePhase(
+                        decelTime, decelPos, maxDecel, accelTime * maxAccel + initialVelocity);
 
-        if (accelPhase.time > 0)
-            phases.add(accelPhase);
-        if (coastPhase.time > 0)
-            phases.add(coastPhase);
-        if (decelPhase.time > 0)
-            phases.add(decelPhase);
+        if (accelPhase.time > 0) phases.add(accelPhase);
+        if (coastPhase.time > 0) phases.add(coastPhase);
+        if (decelPhase.time > 0) phases.add(decelPhase);
     }
     /**
      * Calculate the correct position and velocity for the profile at a given time
@@ -256,14 +292,15 @@ public class AsymmetricTrapezoidProfile {
     public State calculate(double time) {
         double position = initial.position;
         for (ProfilePhase phase : phases) {
-            if (time-phase.time < 0) {
+            if (time - phase.time < 0) {
                 return new State(
-                        position + 0.5 * phase.acceleration * Math.pow(time, 2) + phase.initialVelocity*time,
-                        time*phase.acceleration + phase.initialVelocity
-                );
+                        position
+                                + 0.5 * phase.acceleration * Math.pow(time, 2)
+                                + phase.initialVelocity * time,
+                        time * phase.acceleration + phase.initialVelocity);
             } else {
-                time-=phase.time;
-                position+=phase.position;
+                time -= phase.time;
+                position += phase.position;
             }
         }
         return new State(position, target.velocity);
@@ -272,24 +309,27 @@ public class AsymmetricTrapezoidProfile {
      * Returns the time as a function of the target position.
      *
      * @param targetPosition The target position.
-     * @return The time left until a target position in the profile is reached.
-     * Returns NaN if targetPosition < initial.position, and the total time if targetPosition > target.position
+     * @return The time left until a target position in the profile is reached. Returns NaN if
+     *     targetPosition < initial.position, and the total time if targetPosition > target.position
      */
     public double timeLeftUntil(double targetPosition) {
         targetPosition = targetPosition - initial.position;
         double time = 0;
         for (ProfilePhase phase : phases) {
-            if ((targetPosition-phase.position)*direction < 0) {
-                if (phase.acceleration==0) {
-                    time += targetPosition/constraints.maxVelocity;
+            if ((targetPosition - phase.position) * direction < 0) {
+                if (phase.acceleration == 0) {
+                    time += targetPosition / constraints.maxVelocity;
                 } else {
-                    double sqrt = Math.sqrt(Math.pow(phase.initialVelocity, 2)+2*phase.acceleration*targetPosition);
-                    time += (-phase.initialVelocity + direction*sqrt)/phase.acceleration;
+                    double sqrt =
+                            Math.sqrt(
+                                    Math.pow(phase.initialVelocity, 2)
+                                            + 2 * phase.acceleration * targetPosition);
+                    time += (-phase.initialVelocity + direction * sqrt) / phase.acceleration;
                 }
                 return time;
             } else {
                 time += phase.time;
-                targetPosition-=phase.position;
+                targetPosition -= phase.position;
             }
         }
         return time;

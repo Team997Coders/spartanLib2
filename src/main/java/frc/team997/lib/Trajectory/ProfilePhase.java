@@ -1,17 +1,17 @@
 /**
 Copyright 2022 FRC Team 997
 
-This program is free software:
-you can redistribute it and/or modify it under the terms of the
-GNU General Public License as published by the Free Software Foundation,
+This program is free software: 
+you can redistribute it and/or modify it under the terms of the 
+GNU General Public License as published by the Free Software Foundation, 
 either version 3 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+This program is distributed in the hope that it will be useful, 
+but WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
 See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with SpartanLib2.
+You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
 package frc.team997.lib.Trajectory;
@@ -19,8 +19,8 @@ package frc.team997.lib.Trajectory;
 import java.util.Objects;
 
 /**
- * A data class for profile phase data.
- * Used for forming velocity/acceleration profiles with no regard for position accumulation
+ * A data class for profile phase data. Used for forming velocity/acceleration profiles with no
+ * regard for position accumulation
  */
 public class ProfilePhase {
     public final double time;
@@ -42,6 +42,7 @@ public class ProfilePhase {
         this.acceleration = acceleration;
         this.initialVelocity = initialVelocity;
     }
+
     @Override
     public boolean equals(Object other) {
         double epsilon = 0.0001;
@@ -55,12 +56,22 @@ public class ProfilePhase {
             return false;
         }
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(time, position, acceleration, initialVelocity);
     }
+
     @Override
     public String toString() {
-        return "Phase[time: "+time+", position: "+position+", acceleration: "+acceleration+", initialVelocity:"+initialVelocity+"]";
+        return "Phase[time: "
+                + time
+                + ", position: "
+                + position
+                + ", acceleration: "
+                + acceleration
+                + ", initialVelocity:"
+                + initialVelocity
+                + "]";
     }
 }
