@@ -29,14 +29,14 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
  * Shuffleboard and external log parsers.
  */
 public class DoubleLogger {
-    private DataLog m_dataLog;
-    private String m_tabName;
-    private Boolean m_putToDashboard;
-    private Boolean m_putInLog;
-    private String m_key;
-    private Double m_lastValue;
+    private final DataLog dataLog;
+    private final String tabName;
+    private final Boolean putToDashboard;
+    private final Boolean putInLog;
+    private final String key;
+    private Double lastValue;
 
-    private DoubleLogEntry m_logEntry;
+    private DoubleLogEntry logEntry;
 
     /**
      * Constructor for a DoubleLogger.
@@ -51,24 +51,22 @@ public class DoubleLogger {
      */
     public DoubleLogger(
             DataLog dataLog, String tabName, String key, Boolean putToDashboard, Boolean putInLog) {
-        m_dataLog = dataLog;
-        m_tabName = tabName;
-        m_key = key;
-        m_putToDashboard = putToDashboard;
-        m_putInLog = putInLog;
-        m_lastValue = null;
+        this.dataLog = dataLog;
+        this.tabName = tabName;
+        this.key = key;
+        this.putToDashboard = putToDashboard;
+        this.putInLog = putInLog;
+        lastValue = null;
 
-        if (m_putToDashboard && (m_tabName != null)) {
-            Shuffleboard.getTab(m_tabName)
+        if (this.putToDashboard && (this.tabName != null)) {
+            Shuffleboard.getTab(this.tabName)
                     .addNumber(
-                            m_key,
-                            () -> {
-                                return m_lastValue;
-                            });
+                            this.key,
+                            () -> lastValue);
         }
 
-        if (m_putInLog && (m_dataLog != null)) {
-            m_logEntry = new DoubleLogEntry(m_dataLog, m_key);
+        if (this.putInLog && (this.dataLog != null)) {
+            logEntry = new DoubleLogEntry(this.dataLog, this.key);
         }
     }
 
@@ -88,10 +86,10 @@ public class DoubleLogger {
      *
      * @param value The new double value to update to.
      */
-    public void update(Double value) {
-        if (m_putInLog && (m_dataLog != null) && (value != m_lastValue)) {
-            m_logEntry.append(value);
+    public void update(double value) {
+        if (putInLog && (dataLog != null) && (value != lastValue)) {
+            logEntry.append(value);
         }
-        m_lastValue = value;
+        lastValue = value;
     }
 }
