@@ -14,11 +14,11 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package frc.team997.lib.Math;
+package frc.team997.lib.math;
 
 import static org.junit.Assert.assertEquals;
 
-import frc.team997.lib.Util.GearRatioHelper;
+import frc.team997.lib.util.GearRatioHelper;
 import org.junit.Test;
 
 /* Tests for the GearRatioHelper. **/

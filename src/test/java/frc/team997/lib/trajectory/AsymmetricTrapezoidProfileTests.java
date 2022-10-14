@@ -14,11 +14,11 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package frc.team997.lib.Trajectory;
+package frc.team997.lib.trajectory;
 
 import static org.junit.Assert.*;
 
-import frc.team997.lib.Trajectory.AsymmetricTrapezoidProfile.*;
+import frc.team997.lib.trajectory.AsymmetricTrapezoidProfile.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;

@@ -14,7 +14,7 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package frc.team997.lib.Trajectory;
+package frc.team997.lib.trajectory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 
