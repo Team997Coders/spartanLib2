@@ -14,33 +14,33 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package frc.team997.lib.Loggers;
+package frc.team997.lib.loggers;
 
-import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 /**
- * A class that packages onboard logging and publishing to Shuffleboard / NetworkTables for
- * booleans.
+ * A class that packages onboard logging and publishing to Shuffleboard / NetworkTables for strings.
  *
- * <p>For instance, this can display and record whether a digital limit switch is pressed.
+ * <p>For instance, this can be used to display and record the state of a system using the {@code
+ * .toString()} method of an enum's members.
  *
  * <p>Separate classes are provided for several different data types to enforce type safety for
  * Shuffleboard and external log parsers.
  */
-public class BooleanLogger {
+public class StringLogger {
     private DataLog m_dataLog;
     private String m_tabName;
     private Boolean m_putToDashboard;
     private Boolean m_putInLog;
     private String m_key;
-    private Boolean m_lastValue;
+    private String m_lastValue;
 
-    private BooleanLogEntry m_logEntry;
+    private StringLogEntry m_logEntry;
 
     /**
-     * Constructor for a BooleanLogger.
+     * Constructor for a StringLogger.
      *
      * @param dataLog The log to publish to (most likely from {@code DataLogManager.getLog}). Can be
      *     {@code null} if not intending to publish to log.
@@ -50,7 +50,7 @@ public class BooleanLogger {
      * @param putToDashboard Whether to publish to dashboard.
      * @param putInLog Whether to publish to log.
      */
-    public BooleanLogger(
+    public StringLogger(
             DataLog dataLog, String tabName, String key, Boolean putToDashboard, Boolean putInLog) {
         m_dataLog = dataLog;
         m_tabName = tabName;
@@ -61,7 +61,7 @@ public class BooleanLogger {
 
         if (m_putToDashboard && (m_tabName != null)) {
             Shuffleboard.getTab(m_tabName)
-                    .addBoolean(
+                    .addString(
                             m_key,
                             () -> {
                                 return m_lastValue;
@@ -69,27 +69,27 @@ public class BooleanLogger {
         }
 
         if (m_putInLog && (m_dataLog != null)) {
-            m_logEntry = new BooleanLogEntry(m_dataLog, m_key);
+            m_logEntry = new StringLogEntry(m_dataLog, m_key);
         }
     }
 
     /**
-     * Constructor for a BooleanLogger that publishes to both a log and dashboard.
+     * Constructor for a StringLogger that publishes to both a log and dashboard.
      *
      * @param dataLog The log to publish to (most likely from {@code DataLogManager.getLog})
      * @param tabName The string identifier of the Shuffleboard tab to publish to.
      * @param key The string key to associate with this in logging and on the dashboard.
      */
-    public BooleanLogger(DataLog dataLog, String tabName, String key) {
+    public StringLogger(DataLog dataLog, String tabName, String key) {
         this(dataLog, tabName, key, true, true);
     }
 
     /**
      * Updates log and/or dashboard with a new value.
      *
-     * @param value The new boolean value to update to.
+     * @param value The new string value to update to.
      */
-    public void update(Boolean value) {
+    public void update(String value) {
         if (m_putInLog && (m_dataLog != null) && (value != m_lastValue)) {
             m_logEntry.append(value);
         }
