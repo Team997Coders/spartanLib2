@@ -60,7 +60,8 @@ public class UtilityMath {
      * @return An array of the scaled values, in the same order as they were input.
      * @throws InvalidParameterException If the array is empty.
      */
-    public static double[] normalizeSet(double[] inputs, double maxAbsoluteValue) throws InvalidParameterException {
+    public static double[] normalizeSet(double[] inputs, double maxAbsoluteValue)
+            throws InvalidParameterException {
         if (inputs.length == 0) {
             throw new InvalidParameterException("Values must contain an element!");
         }

@@ -60,10 +60,7 @@ public class StringLogger {
         lastValue = null;
 
         if (this.putToDashboard && (this.tabName != null)) {
-            Shuffleboard.getTab(this.tabName)
-                    .addString(
-                            this.key,
-                            () -> lastValue);
+            Shuffleboard.getTab(this.tabName).addString(this.key, () -> lastValue);
         }
 
         if (this.putInLog && (this.dataLog != null)) {

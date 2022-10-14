@@ -60,10 +60,7 @@ public class BooleanLogger {
         lastValue = null;
 
         if (this.putToDashboard && (this.tabName != null)) {
-            Shuffleboard.getTab(this.tabName)
-                    .addBoolean(
-                            this.key,
-                            () -> lastValue);
+            Shuffleboard.getTab(this.tabName).addBoolean(this.key, () -> lastValue);
         }
 
         if (this.putInLog && (this.dataLog != null)) {

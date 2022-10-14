@@ -59,10 +59,7 @@ public class DoubleLogger {
         lastValue = null;
 
         if (this.putToDashboard && (this.tabName != null)) {
-            Shuffleboard.getTab(this.tabName)
-                    .addNumber(
-                            this.key,
-                            () -> lastValue);
+            Shuffleboard.getTab(this.tabName).addNumber(this.key, () -> lastValue);
         }
 
         if (this.putInLog && (this.dataLog != null)) {
