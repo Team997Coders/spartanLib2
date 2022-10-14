@@ -35,10 +35,10 @@ public class AsymmetricTrapezoidProfileTests {
     @Test
     public void asymmetricPositiveTrianglePhases() {
         var expected = new ArrayList<>(List.of(
-                new Phase(1.1547005383792515, 0.6666666666666666, 1.0, 0.0),
-                new Phase(0.5773502691896257, 0.3333333333333333, -2.0, 1.1547005383792515)
+                new ProfilePhase(1.1547005383792515, 0.6666666666666666, 1.0, 0.0),
+                new ProfilePhase(0.5773502691896257, 0.3333333333333333, -2.0, 1.1547005383792515)
         ));
-        assertEquals(positiveTriangleProfile.phases, expected);
+        assertEquals(positiveTriangleProfile.getPhases(), expected);
     }
     @Test
     public void asymmetricPositiveTriangleTotalTime() {
@@ -95,11 +95,11 @@ public class AsymmetricTrapezoidProfileTests {
     @Test
     public void asymmetricNegativeTrapezoidPhases() {
         var expected = new ArrayList<>(List.of(
-                new Phase(2.0, -2.0, -1.0, 0.0),
-                new Phase(0.5, -1.0, 0.0, -2.0),
-                new Phase(1.0, -1.0, 2.0, -2.0)
+                new ProfilePhase(2.0, -2.0, -1.0, 0.0),
+                new ProfilePhase(0.5, -1.0, 0.0, -2.0),
+                new ProfilePhase(1.0, -1.0, 2.0, -2.0)
         ));
-        assertEquals(negativeTrapezoidProfile.phases, expected);
+        assertEquals(negativeTrapezoidProfile.getPhases(), expected);
     }
     @Test
     public void asymmetricNegativeTrapezoidTotalTime() {
@@ -147,5 +147,16 @@ public class AsymmetricTrapezoidProfileTests {
         assertFalse(negativeTrapezoidProfile.isFinished(1.2));
         assertTrue(negativeTrapezoidProfile.isFinished(3.5));
     }
-    // TODO cases with too steep accel/decel
+    AsymmetricTrapezoidProfile positiveRampProfile = new AsymmetricTrapezoidProfile(
+            new Constraints(10, 1, -2),
+            new State(1, 0),
+            new State(0, 3)
+    );
+    @Test
+    public void asymmetricRampProfilePhases() {
+        var expected = new ArrayList<>(List.of(
+                new ProfilePhase(0.6666666666666666, 1.0, -4.5, 3.0)
+        ));
+        assertEquals(positiveRampProfile.getPhases(), expected);
+    }
 }

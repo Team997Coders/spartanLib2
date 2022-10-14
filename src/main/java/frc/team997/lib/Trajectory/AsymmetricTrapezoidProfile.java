@@ -1,19 +1,19 @@
 /**
- Copyright 2022 FRC Team 997
+Copyright 2022 FRC Team 997
 
- This program is free software:
- you can redistribute it and/or modify it under the terms of the
- GNU General Public License as published by the Free Software Foundation,
- either version 3 of the License, or (at your option) any later version.
+This program is free software:
+you can redistribute it and/or modify it under the terms of the
+GNU General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License along with SpartanLib2.
- If not, see <https://www.gnu.org/licenses/>.
- */
+You should have received a copy of the GNU General Public License along with SpartanLib2.
+If not, see <https://www.gnu.org/licenses/>.
+*/
 package frc.team997.lib.Trajectory;
 
 import java.util.ArrayList;
@@ -52,16 +52,25 @@ import java.util.Objects;
  */
 public class AsymmetricTrapezoidProfile {
     // holds all the phases in order
-    public final List<Phase> phases = new ArrayList<>(3);
-    public final Constraints constraints;
-    public final State initial;
-    public final State target;
-    public final double direction;
+    private final List<ProfilePhase> phases = new ArrayList<>(3);
+    private final Constraints constraints;
+    private final State initial;
+    private final State target;
+    private final double direction;
+
+    /**
+     * Gets all the phases in the profile
+     *
+     * @return An ordered list of Phases
+     */
+    public List<ProfilePhase> getPhases() {
+        return List.copyOf(phases);
+    }
 
     public static class Constraints {
-        final double maxVelocity;
-        final double maxAcceleration;
-        final double maxDeceleration;
+        public final double maxVelocity;
+        public final double maxAcceleration;
+        public final double maxDeceleration;
         /**
          * Construct constraints for a AsymmetricTrapezoidProfile.
          *
@@ -96,8 +105,8 @@ public class AsymmetricTrapezoidProfile {
         }
     }
     public static class State {
-        final double position;
-        final double velocity;
+        public final double position;
+        public final double velocity;
         /**
          * Construct a state for a AsymmetricTrapezoidProfile.
          *
@@ -130,53 +139,7 @@ public class AsymmetricTrapezoidProfile {
     }
 
     /**
-     * A data class for profile phase data.
-     */
-    public static class Phase {
-        final double time;
-        final double position;
-        final double acceleration;
-        final double initialVelocity;
-
-        /**
-         * Construct a Phase.
-         *
-         * @param time The duration of the phase.
-         * @param position The displacement of the phase.
-         * @param acceleration The acceleration of the phase (0 if coast phase).
-         * @param initialVelocity The velocity at the beggining of a phase.
-         */
-        public Phase(double time, double position, double acceleration, double initialVelocity) {
-            this.time = time;
-            this.position = position;
-            this.acceleration = acceleration;
-            this.initialVelocity = initialVelocity;
-        }
-        @Override
-        public boolean equals(Object other) {
-            double epsilon = 0.0001;
-            if (other instanceof Phase) {
-                Phase rhs = (Phase) other;
-                return this.time == rhs.time
-                        && Math.abs(this.position - rhs.position) < epsilon
-                        && Math.abs(this.acceleration - rhs.acceleration) < epsilon
-                        && Math.abs(this.initialVelocity - rhs.initialVelocity) < epsilon;
-            } else {
-                return false;
-            }
-        }
-        @Override
-        public int hashCode() {
-            return Objects.hash(time, position, acceleration, initialVelocity);
-        }
-        @Override
-        public String toString() {
-            return "Phase[time: "+time+", position: "+position+", acceleration: "+acceleration+", initialVelocity:"+initialVelocity+"]";
-        }
-    }
-
-    /**
-     * Construct an AsymmetricTrapezoidProfile with an initial state of 0,0.
+     * Construct an AsymmetricTrapezoidProfile with an initial position and velocity of 0,0.
      *
      * @param constraints The constraints on the profile, like maximum velocity.
      * @param target The desired state when the profile is complete.
@@ -267,12 +230,15 @@ public class AsymmetricTrapezoidProfile {
                 decelPos = targetPosition;
                 decelTime = (2*decelPos)/(initialVelocity+targetVelocity);
                 maxDecel = (targetVelocity-initialVelocity)/decelTime;
+                // we set these so that our initial velocity in the ProfilePhase is correct
+                accelTime = -1;
+                maxAccel = 0;
             }
         }
 
-        Phase accelPhase = new Phase(accelTime, accelPos, maxAccel, initialVelocity);
-        Phase coastPhase = new Phase(coastTime, coastPos, 0, maxVelocity);
-        Phase decelPhase = new Phase(decelTime, decelPos, maxDecel, accelTime*maxAccel+initialVelocity);
+        ProfilePhase accelPhase = new ProfilePhase(accelTime, accelPos, maxAccel, initialVelocity);
+        ProfilePhase coastPhase = new ProfilePhase(coastTime, coastPos, 0, maxVelocity);
+        ProfilePhase decelPhase = new ProfilePhase(decelTime, decelPos, maxDecel, accelTime*maxAccel+initialVelocity);
 
         if (accelPhase.time > 0)
             phases.add(accelPhase);
@@ -289,7 +255,7 @@ public class AsymmetricTrapezoidProfile {
      */
     public State calculate(double time) {
         double position = initial.position;
-        for (Phase phase : phases) {
+        for (ProfilePhase phase : phases) {
             if (time-phase.time < 0) {
                 return new State(
                         position + 0.5 * phase.acceleration * Math.pow(time, 2) + phase.initialVelocity*time,
@@ -303,16 +269,16 @@ public class AsymmetricTrapezoidProfile {
         return new State(position, target.velocity);
     }
     /**
-     * Returns the time left until a target distance in the profile is reached.
+     * Returns the time as a function of the target position.
      *
      * @param targetPosition The target position.
      * @return The time left until a target position in the profile is reached.
-     * Returns NaN if targetPosition < initial.position, and the total position if targetPosition > target.position
+     * Returns NaN if targetPosition < initial.position, and the total time if targetPosition > target.position
      */
     public double timeLeftUntil(double targetPosition) {
         targetPosition = targetPosition - initial.position;
         double time = 0;
-        for (Phase phase : phases) {
+        for (ProfilePhase phase : phases) {
             if ((targetPosition-phase.position)*direction < 0) {
                 if (phase.acceleration==0) {
                     time += targetPosition/constraints.maxVelocity;
@@ -335,7 +301,7 @@ public class AsymmetricTrapezoidProfile {
      */
     public double totalTime() {
         double time = 0;
-        for (Phase phase : phases) {
+        for (ProfilePhase phase : phases) {
             time += phase.time;
         }
         return time;
