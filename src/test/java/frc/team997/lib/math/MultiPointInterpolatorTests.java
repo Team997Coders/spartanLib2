@@ -37,7 +37,7 @@ public class MultiPointInterpolatorTests {
     }
 
     @Test
-    public void rejectsEmptyMap() {
+    public void MultiPointInterpolatorRejectsEmptyMap() {
         assertThrows(
                 InvalidParameterException.class,
                 () -> {
@@ -46,7 +46,7 @@ public class MultiPointInterpolatorTests {
     }
 
     @Test
-    public void rejectsSampleBelowZero() throws Exception {
+    public void MultiPointInterpolatorRejectsSampleBelowZero() throws Exception {
         treeMap.put(1.0, 1.0);
         interpolator = new MultiPointInterpolator(treeMap);
 
@@ -58,7 +58,7 @@ public class MultiPointInterpolatorTests {
     }
 
     @Test
-    public void returnsDefinedValue() throws Exception {
+    public void MultiPointInterpolatorReturnsDefinedValue() throws Exception {
         treeMap.put(0.5, 1.5);
         interpolator = new MultiPointInterpolator(treeMap);
 
@@ -69,7 +69,7 @@ public class MultiPointInterpolatorTests {
     }
 
     @Test
-    public void handlesDefinedValueAtZero() throws Exception {
+    public void MultiPointInterpolatorHandlesDefinedValueAtZero() throws Exception {
         treeMap.put(0.0, 10.0);
         interpolator = new MultiPointInterpolator(treeMap);
 
@@ -77,7 +77,7 @@ public class MultiPointInterpolatorTests {
     }
 
     @Test
-    public void interpolates() throws Exception {
+    public void MultiPointInterpolatorInterpolates() throws Exception {
         treeMap.put(1.0, 0.0);
         treeMap.put(2.0, 1.0);
         interpolator = new MultiPointInterpolator(treeMap);
@@ -86,7 +86,7 @@ public class MultiPointInterpolatorTests {
     }
 
     @Test
-    public void handlesUndefinedZero() throws Exception {
+    public void MultiPointInterpolatorHandlesUndefinedZero() throws Exception {
         treeMap.put(1.0, 2.0);
         interpolator = new MultiPointInterpolator(treeMap);
 
@@ -95,7 +95,7 @@ public class MultiPointInterpolatorTests {
     }
 
     @Test
-    public void handlesValueAboveHighestDefined() throws Exception {
+    public void MultiPointInterpolatorHandlesValueAboveHighestDefined() throws Exception {
         treeMap.put(1.0, 2.0);
         interpolator = new MultiPointInterpolator(treeMap);
 

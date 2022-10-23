@@ -49,6 +49,27 @@ public class UtilityMathTests {
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // normalizeAngleDegrees
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    @Test
+    public void normalizeAngleDegreesReturnsZeroCorrectly() {
+        assertEquals(0, UtilityMath.normalizeAngleDegrees(0), epsilon);
+    }
+
+    @Test
+    public void normalizeAngleDegreesReturnsPositiveCoterminalsCorrectly() {
+        assertEquals(0, UtilityMath.normalizeAngleDegrees(360), epsilon);
+        assertEquals(90, UtilityMath.normalizeAngleDegrees(450), epsilon);
+    }
+
+    @Test
+    public void normalizeAngleDegreesReturnsNegativeCoterminalsCorrectly() {
+        assertEquals(0, UtilityMath.normalizeAngleDegrees(-360), epsilon);
+        assertEquals(90, UtilityMath.normalizeAngleDegrees(-270), epsilon);
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // simpleLinearInterpolation
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @Test
