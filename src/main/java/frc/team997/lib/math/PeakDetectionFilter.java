@@ -51,19 +51,21 @@ public class PeakDetectionFilter {
      * large window will result in more phase lag, but can allow for influences of 1.0 for stddev
      * and mean, as signals will be surrounded by much more data. However, a small window has little
      * phase lag, but can be susceptible to high influences from peaks (they are, after, all,
-     * outliers by definition).
+     * outliers by definition). Larger windows are almost always recommended if you can ignore the
+     * slight phase lag issue.
      *
      * <p>Special care should be taken when the series exhibits trends over time to balance
-     * influences so as not to completely erase said trend.
+     * influences so as not to completely erase or amplify said trend.
      *
-     * @param window Looks back this many cycles to determine mean and standard deviation.
+     * @param window The number of past data points to consider for mean and stddev calculations.
      * @param threshold The number of standard deviations above or below the mean needed to be
      *     considered a signal.
      * @param standardDeviationInfluence The effect a signal will have on the standard deviation, in
      *     [0,1].
      * @param meanInfluence The effect a signal will have on the mean, in [0,1].
      * @param minimumDelta The minimum distance from the mean requrired to be considered
-     *     significant.
+     *     significant. An input of zero means that any variance above {@code threshold} standard
+     *     deviations will be counted, no matter how small.
      * @throws InvalidParameterException If the window is less than 2.
      */
     public PeakDetectionFilter(
@@ -74,7 +76,7 @@ public class PeakDetectionFilter {
             double minimumDelta) {
         if (window < 1) {
             throw new InvalidParameterException(
-                    "Window of PeakDetectionFilter must be greater than 1!");
+                    "Window of PeakDetectionFilter must be greater than 1 for meaningful answers!");
         }
         this.threshold = threshold;
         this.standardDeviationInfluence = standardDeviationInfluence;
@@ -92,12 +94,13 @@ public class PeakDetectionFilter {
      * large window will result in more phase lag, but can allow for influences of 1.0 for stddev
      * and mean, as signals will be surrounded by much more data. However, a small window has little
      * phase lag, but can be susceptible to high influences from peaks (they are, after, all,
-     * outliers by definition).
+     * outliers by definition). Larger windows are almost always recommended if you can ignore the
+     * slight phase lag issue.
      *
      * <p>Special care should be taken when the series exhibits trends over time to balance
-     * influences so as not to completely erase said trend.
+     * influences so as not to completely erase or amplify said trend.
      *
-     * @param window Looks back this many cycles to determine mean and standard deviation.
+     * @param window The number of past data points to consider for mean and stddev calculations.
      * @param threshold The number of standard deviations above or below the mean needed to be
      *     considered a signal.
      * @param standardDeviationInfluence The effect a signal will have on the standard deviation, in
@@ -112,7 +115,9 @@ public class PeakDetectionFilter {
 
     /**
      * Calculates whether a given value is a peak, valley, or neither relative to the rest of the
-     * series.
+     * series. Adds the value to the dataset for calculating future inputs.
+     *
+     * <p>Will return 0 if {@code window - 1} inputs have not yet been given to this instance.
      *
      * @param value The double value to evaluate.
      * @return 1 if the value is a peak, -1 if it is a valley, or 0 if it is neither.
@@ -162,7 +167,7 @@ public class PeakDetectionFilter {
 
     /**
      * Resets the history of the filter. This will not return any more peaks for at least {@code
-     * window} more calls.
+     * window - 1} more calls.
      */
     public void reset() {
         standardDeviationSeries.clear();

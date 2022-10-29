@@ -30,19 +30,15 @@ import org.junit.Test;
  * just checks if it behaves as expected over a predefined set of data.
  */
 public class PeakDetectionFilterTests {
+    private void testDataSet(PeakDetectionFilter filter, double[] inputs, int[] expectedOutputs) {
+        for (int i = 0; i < inputs.length; i++) {
+            int o = filter.calculate(inputs[i]);
+            // System.out.print(o + ", ");
+            assertEquals(expectedOutputs[i], o);
+        }
+    }
+
     private static final double epsilon = 0.0001;
-
-    private static final double[] testInputData = {
-        1, 1, 1.1, 1, 0.9, 1, 1, 1.1, 1, 0.9, 1, 1.1, 1, 1, 0.9, 1, 1, 1.1, 1, 1, 1, 1, 1.1, 0.9, 1,
-        1.1, 1, 1, 0.9, 1, 1.1, 1, 1, 1.1, 1, 0.8, 0.9, 1, 1.2, 0.9, 1, 1, 1.1, 1.2, 1, 1.5, 1, 3,
-        2, 5, 3, 2, 1, 1, 1, 0.9, 1, 1, 3, 2.6, 4, 3, 3.2, 2, 1, 1, 0.8, 4, 4, 2, 2.5, 1, 1, 1
-    };
-
-    private static final Integer[] expectedResult = {
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1,
-        1, 1, 1, 0, 0, -1, 1, 1, 1, 1, 0, 0, 0
-    };
 
     @Test
     public void PeakDetectionFilterRejectsInvalidWindow() {
@@ -54,16 +50,78 @@ public class PeakDetectionFilterTests {
     }
 
     @Test
-    public void PeakDetectionFilterCorrectlyFiltersTestSet() {
-        PeakDetectionFilter filter = new PeakDetectionFilter(5, 3, 0.1, 0.01, 0.2);
+    public void PeakDetectionFilterSensiblyFiltersStaticVarianceSeries() {
+        PeakDetectionFilter filter = new PeakDetectionFilter(5, 5, 0.3, 0.3, 0.1);
 
-        for (int i = 0; i < testInputData.length; i++) {
-            assertEquals(expectedResult[i], Integer.valueOf(filter.calculate(testInputData[i])));
-        }
+        double[] input = {
+            0, 0.1, 0.2, 0.1, 0.1, 0.1, 0, 0, 0, 0, 0.5, 0.3, 0.2, -0.1, -0.1, -0.25, -0.5, -0.4,
+            -0.6, -0.2, -0.1, 0, -0.1, 0, -0.1, 0, 0.1, 0, 0, 0.2, 0.2, -0.25
+        };
+
+        int[] output = {
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+            1, 0, -1
+        };
+
+        testDataSet(filter, input, output);
     }
 
     @Test
-    public void SamplesOfTheFirstWindowReturnZero() {
+    public void PeakDetectionFilterSensiblyFiltersGrowingVarianceSeries() {
+        PeakDetectionFilter filter = new PeakDetectionFilter(5, 3, 0.1, 0.01, 0.2);
+
+        double[] input = {
+            1, 1, 1.1, 1, 0.9, 1, 1, 1.1, 1, 0.9, 1, 1.1, 1, 1, 0.9, 1, 1, 1.1, 1, 1, 1, 1, 1.1,
+            0.9, 1, 1.1, 1, 1, 0.9, 1, 1.1, 1, 1, 1.1, 1, 0.8, 0.9, 1, 1.2, 0.9, 1, 1, 1.1, 1.2, 1,
+            1.5, 1, 3, 2, 5, 3, 2, 1, 1, 1, 0.9, 1, 1, 3, 2.6, 4, 3, 3.2, 2, 1, 1, 0.8, 4, 4, 2,
+            2.5, 1, 1, 1
+        };
+
+        int[] expectedOutput = {
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+            1, 1, 1, 1, 1, 1, 0, 0, -1, 1, 1, 1, 1, 0, 0, 0
+        };
+
+        testDataSet(filter, input, expectedOutput);
+    }
+
+    @Test
+    public void PeakDetectionFilterCanFilterNonstationarySeries() {
+        PeakDetectionFilter filter = new PeakDetectionFilter(10, 3, 0.25, 0.05);
+
+        double[] input = {
+            0, 1, 3, 0, 2, -1, -1, 0, 2, -1, 2, -1, 0, 0, 0.5, 3, -2, -1, -0.5, 2, 4, 3, 0.5, 2, -1,
+            -3, 1, -3, 2, 3, -1, -2, -3, -1, 0, 0, -4, 0, 0, -5, -5, 0, 1, 2, -0.5, -2, -2, -5, -3,
+            -2, -2, -2, -3, -2, -1, -1, -2, -3, -2, 0, 1, 0, 0, -0.5, 1, -2, -2, -3, -2, -4, -4, -6
+        };
+
+        int[] output = {
+            0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 1, -1, 0, 0, 0, 1, -1, -1, 0, 1, 1, 1, 0, 0, 0, -1, 0,
+            -1, 0, 1, 0, -1, -1, 0, 0, 0, -1, 0, 0, -1, -1, 0, 0, 1, 0, 0, 0, -1, -1, 0, 0, 0, 0, 0,
+            0, 0, 0, -1, -1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, -1, -1, -1
+        };
+
+        testDataSet(filter, input, output);
+    }
+
+    @Test
+    public void PeakDetectionFilterProperlyHandlesConstantSeries() {
+        PeakDetectionFilter filter = new PeakDetectionFilter(5, 3, 0.1, 0.1);
+
+        double[] input = {
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        };
+
+        int[] output = {
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        };
+
+        testDataSet(filter, input, output);
+    }
+
+    @Test
+    public void PeakDetectionFilterSamplesOfTheFirstWindowReturnZero() {
         PeakDetectionFilter filter = new PeakDetectionFilter(5, 0.1, 1, 1);
         assertEquals(0, filter.calculate(0));
         assertEquals(0, filter.calculate(0));
@@ -73,7 +131,7 @@ public class PeakDetectionFilterTests {
     }
 
     @Test
-    public void GetSeriesInWindowReturnsProperly() {
+    public void PeakDetectionFilterGetSeriesInWindowReturnsProperly() {
         PeakDetectionFilter filter = new PeakDetectionFilter(3, 1, 0.5, 0.5);
         double[] expectedOutput = {0, 0, 5};
         filter.calculate(0);
