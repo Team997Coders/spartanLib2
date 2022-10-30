@@ -51,7 +51,7 @@ public class GearRatioHelper {
     /**
      * Creates a gear ratio helper from a double ratio of input to output.
      *
-     * @param ratioInputToOutput
+     * @param ratioInputToOutput The ratio as input::output.
      */
     public GearRatioHelper(double ratioInputToOutput) {
         this(ratioInputToOutput, 1);

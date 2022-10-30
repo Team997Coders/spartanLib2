@@ -1,0 +1,25 @@
+name : CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+  
+    container: wpilib/roborio-cross-ubuntu:2022-18.04
+    
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Grant execute permission to gradle
+        run: chmod +x gradlew
+      
+      - name: Compile
+        run: ./gradlew build -x test
+
+      - name: Test
+        run: ./gradlew test

@@ -29,8 +29,18 @@ public class UtilityMath {
      */
     public static double normalizeAngleRadians(double angleRadians) {
         return ((angleRadians % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-        // remainder of the angle and 2pi, positive coterminal'd, and then remainder'd
-        // again
+        // remainder of the angle and 2pi, positive coterminal'd, and then remainder'd again
+    }
+
+    /**
+     * Normalizes an angle in degrees between 0 and 360.
+     *
+     * @param angleDegrees Value of the angle.
+     * @return The normalized value.
+     */
+    public static double normalizeAngleDegrees(double angleDegrees) {
+        return ((angleDegrees % 360) + 360) % 360;
+        // remainder of the angle and 360, positive coterminal'd, and then remainder'd again
     }
 
     /**
