@@ -96,28 +96,25 @@ public class AsymmetricTrapezoidProfile extends MotionProfile {
     /**
      * Constructs an AsymmetricTrapezoidProfile with an initial position and velocity of 0,0.
      *
-     * @param AsymmetricTrapezoidProfileConstraints The AsymmetricTrapezoidProfileConstraints on the
-     *     profile, like maximum velocity.
+     * @param AsymmetricTrapezoidProfileConstraints The constraints on the profile, like maximum
+     *     velocity.
      * @param target The desired state when the profile is complete.
      */
     public AsymmetricTrapezoidProfile(
-            AsymmetricTrapezoidProfileConstraints AsymmetricTrapezoidProfileConstraints,
-            State target) {
-        this(AsymmetricTrapezoidProfileConstraints, target, new State(0, 0));
+            AsymmetricTrapezoidProfileConstraints constraints, State target) {
+        this(constraints, target, new State(0, 0));
     }
 
     /**
      * Constructs an AsymmetricTrapezoidProfile.
      *
-     * @param AsymmetricTrapezoidProfileConstraints The AsymmetricTrapezoidProfileConstraints on the
-     *     profile, like maximum velocity.
+     * @param AsymmetricTrapezoidProfileConstraints The constraints on the profile, like maximum
+     *     velocity.
      * @param target The desired state when the profile is complete.
      * @param initial The initial state (usually the current state).
      */
     public AsymmetricTrapezoidProfile(
-            AsymmetricTrapezoidProfileConstraints AsymmetricTrapezoidProfileConstraints,
-            State target,
-            State initial) {
+            AsymmetricTrapezoidProfileConstraints constraints, State target, State initial) {
         super(initial);
 
         // in the case the target position is before the initial, we should calculate it all
@@ -126,11 +123,9 @@ public class AsymmetricTrapezoidProfile extends MotionProfile {
         double targetPosition = target.position - initial.position;
         int direction = targetPosition < 0 ? -1 : 1;
 
-        double maxVelocity = AsymmetricTrapezoidProfileConstraints.maxVelocity * direction;
-        double maxAccel =
-                Math.abs(AsymmetricTrapezoidProfileConstraints.maxAcceleration) * direction;
-        double maxDecel =
-                Math.abs(AsymmetricTrapezoidProfileConstraints.maxDeceleration) * direction * -1;
+        double maxVelocity = constraints.maxVelocity * direction;
+        double maxAccel = Math.abs(constraints.maxAcceleration) * direction;
+        double maxDecel = Math.abs(constraints.maxDeceleration) * direction * -1;
 
         // constrain the initial and target velocities to bellow maxVelocity (this is how wpilib
         // does it)
