@@ -19,6 +19,7 @@ package frc.team997.lib.trajectory;
 import static org.junit.Assert.*;
 
 import frc.team997.lib.trajectory.AsymmetricTrapezoidProfile.*;
+import frc.team997.lib.trajectory.MotionProfile.State;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
@@ -28,7 +29,9 @@ public class AsymmetricTrapezoidProfileTests {
 
     AsymmetricTrapezoidProfile positiveTriangleProfile =
             new AsymmetricTrapezoidProfile(
-                    new Constraints(10, 1, -2), new State(2, 0), new State(1, 0));
+                    new AsymmetricTrapezoidProfileConstraints(10, 1, -2),
+                    new State(2, 0),
+                    new State(1, 0));
 
     @Test
     public void asymmetricPositiveTrianglePhases() {
@@ -61,12 +64,6 @@ public class AsymmetricTrapezoidProfileTests {
     }
 
     @Test
-    public void asymmetricPositiveTriangleTimeLeftUntil() {
-        assertEquals(positiveTriangleProfile.timeLeftUntil(1), 0.0, epsilon);
-        assertEquals(positiveTriangleProfile.timeLeftUntil(1.92), 1.4492, epsilon);
-    }
-
-    @Test
     public void asymmetricPositiveTriangleIsFinished() {
         assertFalse(positiveTriangleProfile.isFinished(1.2));
         assertTrue(positiveTriangleProfile.isFinished(2.0));
@@ -74,7 +71,9 @@ public class AsymmetricTrapezoidProfileTests {
 
     AsymmetricTrapezoidProfile negativeTrapezoidProfile =
             new AsymmetricTrapezoidProfile(
-                    new Constraints(2, 1, -2), new State(-1, 0), new State(3, 0));
+                    new AsymmetricTrapezoidProfileConstraints(2, 1, -2),
+                    new State(-1, 0),
+                    new State(3, 0));
 
     @Test
     public void asymmetricNegativeTrapezoidPhases() {
@@ -102,12 +101,6 @@ public class AsymmetricTrapezoidProfileTests {
     }
 
     @Test
-    public void asymmetricNegativeTrapezoidTimeLeftUntil() {
-        assertEquals(negativeTrapezoidProfile.timeLeftUntil(1.92), 1.469693845669907, epsilon);
-        assertEquals(negativeTrapezoidProfile.timeLeftUntil(1), 2.0, epsilon);
-    }
-
-    @Test
     public void asymmetricNegativeTrapezoidIsFinished() {
         assertFalse(negativeTrapezoidProfile.isFinished(1.2));
         assertTrue(negativeTrapezoidProfile.isFinished(3.5));
@@ -115,7 +108,9 @@ public class AsymmetricTrapezoidProfileTests {
 
     AsymmetricTrapezoidProfile positiveRampProfile =
             new AsymmetricTrapezoidProfile(
-                    new Constraints(10, 1, -2), new State(1, 0), new State(0, 3));
+                    new AsymmetricTrapezoidProfileConstraints(10, 1, -2),
+                    new State(1, 0),
+                    new State(0, 3));
 
     @Test
     public void asymmetricRampProfilePhases() {
