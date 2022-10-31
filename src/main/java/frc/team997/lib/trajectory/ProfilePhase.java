@@ -44,6 +44,8 @@ public class ProfilePhase {
     /**
      * Constructs a ProfilePhase. All units fine as long as they agree.
      *
+     * <p>You probably should use {@code ProfilePhase.fromRatesAndTime()} instead.
+     *
      * @param time The duration of the phase (time units).
      * @param position The displacement of the phase (displacement units).
      * @param acceleration The acceleration of the phase (0 if coast phase) (displacement units/time

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.Test;
 
+/** Tests for the AsymmetricTrapezoidProfile. */
 public class AsymmetricTrapezoidProfileTests {
     private final double epsilon = 0.0001;
 
@@ -34,7 +35,16 @@ public class AsymmetricTrapezoidProfileTests {
                     new State(1, 0));
 
     @Test
-    public void asymmetricPositiveTrianglePhases() {
+    public void AsymmetricTrapezoidProfileConstraintsEqualsWorks() {
+        AsymmetricTrapezoidProfileConstraints constraints1 =
+                new AsymmetricTrapezoidProfileConstraints(1, 3, 2);
+        AsymmetricTrapezoidProfileConstraints constraints2 =
+                new AsymmetricTrapezoidProfileConstraints(0.99999, 3.00001, 2.00001);
+        assertEquals(true, constraints1.equals(constraints2));
+    }
+
+    @Test
+    public void AsymmetricTrapezoidProfilePositiveTrianglePhases() {
         var expected =
                 new ArrayList<>(
                         List.of(
@@ -48,12 +58,12 @@ public class AsymmetricTrapezoidProfileTests {
     }
 
     @Test
-    public void asymmetricPositiveTriangleTotalTime() {
+    public void AsymmetricTrapezoidProfilePositiveTriangleTotalTime() {
         assertEquals(positiveTriangleProfile.totalTime(), 1.7320508075688772, epsilon);
     }
 
     @Test
-    public void asymmetricPositiveTriangleCalculate() {
+    public void AsymmetricTrapezoidProfilePositiveTriangleCalculate() {
         assertEquals(positiveTriangleProfile.calculate(0), new State(1.0, 0.0));
         assertEquals(positiveTriangleProfile.calculate(0.5), new State(1.125, 0.5));
         assertEquals(positiveTriangleProfile.calculate(1.1), new State(1.605, 1.1));
@@ -64,7 +74,7 @@ public class AsymmetricTrapezoidProfileTests {
     }
 
     @Test
-    public void asymmetricPositiveTriangleIsFinished() {
+    public void AsymmetricTrapezoidProfilePositiveTriangleIsFinished() {
         assertFalse(positiveTriangleProfile.isFinished(1.2));
         assertTrue(positiveTriangleProfile.isFinished(2.0));
     }
@@ -76,7 +86,7 @@ public class AsymmetricTrapezoidProfileTests {
                     new State(3, 0));
 
     @Test
-    public void asymmetricNegativeTrapezoidPhases() {
+    public void AsymmetricTrapezoidProfileNegativeTrapezoidPhases() {
         var expected =
                 new ArrayList<>(
                         List.of(
@@ -87,12 +97,12 @@ public class AsymmetricTrapezoidProfileTests {
     }
 
     @Test
-    public void asymmetricNegativeTrapezoidTotalTime() {
+    public void AsymmetricTrapezoidProfileNegativeTrapezoidTotalTime() {
         assertEquals(negativeTrapezoidProfile.totalTime(), 3.5, epsilon);
     }
 
     @Test
-    public void asymmetricNegativeTrapezoidCalculate() {
+    public void AsymmetricTrapezoidProfileNegativeTrapezoidCalculate() {
         assertEquals(negativeTrapezoidProfile.calculate(0), new State(3.0, 0.0));
         assertEquals(negativeTrapezoidProfile.calculate(0.5), new State(2.875, -0.5));
         assertEquals(negativeTrapezoidProfile.calculate(1.1), new State(2.395, -1.1));
@@ -101,7 +111,7 @@ public class AsymmetricTrapezoidProfileTests {
     }
 
     @Test
-    public void asymmetricNegativeTrapezoidIsFinished() {
+    public void AsymmetricTrapezoidProfileNegativeTrapezoidIsFinished() {
         assertFalse(negativeTrapezoidProfile.isFinished(1.2));
         assertTrue(negativeTrapezoidProfile.isFinished(3.5));
     }
@@ -113,7 +123,7 @@ public class AsymmetricTrapezoidProfileTests {
                     new State(0, 3));
 
     @Test
-    public void asymmetricRampProfilePhases() {
+    public void AsymmetricTrapezoidProfileRampProfilePhases() {
         var expected =
                 new ArrayList<>(List.of(new ProfilePhase(0.6666666666666666, 1.0, -4.5, 3.0)));
         assertEquals(positiveRampProfile.getPhases(), expected);

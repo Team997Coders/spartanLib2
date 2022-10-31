@@ -54,9 +54,8 @@ public class TrapezoidProfile extends AsymmetricTrapezoidProfile {
         @Override
         public boolean equals(Object other) {
             double epsilon = 0.0001;
-            if (other instanceof AsymmetricTrapezoidProfileConstraints) {
-                AsymmetricTrapezoidProfileConstraints rhs =
-                        (AsymmetricTrapezoidProfileConstraints) other;
+            if (other instanceof TrapezoidProfileConstraints) {
+                TrapezoidProfileConstraints rhs = (TrapezoidProfileConstraints) other;
                 return Math.abs(this.maxVelocity - rhs.maxVelocity) < epsilon
                         && Math.abs(this.maxAcceleration - rhs.maxAcceleration) < epsilon;
             } else {
@@ -87,7 +86,7 @@ public class TrapezoidProfile extends AsymmetricTrapezoidProfile {
      * @param goalState The target state of the profile.
      */
     public TrapezoidProfile(
-            TrapezoidProfileConstraints constraints, State initialState, State goalState) {
+            TrapezoidProfileConstraints constraints, State goalState, State initialState) {
         super(
                 new AsymmetricTrapezoidProfileConstraints(
                         constraints.maxVelocity,

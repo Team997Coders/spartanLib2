@@ -91,6 +91,10 @@ public class MotionProfile {
     /**
      * Constructor for a MotionProfile with no phases and a defined initial state.
      *
+     * <p>This constructor is protected because it encourages users to create empty profiles and
+     * then add phases to the (also protected) {@code phases}, when this can cause undefined
+     * behavior. This needs to exist, however, for certain subclasses of this to work properly.
+     *
      * @param initialState The initial state of the motion profile.
      */
     protected MotionProfile(State initialState) {
@@ -142,10 +146,17 @@ public class MotionProfile {
     /**
      * Calculates the current State of the profile at a given time.
      *
+     * <p>If the time sampled is less than 0, returns a State of 0 position and velocity. If it is
+     * greater than the timespan of the profile, returns a State of the aggregated position and zero
+     * velocity.
+     *
      * @param time The time since the beginning of the profile.
      * @return The position and velocity of the profile at that time.
      */
     public State calculate(double time) {
+        if (time < 0) {
+            return new State(0, 0);
+        }
         double position = initialState.position;
         for (ProfilePhase phase : phases) {
             if (time - phase.time < 0) {
