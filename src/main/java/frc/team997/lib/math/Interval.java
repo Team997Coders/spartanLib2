@@ -30,8 +30,8 @@ public class Interval {
 
     private final Inclusion smallSideInclusion;
     private final Inclusion largeSideInclusion;
-    private final Double smallSide;
-    private final Double largeSide;
+    private final double smallSide;
+    private final double largeSide;
 
     /**
      * Creates an interval with the specified endpoints.

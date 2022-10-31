@@ -25,19 +25,19 @@ public class GearRatioHelperTests {
     private final double epsilon = 0.0001;
 
     @Test
-    public void gearRatioHelperInverseProperly() {
+    public void GearRatioHelperInverseProperly() {
         GearRatioHelper helper = new GearRatioHelper(5, 1);
         assertEquals(87.3, helper.inputFromOutput(helper.outputFromInput(87.3)), epsilon);
     }
 
     @Test
-    public void gearRatioHelperOutputToInput() {
+    public void GearRatioHelperOutputToInput() {
         GearRatioHelper helper = new GearRatioHelper(3, 5);
         assertEquals(12, helper.outputFromInput(20), epsilon);
     }
 
     @Test
-    public void gearRatioHelperInputToOutput() {
+    public void GearRatioHelperInputToOutput() {
         GearRatioHelper helper = new GearRatioHelper(7, 1);
         assertEquals(5, helper.inputFromOutput(35), epsilon);
     }

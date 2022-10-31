@@ -32,8 +32,8 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 public class BooleanLogger {
     private final DataLog dataLog;
     private final String tabName;
-    private final Boolean putToDashboard;
-    private final Boolean putInLog;
+    private final boolean putToDashboard;
+    private final boolean putInLog;
     private final String key;
     private Boolean lastValue;
 
