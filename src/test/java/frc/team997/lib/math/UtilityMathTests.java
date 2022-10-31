@@ -32,18 +32,18 @@ public class UtilityMathTests {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @Test
-    public void normalizeAngleRadiansReturnsZeroCorrectly() {
+    public void UtilityMathNormalizeAngleRadiansReturnsZeroCorrectly() {
         assertEquals(0, UtilityMath.normalizeAngleRadians(0), epsilon);
     }
 
     @Test
-    public void normalizeAngleRadiansReturnsPositiveCoterminalsCorrectly() {
+    public void UtilityMathNormalizeAngleRadiansReturnsPositiveCoterminalsCorrectly() {
         assertEquals(0, UtilityMath.normalizeAngleRadians(2 * Math.PI), epsilon);
         assertEquals(0.5 * Math.PI, UtilityMath.normalizeAngleRadians(2.5 * Math.PI), epsilon);
     }
 
     @Test
-    public void normalizeAngleRadiansReturnsNegativeCoterminalsCorrectly() {
+    public void UtilityMathNormalizeAngleRadiansReturnsNegativeCoterminalsCorrectly() {
         assertEquals(0, UtilityMath.normalizeAngleRadians(-2 * Math.PI), epsilon);
         assertEquals(0.5 * Math.PI, UtilityMath.normalizeAngleRadians(-1.5 * Math.PI), epsilon);
     }
@@ -53,18 +53,18 @@ public class UtilityMathTests {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @Test
-    public void normalizeAngleDegreesReturnsZeroCorrectly() {
+    public void UtilityMathNormalizeAngleDegreesReturnsZeroCorrectly() {
         assertEquals(0, UtilityMath.normalizeAngleDegrees(0), epsilon);
     }
 
     @Test
-    public void normalizeAngleDegreesReturnsPositiveCoterminalsCorrectly() {
+    public void UtilityMathNormalizeAngleDegreesReturnsPositiveCoterminalsCorrectly() {
         assertEquals(0, UtilityMath.normalizeAngleDegrees(360), epsilon);
         assertEquals(90, UtilityMath.normalizeAngleDegrees(450), epsilon);
     }
 
     @Test
-    public void normalizeAngleDegreesReturnsNegativeCoterminalsCorrectly() {
+    public void UtilityMathNormalizeAngleDegreesReturnsNegativeCoterminalsCorrectly() {
         assertEquals(0, UtilityMath.normalizeAngleDegrees(-360), epsilon);
         assertEquals(90, UtilityMath.normalizeAngleDegrees(-270), epsilon);
     }
@@ -73,12 +73,12 @@ public class UtilityMathTests {
     // simpleLinearInterpolation
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @Test
-    public void simpleLinearInterpolationReturnsInBoundsCorrectly() {
+    public void UtilityMathSimpleLinearInterpolationReturnsInBoundsCorrectly() {
         assertEquals(1, UtilityMath.simpleLinearInterpolation(0, 0, 2, 2, 1), epsilon);
     }
 
     @Test
-    public void simpleLinearInterpolationReturnsOutOfBoundsCorrectly() {
+    public void UtilityMathSimpleLinearInterpolationReturnsOutOfBoundsCorrectly() {
         assertEquals(-5, UtilityMath.simpleLinearInterpolation(3, -1, -1, 1, 3), epsilon);
     }
 
@@ -87,7 +87,7 @@ public class UtilityMathTests {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @Test
-    public void normalizeSetHandlesEmptyListProperly() {
+    public void UtilityMathNormalizeSetHandlesEmptyListProperly() {
         double[] emptyArray = {};
         assertThrows(
                 InvalidParameterException.class,
@@ -97,14 +97,14 @@ public class UtilityMathTests {
     }
 
     @Test
-    public void normalizeSetReturnsZeroCorrectly() throws Exception {
+    public void UtilityMathNormalizeSetReturnsZeroCorrectly() throws Exception {
         double[] zeroArray = {0.0};
         double[] actualOutput = UtilityMath.normalizeSet(zeroArray, 1.0);
         assertArrayEquals(zeroArray, actualOutput, epsilon);
     }
 
     @Test
-    public void normalizeSetAppliesCapProperly() throws Exception {
+    public void UtilityMathNormalizeSetAppliesCapProperly() throws Exception {
         double[] inputArray = {1.0};
         double[] expectedOutput = {0.5};
         double[] actualOutput = UtilityMath.normalizeSet(inputArray, 0.5);
@@ -113,7 +113,7 @@ public class UtilityMathTests {
     }
 
     @Test
-    public void normalizeSetWorksWithMultipleMembers() throws Exception {
+    public void UtilityMathNormalizeSetWorksWithMultipleMembers() throws Exception {
         double[] inputArray = {0.5, 1.5, 3.0};
         double[] expectedOuput = {0.25, 0.75, 1.5};
         double[] actualOutput = UtilityMath.normalizeSet(inputArray, 1.5);
@@ -122,7 +122,7 @@ public class UtilityMathTests {
     }
 
     @Test
-    public void normalizeSetWorksWithNegatives() throws Exception {
+    public void UtilityMathNormalizeSetWorksWithNegatives() throws Exception {
         double[] inputArray = {-1.0, -2.0};
         double[] expectedOuput = {-0.25, -0.5};
         double[] actualOutput = UtilityMath.normalizeSet(inputArray, 0.5);
