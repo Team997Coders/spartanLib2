@@ -40,23 +40,23 @@ public class MotionProfileTests {
 
     @Test
     public void MotionProfileHandlesSampleTimeLessThanZero() {
-        MotionProfile profile = new MotionProfile(ProfilePhase.fromRatesAndTime(1, 1, 1));
+        MotionProfile profile = new MotionProfile(new ProfilePhase(1, 1, 1));
 
         assertEquals(new State(0, 0), profile.calculate(-10));
     }
 
     @Test
     public void MotionProfileHandlesSampleTimeGreaterThanRuntime() {
-        MotionProfile profile = new MotionProfile(ProfilePhase.fromRatesAndTime(10, 10, 2));
+        MotionProfile profile = new MotionProfile(new ProfilePhase(10, 10, 2));
 
         assertEquals(new State(40, 0), profile.calculate(5));
     }
 
     @Test
     public void MotionProfileProperlyAggregatesPhases() {
-        ProfilePhase phase1 = ProfilePhase.fromRatesAndTime(0, 5, 2);
-        ProfilePhase phase2 = ProfilePhase.fromRatesAndTime(-1, 5, 2);
-        ProfilePhase phase3 = ProfilePhase.fromRatesAndTime(0, 0, 3);
+        ProfilePhase phase1 = new ProfilePhase(0, 5, 2);
+        ProfilePhase phase2 = new ProfilePhase(-1, 5, 2);
+        ProfilePhase phase3 = new ProfilePhase(0, 0, 3);
 
         MotionProfile profile = new MotionProfile(new State(0, 0), phase1, phase2, phase3);
 
@@ -65,7 +65,7 @@ public class MotionProfileTests {
 
     @Test
     public void MotionProfileHandlesSamplingInMidpointOfPhase() {
-        MotionProfile profile = new MotionProfile(ProfilePhase.fromRatesAndTime(1, 0, 5));
+        MotionProfile profile = new MotionProfile(new ProfilePhase(1, 0, 5));
 
         assertEquals(new State(8, 4), profile.calculate(4));
     }

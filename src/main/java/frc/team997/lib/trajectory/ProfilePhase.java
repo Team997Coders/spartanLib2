@@ -26,7 +26,7 @@ public class ProfilePhase {
     public final double initialVelocity;
 
     /**
-     * Creates a ProfilePhase of a given acceleration, initial velocity, and time. All units of
+     * Constructs a ProfilePhase from a given acceleration, initial velocity, and time. All units of
      * displacement work, as long as they agree.
      *
      * @param acceleration The acceleration throughout this phase (displacement units/time unit/time
@@ -35,10 +35,12 @@ public class ProfilePhase {
      * @param time The duration of the phase (time units).
      * @return A ProfilePhase with the given values and a calculated displacement.
      */
-    public static ProfilePhase fromRatesAndTime(
-            double acceleration, double initialVelocity, double time) {
+    public ProfilePhase(double acceleration, double initialVelocity, double time) {
         double displacement = (0.5 * (acceleration) * (time * time)) + time * initialVelocity;
-        return new ProfilePhase(time, displacement, acceleration, initialVelocity);
+        this.time = time;
+        this.position = displacement;
+        this.acceleration = acceleration;
+        this.initialVelocity = initialVelocity;
     }
 
     /**
@@ -53,7 +55,8 @@ public class ProfilePhase {
      * @param initialVelocity The velocity at the beginning of a phase (displacement units/time
      *     unit).
      */
-    public ProfilePhase(double time, double position, double acceleration, double initialVelocity) {
+    protected ProfilePhase(
+            double time, double position, double acceleration, double initialVelocity) {
         this.time = time;
         this.position = position;
         this.acceleration = acceleration;

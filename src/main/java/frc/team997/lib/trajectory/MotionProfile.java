@@ -33,7 +33,7 @@ import java.util.Objects;
  */
 public class MotionProfile {
     protected List<ProfilePhase> phases;
-    private State initialState;
+    protected State initialState;
 
     /** Holds position and velocity outputs from a MotionProfile. */
     public static class State {
@@ -75,10 +75,10 @@ public class MotionProfile {
     }
 
     /**
-     * Constructor for a MotionProfile.
+     * Constructor for a MotionProfile with arbitrary phaes.
      *
      * @param initialState The initial state of the motion profile.
-     * @param phases The ProfilePhases to start the profile with.
+     * @param phases The ProfilePhases of the motion profile.
      */
     public MotionProfile(State initialState, ProfilePhase... phases) {
         this.initialState = initialState;
@@ -103,9 +103,10 @@ public class MotionProfile {
     }
 
     /**
-     * Constructor for a MotionProfile with an initial state of zero displacement and zero velocity.
+     * Constructor for a MotionProfile of arbitrary phases with an initial state of zero
+     * displacement and zero velocity.
      *
-     * @param phases The ProfilePhases to start the profile with.
+     * @param phases The ProfilePhases of the profile.
      */
     public MotionProfile(ProfilePhase... phases) {
         this(new State(0, 0), phases);

@@ -36,7 +36,7 @@ import java.util.Objects;
 public class TrapezoidProfile extends AsymmetricTrapezoidProfile {
 
     /** Data class to hold the maximum allowed rates for the output of a TrapezoidProfile. */
-    public static class TrapezoidProfileConstraints {
+    public static class Constraints {
         public final double maxVelocity;
         public final double maxAcceleration;
 
@@ -46,7 +46,7 @@ public class TrapezoidProfile extends AsymmetricTrapezoidProfile {
          * @param maxVelocity maximum allowed velocity.
          * @param maxAcceleration maximum allowed acceleration (both directions).
          */
-        public TrapezoidProfileConstraints(double maxVelocity, double maxAcceleration) {
+        public Constraints(double maxVelocity, double maxAcceleration) {
             this.maxVelocity = maxVelocity;
             this.maxAcceleration = maxAcceleration;
         }
@@ -54,8 +54,8 @@ public class TrapezoidProfile extends AsymmetricTrapezoidProfile {
         @Override
         public boolean equals(Object other) {
             double epsilon = 0.0001;
-            if (other instanceof TrapezoidProfileConstraints) {
-                TrapezoidProfileConstraints rhs = (TrapezoidProfileConstraints) other;
+            if (other instanceof Constraints) {
+                Constraints rhs = (Constraints) other;
                 return Math.abs(this.maxVelocity - rhs.maxVelocity) < epsilon
                         && Math.abs(this.maxAcceleration - rhs.maxAcceleration) < epsilon;
             } else {
@@ -85,10 +85,9 @@ public class TrapezoidProfile extends AsymmetricTrapezoidProfile {
      * @param initialState The initial state of the profile.
      * @param goalState The target state of the profile.
      */
-    public TrapezoidProfile(
-            TrapezoidProfileConstraints constraints, State goalState, State initialState) {
+    public TrapezoidProfile(Constraints constraints, State goalState, State initialState) {
         super(
-                new AsymmetricTrapezoidProfileConstraints(
+                new AsymmetricTrapezoidProfile.Constraints(
                         constraints.maxVelocity,
                         constraints.maxAcceleration,
                         constraints.maxAcceleration),
@@ -103,9 +102,9 @@ public class TrapezoidProfile extends AsymmetricTrapezoidProfile {
      * @param constraints The maximum allowed velocity and accelerations.
      * @param goalState The target state of the profile.
      */
-    public TrapezoidProfile(TrapezoidProfileConstraints constraints, State goalState) {
+    public TrapezoidProfile(Constraints constraints, State goalState) {
         super(
-                new AsymmetricTrapezoidProfileConstraints(
+                new AsymmetricTrapezoidProfile.Constraints(
                         constraints.maxVelocity,
                         constraints.maxAcceleration,
                         constraints.maxAcceleration),

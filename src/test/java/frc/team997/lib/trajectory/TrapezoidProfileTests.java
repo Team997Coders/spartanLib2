@@ -18,9 +18,8 @@ package frc.team997.lib.trajectory;
 
 import static org.junit.Assert.assertEquals;
 
-import frc.team997.lib.trajectory.AsymmetricTrapezoidProfile.*;
 import frc.team997.lib.trajectory.MotionProfile.*;
-import frc.team997.lib.trajectory.TrapezoidProfile.*;
+import frc.team997.lib.trajectory.TrapezoidProfile.Constraints;
 import org.junit.Test;
 
 /**
@@ -33,9 +32,8 @@ public class TrapezoidProfileTests {
 
     @Test
     public void TrapezoidProfileConstraintsEqualityWorks() {
-        TrapezoidProfileConstraints constraints1 = new TrapezoidProfileConstraints(1, 5);
-        TrapezoidProfileConstraints constraints2 =
-                new TrapezoidProfileConstraints(1.00001, 4.99999);
+        Constraints constraints1 = new Constraints(1, 5);
+        Constraints constraints2 = new Constraints(1.00001, 4.99999);
 
         assertEquals(true, constraints1.equals(constraints2));
     }
@@ -43,11 +41,10 @@ public class TrapezoidProfileTests {
     @Test
     public void TrapezoidProfileAgreesWithAsymmetricTrapezoidProfile() {
         TrapezoidProfile symmetrical =
-                new TrapezoidProfile(
-                        new TrapezoidProfileConstraints(5, 3), new State(0, 5), new State(40, 2));
+                new TrapezoidProfile(new Constraints(5, 3), new State(0, 5), new State(40, 2));
         AsymmetricTrapezoidProfile asymmetrical =
                 new AsymmetricTrapezoidProfile(
-                        new AsymmetricTrapezoidProfileConstraints(5, 3, 3),
+                        new AsymmetricTrapezoidProfile.Constraints(5, 3, 3),
                         new State(0, 5),
                         new State(40, 2));
 

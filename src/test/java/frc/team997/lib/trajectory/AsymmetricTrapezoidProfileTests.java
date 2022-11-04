@@ -30,16 +30,12 @@ public class AsymmetricTrapezoidProfileTests {
 
     AsymmetricTrapezoidProfile positiveTriangleProfile =
             new AsymmetricTrapezoidProfile(
-                    new AsymmetricTrapezoidProfileConstraints(10, 1, -2),
-                    new State(2, 0),
-                    new State(1, 0));
+                    new Constraints(10, 1, -2), new State(2, 0), new State(1, 0));
 
     @Test
     public void AsymmetricTrapezoidProfileConstraintsEqualsWorks() {
-        AsymmetricTrapezoidProfileConstraints constraints1 =
-                new AsymmetricTrapezoidProfileConstraints(1, 3, 2);
-        AsymmetricTrapezoidProfileConstraints constraints2 =
-                new AsymmetricTrapezoidProfileConstraints(0.99999, 3.00001, 2.00001);
+        Constraints constraints1 = new Constraints(1, 3, 2);
+        Constraints constraints2 = new Constraints(0.99999, 3.00001, 2.00001);
         assertEquals(true, constraints1.equals(constraints2));
     }
 
@@ -81,9 +77,7 @@ public class AsymmetricTrapezoidProfileTests {
 
     AsymmetricTrapezoidProfile negativeTrapezoidProfile =
             new AsymmetricTrapezoidProfile(
-                    new AsymmetricTrapezoidProfileConstraints(2, 1, -2),
-                    new State(-1, 0),
-                    new State(3, 0));
+                    new Constraints(2, 1, -2), new State(-1, 0), new State(3, 0));
 
     @Test
     public void AsymmetricTrapezoidProfileNegativeTrapezoidPhases() {
@@ -118,9 +112,7 @@ public class AsymmetricTrapezoidProfileTests {
 
     AsymmetricTrapezoidProfile positiveRampProfile =
             new AsymmetricTrapezoidProfile(
-                    new AsymmetricTrapezoidProfileConstraints(10, 1, -2),
-                    new State(1, 0),
-                    new State(0, 3));
+                    new Constraints(10, 1, -2), new State(1, 0), new State(0, 3));
 
     @Test
     public void AsymmetricTrapezoidProfileRampProfilePhases() {

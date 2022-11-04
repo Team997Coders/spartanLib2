@@ -16,7 +16,6 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package frc.team997.lib.trajectory;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -43,20 +42,19 @@ public class AsymmetricTrapezoidProfile extends MotionProfile {
      * values. It's probably best to think of them as the acceleration constraint for the first
      * phase of motion, and deceleration constraint for the final phase of motion.
      */
-    public static class AsymmetricTrapezoidProfileConstraints {
+    public static class Constraints {
         public final double maxVelocity;
         public final double maxAcceleration;
         public final double maxDeceleration;
 
         /**
-         * Construct AsymmetricTrapezoidProfileConstraints for a AsymmetricTrapezoidProfile.
+         * Construct Constraints for a AsymmetricTrapezoidProfile.
          *
          * @param maxVelocity maximum velocity.
          * @param maxAcceleration maximum acceleration.
          * @param maxDeceleration maximum deceleration.
          */
-        public AsymmetricTrapezoidProfileConstraints(
-                double maxVelocity, double maxAcceleration, double maxDeceleration) {
+        public Constraints(double maxVelocity, double maxAcceleration, double maxDeceleration) {
             this.maxVelocity = maxVelocity;
             this.maxAcceleration = maxAcceleration;
             this.maxDeceleration = maxDeceleration;
@@ -65,9 +63,8 @@ public class AsymmetricTrapezoidProfile extends MotionProfile {
         @Override
         public boolean equals(Object other) {
             double epsilon = 0.0001;
-            if (other instanceof AsymmetricTrapezoidProfileConstraints) {
-                AsymmetricTrapezoidProfileConstraints rhs =
-                        (AsymmetricTrapezoidProfileConstraints) other;
+            if (other instanceof Constraints) {
+                Constraints rhs = (Constraints) other;
                 return Math.abs(this.maxVelocity - rhs.maxVelocity) < epsilon
                         && Math.abs(this.maxAcceleration - rhs.maxAcceleration) < epsilon
                         && Math.abs(this.maxDeceleration - rhs.maxDeceleration) < epsilon;
@@ -96,12 +93,10 @@ public class AsymmetricTrapezoidProfile extends MotionProfile {
     /**
      * Constructs an AsymmetricTrapezoidProfile with an initial position and velocity of 0,0.
      *
-     * @param AsymmetricTrapezoidProfileConstraints The constraints on the profile, like maximum
-     *     velocity.
+     * @param constraints The constraints on the profile, like maximum velocity.
      * @param target The desired state when the profile is complete.
      */
-    public AsymmetricTrapezoidProfile(
-            AsymmetricTrapezoidProfileConstraints constraints, State target) {
+    public AsymmetricTrapezoidProfile(Constraints constraints, State target) {
         this(constraints, target, new State(0, 0));
     }
 
@@ -113,8 +108,7 @@ public class AsymmetricTrapezoidProfile extends MotionProfile {
      * @param target The desired state when the profile is complete.
      * @param initial The initial state (usually the current state).
      */
-    public AsymmetricTrapezoidProfile(
-            AsymmetricTrapezoidProfileConstraints constraints, State target, State initial) {
+    public AsymmetricTrapezoidProfile(Constraints constraints, State target, State initial) {
         super(initial);
 
         // in the case the target position is before the initial, we should calculate it all
@@ -139,6 +133,8 @@ public class AsymmetricTrapezoidProfile extends MotionProfile {
                 direction == 1
                         ? Math.min(target.velocity, maxVelocity)
                         : Math.max(target.velocity, maxVelocity);
+
+        initialState = new State(initial.position, initialVelocity);
 
         // calculate the time and position to reach max velocity (don't worry if we go over max
         // position)
@@ -222,11 +218,8 @@ public class AsymmetricTrapezoidProfile extends MotionProfile {
                 new ProfilePhase(
                         decelTime, decelPos, maxDecel, accelTime * maxAccel + initialVelocity);
 
-        ArrayList<ProfilePhase> validPhases = new ArrayList<ProfilePhase>();
-        if (accelPhase.time > 0) validPhases.add(accelPhase);
-        if (coastPhase.time > 0) validPhases.add(coastPhase);
-        if (decelPhase.time > 0) validPhases.add(decelPhase);
-
-        super.phases = validPhases;
+        if (accelPhase.time > 0) super.phases.add(accelPhase);
+        if (coastPhase.time > 0) super.phases.add(coastPhase);
+        if (decelPhase.time > 0) super.phases.add(decelPhase);
     }
 }
