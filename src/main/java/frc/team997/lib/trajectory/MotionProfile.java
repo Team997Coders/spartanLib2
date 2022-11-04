@@ -32,7 +32,7 @@ import java.util.Objects;
  * out of constraints and desired states.
  */
 public class MotionProfile {
-    protected List<ProfilePhase> phases;
+    protected List<ProfilePhase> phases = new ArrayList<>();
     protected State initialState;
 
     /** Holds position and velocity outputs from a MotionProfile. */
@@ -82,7 +82,6 @@ public class MotionProfile {
      */
     public MotionProfile(State initialState, ProfilePhase... phases) {
         this.initialState = initialState;
-        this.phases = new ArrayList<>();
         for (ProfilePhase phase : phases) {
             this.phases.add(phase);
         }
@@ -99,7 +98,6 @@ public class MotionProfile {
      */
     protected MotionProfile(State initialState) {
         this.initialState = initialState;
-        this.phases = new ArrayList<>();
     }
 
     /**
