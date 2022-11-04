@@ -26,8 +26,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * A NTSendable which abstracts the SendableChooser api in favor of a listener based api
- * Used for constructing option widgets in Shuffleboard
+ * A NTSendable which abstracts the SendableChooser api in favor of a listener based api Used for
+ * constructing option widgets in Shuffleboard
  *
  * @param <T> The option data type
  */
