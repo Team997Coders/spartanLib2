@@ -2,7 +2,7 @@ name: Deploy Javadoc
 
 on:
   push:
-    branches: [test-docs]
+    branches: [ci/javadocs]
 
   workflow_dispatch:
 
