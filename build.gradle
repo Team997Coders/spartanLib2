@@ -35,7 +35,13 @@ spotless {
 	}
 }
 
-task buildDocs(type: Javadoc) {
+tasks.register('updateGitHooks', Copy) {
+	from './scripts/pre-commit'
+	into './.git/hooks'
+}
+compileJava.dependsOn updateGitHooks
+
+tasks.register('buildDocs', Javadoc) {
 	source = sourceSets.main.allJava
 	classpath = sourceSets.main.runtimeClasspath
 }
