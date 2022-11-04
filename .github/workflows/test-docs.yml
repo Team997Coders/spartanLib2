@@ -28,8 +28,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: './build/docs'
-  deploy:
+          path: './build/docs/javadoc'
+  publish:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
