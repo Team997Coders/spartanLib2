@@ -20,20 +20,24 @@ test {
 }
 
 spotless {
+	format 'misc', {
+		target '*.gradle', '*.md', '.gitignore'
 
-format 'misc', {
-	target '*.gradle', '*.md', '.gitignore'
+		trimTrailingWhitespace()
+		indentWithTabs()
+		endWithNewline()
+	}
+	java {
+		googleJavaFormat('1.15.0').aosp().reflowLongStrings()
+		formatAnnotations()
 
-	trimTrailingWhitespace()
-	indentWithTabs()
-	endWithNewline()
+		licenseHeaderFile 'licenseHeader.txt'
+	}
 }
-java {
-	googleJavaFormat('1.15.0').aosp().reflowLongStrings()
-	formatAnnotations()
 
-	licenseHeaderFile 'licenseHeader.txt'
-}
+task buildDocs(type: Javadoc) {
+	source = sourceSets.main.allJava
+	classpath = sourceSets.main.runtimeClasspath
 }
 
 repositories {
