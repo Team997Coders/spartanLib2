@@ -27,11 +27,11 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A NTSendable which abstracts the SendableChooser api in favor of a listener based api Used for
- * constructing option widgets in Shuffleboard
+ * constructing option widgets in the dashboard
  *
  * @param <T> The option data type
  */
-public class ShuffleboardChooser<T> implements NTSendable, AutoCloseable {
+public class DashboardChooser<T> implements NTSendable, AutoCloseable {
     private static final AtomicInteger numInstances = new AtomicInteger();
 
     private final int channel;
@@ -43,7 +43,7 @@ public class ShuffleboardChooser<T> implements NTSendable, AutoCloseable {
     private final Set<NetworkTableEntry> activeEntries = new LinkedHashSet<>();
     private final ReentrantLock mutex = new ReentrantLock();
 
-    public interface ShuffleboardOption {
+    public interface Option {
         String getDisplayName();
     }
 
@@ -52,41 +52,41 @@ public class ShuffleboardChooser<T> implements NTSendable, AutoCloseable {
     }
 
     /**
-     * Constructs a ShuffleboardChooser from an enum implementing {@link ShuffleboardOption}
+     * Constructs a DashboardChooser from an enum implementing {@link Option}
      *
      * @param enumClass The {@code <enum>.class}
      * @param defaultOption The default enum option
-     * @return A new ShuffleboardChooser object
+     * @return A new DashboardChooser object
      * @param <T> The enum's type
      */
     @SuppressWarnings("unchecked")
-    public static <T> ShuffleboardChooser<T> fromEnum(
-            Class<? extends ShuffleboardOption> enumClass, ShuffleboardOption defaultOption) {
+    public static <T> DashboardChooser<T> fromEnum(
+            Class<? extends Option> enumClass, Option defaultOption) {
         Map<String, T> options = new HashMap<>();
-        for (ShuffleboardOption entry : enumClass.getEnumConstants()) {
+        for (Option entry : enumClass.getEnumConstants()) {
             options.put(entry.getDisplayName(), (T) entry);
         }
         options.put(defaultOption.getDisplayName(), (T) defaultOption);
-        return new ShuffleboardChooser<T>(options, defaultOption.getDisplayName());
+        return new DashboardChooser<T>(options, defaultOption.getDisplayName());
     }
 
     /**
-     * Constructs a ShuffleboardChooser from a {@code Map<String, T>}
+     * Constructs a DashboardChooser from a {@code Map<String, T>}
      *
      * @param options The option list, as a Map<title, value>
      * @param defaultOption The title of the default option
      */
-    public ShuffleboardChooser(Map<String, T> options, String defaultOption) {
+    public DashboardChooser(Map<String, T> options, String defaultOption) {
         // I watched this break the drivetrain - every shuffleboard option should
         // have a default, but if not the default should be explicitly passed as null.
         if (defaultOption != null && !options.containsKey(defaultOption)) {
             throw new InvalidParameterException(
                     "defaultOption must be either null or a valid option value");
         }
-        // set the channel to the nex available channel (each instance gets it's own channel)
+        // set the channel to the nex available channel (each instance gets its own channel)
         channel = numInstances.getAndIncrement();
         // register the chooser with shuffleboard
-        SendableRegistry.add(this, "ShuffleboardChooser", channel);
+        SendableRegistry.add(this, "DashboardChooser", channel);
 
         optionMap = options;
         this.defaultOption = defaultOption;

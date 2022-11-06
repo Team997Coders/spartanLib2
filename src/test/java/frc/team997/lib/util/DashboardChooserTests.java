@@ -23,9 +23,9 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import org.junit.Test;
 
-public class ShuffleboardOptionTests {
+public class DashboardChooserTests {
     @Test
-    public void enumShuffleboardOptionSendableChooserMatches()
+    public void enumDashboardChooserMatchesSendableChooser()
             throws NoSuchFieldException, IllegalAccessException {
         // Expected SendableChooser
         SendableChooser<OptionEnum> expectedChooser = new SendableChooser<>();
@@ -35,15 +35,15 @@ public class ShuffleboardOptionTests {
         expectedChooser.addOption(OptionEnum.OPTION_3.getDisplayName(), OptionEnum.OPTION_3);
 
         // Actual ShuffleboardChooser
-        ShuffleboardChooser<OptionEnum> actualChooser =
-                ShuffleboardChooser.fromEnum(OptionEnum.class, OptionEnum.OPTION_2);
+        DashboardChooser<OptionEnum> actualChooser =
+                DashboardChooser.fromEnum(OptionEnum.class, OptionEnum.OPTION_2);
 
         // reflectively access sendable chooser's display name to value map.
         Field sendableMapField = SendableChooser.class.getDeclaredField("m_map");
         sendableMapField.setAccessible(true);
 
         // reflectively access ShuffleboardChooser's display name to value map.
-        Field shuffleboardMapField = ShuffleboardChooser.class.getDeclaredField("optionMap");
+        Field shuffleboardMapField = DashboardChooser.class.getDeclaredField("optionMap");
         shuffleboardMapField.setAccessible(true);
 
         Map<String, OptionEnum> expectedMap =
@@ -60,7 +60,7 @@ public class ShuffleboardOptionTests {
     }
 
     @Test
-    public void genericShuffleboardOptionSendableChooserMatches()
+    public void genericDashboardChooserMatchesSendableChooser()
             throws NoSuchFieldException, IllegalAccessException {
         // Expected SendableChooser
         SendableChooser<String> expectedChooser = new SendableChooser<>();
@@ -70,8 +70,8 @@ public class ShuffleboardOptionTests {
         expectedChooser.setDefaultOption("Option 3", "Value 3");
 
         // Actual SendableChooser
-        ShuffleboardChooser<String> actualChooser =
-                new ShuffleboardChooser<>(
+        DashboardChooser<String> actualChooser =
+                new DashboardChooser<>(
                         Map.of(
                                 "Option 1", "Value 1",
                                 "Option 2", "Value 2",
@@ -83,7 +83,7 @@ public class ShuffleboardOptionTests {
         sendableMapField.setAccessible(true);
 
         // reflectively access ShuffleboardChooser's display name to value map.
-        Field shuffleboardMapField = ShuffleboardChooser.class.getDeclaredField("optionMap");
+        Field shuffleboardMapField = DashboardChooser.class.getDeclaredField("optionMap");
         shuffleboardMapField.setAccessible(true);
 
         Map<String, OptionEnum> expectedMap =
@@ -100,7 +100,7 @@ public class ShuffleboardOptionTests {
     }
 }
 
-enum OptionEnum implements ShuffleboardChooser.ShuffleboardOption {
+enum OptionEnum implements DashboardChooser.Option {
     OPTION_1("Option 1"),
     OPTION_2("Option 2"),
     OPTION_3("Option 3");
