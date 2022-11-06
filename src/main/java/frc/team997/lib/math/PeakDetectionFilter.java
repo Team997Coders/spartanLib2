@@ -29,12 +29,23 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  *
  * <p>Concept from the Stack Overflow answer cited below.
  *
+ * <p>Generally when tuning, there's a balance to be made between window (number of past data points
+ * to consider) and stddev and mean (influence a value considered a peak will have on the total mean
+ * and standard deviation of the data) influences. A large window will result in more phase lag, but
+ * can allow for influences of 1.0 for stddev and mean, as signals will be surrounded by much more
+ * data. However, a small window has little phase lag, but can be susceptible to high influences
+ * from peaks (they are, after all, outliers by definition). Larger windows are almost always
+ * recommended if you can ignore the slight phase lag issue.
+ *
+ * <p>Special care should be taken when the series exhibits trends over time to balance influences
+ * so as not to completely erase or amplify said trend.
+ *
  * <p>Brakel, J.P.G. van (2014). "Robust peak detection algorithm using z-scores". Stack Overflow.
  * Available at:
  * https://stackoverflow.com/questions/22583391/peak-signal-detection-in-realtime-timeseries-data/22640362#22640362
  * (version: 2020-11-08).
  */
-public class PeakDetectionFilter {
+public class PeakDetectionFilter implements Filter {
     private double threshold;
     private double standardDeviationInfluence;
     private double meanInfluence;
@@ -43,19 +54,11 @@ public class PeakDetectionFilter {
     private DescriptiveStatistics meanSeries;
     private DescriptiveStatistics series;
 
+    private int returnValue = 0;
+
     /**
      * Constructs a PeakDetection filter with a minimum delta from the mean to be considered a
      * signal.
-     *
-     * <p>Generally, there's a balance to be made between window and stddev and mean influences. A
-     * large window will result in more phase lag, but can allow for influences of 1.0 for stddev
-     * and mean, as signals will be surrounded by much more data. However, a small window has little
-     * phase lag, but can be susceptible to high influences from peaks (they are, after, all,
-     * outliers by definition). Larger windows are almost always recommended if you can ignore the
-     * slight phase lag issue.
-     *
-     * <p>Special care should be taken when the series exhibits trends over time to balance
-     * influences so as not to completely erase or amplify said trend.
      *
      * @param window The number of past data points to consider for mean and stddev calculations.
      * @param threshold The number of standard deviations above or below the mean needed to be
@@ -90,16 +93,6 @@ public class PeakDetectionFilter {
     /**
      * Constructs a PeakDetection filter.
      *
-     * <p>Generally, there's a balance to be made between window and stddev and mean influences. A
-     * large window will result in more phase lag, but can allow for influences of 1.0 for stddev
-     * and mean, as signals will be surrounded by much more data. However, a small window has little
-     * phase lag, but can be susceptible to high influences from peaks (they are, after, all,
-     * outliers by definition). Larger windows are almost always recommended if you can ignore the
-     * slight phase lag issue.
-     *
-     * <p>Special care should be taken when the series exhibits trends over time to balance
-     * influences so as not to completely erase or amplify said trend.
-     *
      * @param window The number of past data points to consider for mean and stddev calculations.
      * @param threshold The number of standard deviations above or below the mean needed to be
      *     considered a signal.
@@ -114,15 +107,17 @@ public class PeakDetectionFilter {
     }
 
     /**
-     * Calculates whether a given value is a peak, valley, or neither relative to the rest of the
-     * series. Adds the value to the dataset for calculating future inputs.
+     * Returns whether a value is considered a peak, a valley, or neither within the combined input
+     * data.
      *
-     * <p>Will return 0 if {@code window - 1} inputs have not yet been given to this instance.
+     * <p>Returns 0 for the first {@code window-1} inputs.
      *
-     * @param value The double value to evaluate.
-     * @return 1 if the value is a peak, -1 if it is a valley, or 0 if it is neither.
+     * @param value The value to input to the filter.
+     * @return 1 if the input value represents a peak, -1 if it represents a valley, 0 if it
+     *     represents neither.
      */
-    public int calculate(double value) {
+    @Override
+    public double calculate(double value) {
         if ((int) series.getN() == 0) {
             standardDeviationSeries.addValue(value);
             meanSeries.addValue(value);
@@ -130,7 +125,6 @@ public class PeakDetectionFilter {
         }
         // prevents exceptions when trying to sample the previous value on the first loop
 
-        int returnValue;
         if ((int) series.getN() < series.getWindowSize()) {
             returnValue = 0;
             // if there aren't enough data points to fill the window, return 0
@@ -165,22 +159,15 @@ public class PeakDetectionFilter {
         return returnValue;
     }
 
-    /**
-     * Resets the history of the filter. This will not return any more peaks for at least {@code
-     * window - 1} more calls.
-     */
+    @Override
     public void reset() {
         standardDeviationSeries.clear();
         meanSeries.clear();
         series.clear();
     }
 
-    /**
-     * Returns up to {@code window} previous values, in the order they were input.
-     *
-     * @return An array of doubles representing the inputs in the window.
-     */
-    public double[] getSeriesInWindow() {
-        return series.getValues();
+    @Override
+    public double getCurrentOutput() {
+        return returnValue;
     }
 }

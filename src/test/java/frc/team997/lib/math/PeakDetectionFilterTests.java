@@ -16,7 +16,6 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package frc.team997.lib.math;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
@@ -30,15 +29,15 @@ import org.junit.Test;
  * just checks if it behaves as expected over a predefined set of data.
  */
 public class PeakDetectionFilterTests {
+    private static final double epsilon = 0.0001;
+
     private void testDataSet(PeakDetectionFilter filter, double[] inputs, int[] expectedOutputs) {
         for (int i = 0; i < inputs.length; i++) {
-            int o = filter.calculate(inputs[i]);
+            double o = filter.calculate(inputs[i]);
             // System.out.print(o + ", ");
-            assertEquals(expectedOutputs[i], o);
+            assertEquals(expectedOutputs[i], o, epsilon);
         }
     }
-
-    private static final double epsilon = 0.0001;
 
     @Test
     public void PeakDetectionFilterRejectsInvalidWindow() {
@@ -123,19 +122,10 @@ public class PeakDetectionFilterTests {
     @Test
     public void PeakDetectionFilterSamplesOfTheFirstWindowReturnZero() {
         PeakDetectionFilter filter = new PeakDetectionFilter(5, 0.1, 1, 1);
-        assertEquals(0, filter.calculate(0));
-        assertEquals(0, filter.calculate(0));
-        assertEquals(0, filter.calculate(-1));
-        assertEquals(0, filter.calculate(10));
-        assertEquals(1, filter.calculate(15));
-    }
-
-    @Test
-    public void PeakDetectionFilterGetSeriesInWindowReturnsProperly() {
-        PeakDetectionFilter filter = new PeakDetectionFilter(3, 1, 0.5, 0.5);
-        double[] expectedOutput = {0, 0, 5};
-        filter.calculate(0);
-        filter.calculate(5);
-        assertArrayEquals(expectedOutput, filter.getSeriesInWindow(), epsilon);
+        assertEquals(0, filter.calculate(0), epsilon);
+        assertEquals(0, filter.calculate(0), epsilon);
+        assertEquals(0, filter.calculate(-1), epsilon);
+        assertEquals(0, filter.calculate(10), epsilon);
+        assertEquals(1, filter.calculate(15), epsilon);
     }
 }
