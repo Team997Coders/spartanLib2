@@ -93,7 +93,7 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
     /**
      * Constructs a DashboardChooser from a {@code Map<String, T>}.
      *
-     * @param options The option list, as a Map<title, value>.
+     * @param options The option list, as a {@code Map<title, value>}.
      * @param defaultOption The title of the default option.
      * @param logChanges Whether to log changes in the chosen value to an on-robot log.
      */
@@ -128,7 +128,7 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
      * Constructs a DashboardChooser from a {@code Map<String, T>}, recording changes to the chosen
      * value in an on-robot log.
      *
-     * @param options The option list, as a Map<title, value>.
+     * @param options The option list, as a {@code Map<title, value>}.
      * @param defaultOption The title of the default option.
      */
     public DashboardChooser(Map<String, T> options, String defaultOption) {
