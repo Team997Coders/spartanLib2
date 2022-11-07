@@ -31,16 +31,18 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
  *
  * <p>If the data isn't numerical (Double, Int, Long) or Boolean/String, this will instead publish
  * and log the result of its {@code .toString()} method.
+ *
+ * @param <T> The data type of the log entry.
  */
 public class Logger<T> {
-    private String key;
-    private String tabName;
+    private final String key;
+    private final String tabName;
     private boolean publishToDashboard;
     private boolean recordInLog;
 
-    private BooleanLogEntry boolLogEntry;
-    private DoubleLogEntry doubleLogEntry;
-    private StringLogEntry stringLogEntry;
+    private final BooleanLogEntry boolLogEntry;
+    private final DoubleLogEntry doubleLogEntry;
+    private final StringLogEntry stringLogEntry;
 
     private boolean entryAlreadyExists;
 
@@ -147,7 +149,12 @@ public class Logger<T> {
      */
     public void update(T value) {
         if (publishToDashboard) currentDashboardValue = value;
-        if (value instanceof Double || value instanceof Integer || value instanceof Long) {
+        if (value instanceof Double
+                || value instanceof Integer
+                || value instanceof Long
+                || value instanceof Short
+                || value instanceof Byte
+                || value instanceof Float) {
             if (recordInLog) doubleLogEntry.append((double) value);
             if (publishToDashboard && !entryAlreadyExists) {
                 entryAlreadyExists = true;

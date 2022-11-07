@@ -36,7 +36,7 @@ public class DashboardChooserTests {
 
         // Actual ShuffleboardChooser
         DashboardChooser<OptionEnum> actualChooser =
-                DashboardChooser.fromEnum(OptionEnum.class, OptionEnum.OPTION_2);
+                DashboardChooser.fromEnum(OptionEnum.class, OptionEnum.OPTION_2, false);
 
         // reflectively access sendable chooser's display name to value map.
         Field sendableMapField = SendableChooser.class.getDeclaredField("m_map");
@@ -46,8 +46,10 @@ public class DashboardChooserTests {
         Field shuffleboardMapField = DashboardChooser.class.getDeclaredField("optionMap");
         shuffleboardMapField.setAccessible(true);
 
+        @SuppressWarnings("unchecked")
         Map<String, OptionEnum> expectedMap =
                 (Map<String, OptionEnum>) sendableMapField.get(expectedChooser);
+        @SuppressWarnings("unchecked")
         Map<String, OptionEnum> actualMap =
                 (Map<String, OptionEnum>) shuffleboardMapField.get(actualChooser);
 
@@ -76,7 +78,8 @@ public class DashboardChooserTests {
                                 "Option 1", "Value 1",
                                 "Option 2", "Value 2",
                                 "Option 3", "Value 3"),
-                        "Option 3");
+                        "Option 3",
+                        false);
 
         // reflectively access sendable chooser's display name to value map.
         Field sendableMapField = SendableChooser.class.getDeclaredField("m_map");
@@ -86,8 +89,10 @@ public class DashboardChooserTests {
         Field shuffleboardMapField = DashboardChooser.class.getDeclaredField("optionMap");
         shuffleboardMapField.setAccessible(true);
 
+        @SuppressWarnings("unchecked")
         Map<String, OptionEnum> expectedMap =
                 (Map<String, OptionEnum>) sendableMapField.get(expectedChooser);
+        @SuppressWarnings("unchecked")
         Map<String, OptionEnum> actualMap =
                 (Map<String, OptionEnum>) shuffleboardMapField.get(actualChooser);
 

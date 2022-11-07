@@ -20,16 +20,18 @@ import edu.wpi.first.networktables.NTSendable;
 import edu.wpi.first.networktables.NTSendableBuilder;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.util.sendable.SendableRegistry;
+import edu.wpi.first.wpilibj.DataLogManager;
+import frc.team997.lib.telemetry.Logger;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * A NTSendable which abstracts the SendableChooser api in favor of a listener based api Used for
- * constructing option widgets in the dashboard
+ * A NTSendable which replaces the SendableChooser in favor of a listener-based api. Used for
+ * constructing option widgets in the dashboard.
  *
- * @param <T> The option data type
+ * @param <T> The data type of the option.
  */
 public class DashboardChooser<T> implements NTSendable, AutoCloseable {
     private static final AtomicInteger numInstances = new AtomicInteger();
@@ -43,6 +45,9 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
     private final Set<NetworkTableEntry> activeEntries = new LinkedHashSet<>();
     private final ReentrantLock mutex = new ReentrantLock();
 
+    private Logger<T> logger;
+    private final boolean logChanges;
+
     public interface Option {
         String getDisplayName();
     }
@@ -52,44 +57,88 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
     }
 
     /**
-     * Constructs a DashboardChooser from an enum implementing {@link Option}
+     * Constructs a DashboardChooser from an enum implementing {@link Option}.
      *
      * @param enumClass The {@code <enum>.class}
      * @param defaultOption The default enum option
-     * @return A new DashboardChooser object
-     * @param <T> The enum's type
+     * @param logChanges Whether to log changes in the chosen value to an on-robot log.
+     * @return A new DashboardChooser object.
+     * @param <T> The enum's type.
      */
     @SuppressWarnings("unchecked")
     public static <T> DashboardChooser<T> fromEnum(
-            Class<? extends Option> enumClass, Option defaultOption) {
+            Class<? extends Option> enumClass, Option defaultOption, boolean logChanges) {
         Map<String, T> options = new HashMap<>();
         for (Option entry : enumClass.getEnumConstants()) {
             options.put(entry.getDisplayName(), (T) entry);
         }
         options.put(defaultOption.getDisplayName(), (T) defaultOption);
-        return new DashboardChooser<T>(options, defaultOption.getDisplayName());
+        return new DashboardChooser<T>(options, defaultOption.getDisplayName(), logChanges);
     }
 
     /**
-     * Constructs a DashboardChooser from a {@code Map<String, T>}
+     * Constructs a DashboardChooser from an enum implementing {@link Option}, saving changes to an
+     * on-robot log.
      *
-     * @param options The option list, as a Map<title, value>
-     * @param defaultOption The title of the default option
+     * @param enumClass The {@code <enum>.class}
+     * @param defaultOption The default enum option
+     * @return A new DashboardChooser object.
+     * @param <T> The enum's type.
      */
-    public DashboardChooser(Map<String, T> options, String defaultOption) {
-        // I watched this break the drivetrain - every shuffleboard option should
-        // have a default, but if not the default should be explicitly passed as null.
+    public static <T> DashboardChooser<T> fromEnum(
+            Class<? extends Option> enumClass, Option defaultOption) {
+        return fromEnum(enumClass, defaultOption, true);
+    }
+
+    /**
+     * Constructs a DashboardChooser from a {@code Map<String, T>}.
+     *
+     * @param options The option list, as a Map<title, value>.
+     * @param defaultOption The title of the default option.
+     * @param logChanges Whether to log changes in the chosen value to an on-robot log.
+     * @throws InvalidParameterException If the default option is neither {@code null} or part of
+     *     the options.
+     */
+    public DashboardChooser(Map<String, T> options, String defaultOption, boolean logChanges)
+            throws InvalidParameterException {
         if (defaultOption != null && !options.containsKey(defaultOption)) {
             throw new InvalidParameterException(
                     "defaultOption must be either null or a valid option value");
         }
         // set the channel to the nex available channel (each instance gets its own channel)
         channel = numInstances.getAndIncrement();
-        // register the chooser with shuffleboard
+
+        if (logChanges) {
+            logger =
+                    new Logger<T>(
+                            DataLogManager.getLog(),
+                            "DashboardChooser" + channel,
+                            "DashboardChooser",
+                            false,
+                            true);
+        }
+
+        this.logChanges = logChanges;
+
+        // register the chooser with NT
         SendableRegistry.add(this, "DashboardChooser", channel);
 
         optionMap = options;
         this.defaultOption = defaultOption;
+    }
+
+    /**
+     * Constructs a DashboardChooser from a {@code Map<String, T>}, recording changes to the chosen
+     * value in an on-robot log.
+     *
+     * @param options The option list, as a Map<title, value>.
+     * @param defaultOption The title of the default option.
+     * @throws InvalidParameterException If the default option is neither {@code null} or part of
+     *     the options.
+     */
+    public DashboardChooser(Map<String, T> options, String defaultOption)
+            throws InvalidParameterException {
+        this(options, defaultOption, true);
     }
 
     @Override
@@ -161,6 +210,8 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
         }
         // get value after
         T newOption = getSelected();
+
+        if (logChanges) logger.update(newOption);
 
         // call listeners
         for (ValueUpdater<T> listener : listeners) {
