@@ -33,12 +33,16 @@ public class HighLevelLogger {
     private static final String branchDataFilename = "branch.txt";
 
     /**
-     * Upon startup, the logger attempts to read git commit/branch data from the files specified in
-     * the source for this class, in the deploy directory.
+     * Starts the HighLevelLogger.
+     *
+     * <p>Upon startup, the logger attempts to read git commit/branch data from the files in the
+     * deploy directory of the RoboRio specified in the source for this class (currently
+     * "commit.txt" and "branch.txt").
      *
      * <p>These should be updated by the build.gradle of your functional robot code as specified by
      * <a
-     * href="https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html">deploy-git-data</a>
+     * href="https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html">this</a>
+     * documentation from WPI.
      */
     public static void startLogging() {
         if (!hasStarted) {

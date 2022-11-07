@@ -23,6 +23,10 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import org.junit.Test;
 
+/**
+ * Tests for the DashboardChooser, using reflection to function without a running NetworkTables
+ * server.
+ */
 public class DashboardChooserTests {
     @Test
     @SuppressWarnings("unchecked")

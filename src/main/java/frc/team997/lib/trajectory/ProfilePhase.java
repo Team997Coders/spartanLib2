@@ -18,7 +18,7 @@ package frc.team997.lib.trajectory;
 
 import java.util.Objects;
 
-/** A data class for profile phase data. */
+/** Holds constant-acceleration kinematic rates and time. */
 public class ProfilePhase {
     public final double time;
     public final double position;
@@ -26,13 +26,11 @@ public class ProfilePhase {
     public final double initialVelocity;
 
     /**
-     * Constructs a ProfilePhase from a given acceleration, initial velocity, and time. All units of
-     * displacement work, as long as they agree.
+     * Constructs a ProfilePhase from a given acceleration, initial velocity, and time.
      *
-     * @param acceleration The acceleration throughout this phase (displacement units/time unit/time
-     *     unit).
-     * @param initialVelocity The velocity at the start of the phase (displacement units/time unit).
-     * @param time The duration of the phase (time units).
+     * @param acceleration The acceleration throughout this phase.
+     * @param initialVelocity The velocity at the start of the phase.
+     * @param time The duration of the phase.
      */
     public ProfilePhase(double acceleration, double initialVelocity, double time) {
         double displacement = (0.5 * (acceleration) * (time * time)) + time * initialVelocity;
@@ -43,16 +41,12 @@ public class ProfilePhase {
     }
 
     /**
-     * Constructs a ProfilePhase. All units fine as long as they agree.
+     * Constructs a ProfilePhase.
      *
-     * <p>You probably should use {@code ProfilePhase.fromRatesAndTime()} instead.
-     *
-     * @param time The duration of the phase (time units).
-     * @param position The displacement of the phase (displacement units).
-     * @param acceleration The acceleration of the phase (0 if coast phase) (displacement units/time
-     *     unit/time unit).
-     * @param initialVelocity The velocity at the beginning of a phase (displacement units/time
-     *     unit).
+     * @param time The duration of the phase.
+     * @param position The displacement of the phase.
+     * @param acceleration The acceleration of the phase (0 if coast phase).
+     * @param initialVelocity The velocity at the beginning of a phase.
      */
     protected ProfilePhase(
             double time, double position, double acceleration, double initialVelocity) {

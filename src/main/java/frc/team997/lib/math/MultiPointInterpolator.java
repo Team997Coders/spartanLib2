@@ -19,7 +19,12 @@ package frc.team997.lib.math;
 import java.security.InvalidParameterException;
 import java.util.TreeMap;
 
-/** A class to provide linear interpolation, using a set of key/value pairs. */
+/**
+ * Provides linear interpolation through a map of two variables.
+ *
+ * <p>This is not a full line- or curve- fitting interpolation, it only considers the two closest
+ * values in the map.
+ */
 public class MultiPointInterpolator {
     private final TreeMap<Double, Double> points;
 
@@ -64,7 +69,8 @@ public class MultiPointInterpolator {
      * Samples the profile for a value at a given key.
      *
      * @param key A double representing the key to sample.
-     * @return The value at that place, linearly interpolated if not defined.
+     * @return The value at that place, linearly interpolated if not already defined by the input
+     *     map.
      * @throws InvalidParameterException If the key to sample is less than zero.
      */
     public double sample(double key) throws InvalidParameterException {

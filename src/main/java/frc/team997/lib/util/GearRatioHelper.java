@@ -18,22 +18,20 @@ package frc.team997.lib.util;
 
 import java.security.InvalidParameterException;
 
-/**
- * We all often struggle with basic mathmatical intuition, despite doing much more challenging math
- * without a sweat.
- *
- * <p>The GearRatioHelper should alleviate a common source of stress as we can stop losing sleep
- * over what order to organize the multiplication and division in.
- */
+/** Simple utility representing a gear ratio. */
 public class GearRatioHelper {
     private final double inputRatio;
     private final double outputRatio;
 
     /**
-     * Creates a gear ratio helper.
+     * Constructs a GearRatioHelper.
      *
      * <p>The parameters indicate the "input" and "output" sides of the mechanism. Should be
-     * measured in distance of travel, not angular velocity, for this conversion to be valid.
+     * measured in distance of travel.
+     *
+     * <p>A higher output ratio than input ratio is a reduction (lower speed, higher torque).
+     *
+     * <p>A higher input ratio than output ratio is a step-up (higher speed, lower torque).
      *
      * @param inputRatio The measurement of the "input" side (usually where the motor is)
      * @param outputRatio The measurement of the "output" side (usually on the other side of a
@@ -51,16 +49,16 @@ public class GearRatioHelper {
     /**
      * Creates a gear ratio helper from a double ratio of input to output.
      *
-     * @param ratioInputToOutput The ratio as input::output.
+     * @param ratioInputToOutput The ratio as input/output.
      */
     public GearRatioHelper(double ratioInputToOutput) {
         this(ratioInputToOutput, 1);
     }
 
     /**
-     * Returns the gear ratio as input::output.
+     * Returns the gear ratio as input/output.
      *
-     * @return The double ratio as input::output.
+     * @return The double ratio as input/output.
      */
     public double toDoubleRatioInputToOutput() {
         return inputRatio / outputRatio;
