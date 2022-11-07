@@ -4,7 +4,9 @@
 
 Reusable code for FRC team 997.
 
-<img src="https://lh4.googleusercontent.com/zyjl2m5D_WEY1cgqMgGPeLXmayvhxZGDu_uWI15sOP038dfpa6T9SY9PhvHk7LDcsAIKJceWxr8r61DqQBFuQ2_QzUlhqz2WqYc192rUr94EsJ6xLmmsELLkoPasVJAxwQ=w1280" width="350" height="350" />
+<p>
+  <img src="https://lh5.googleusercontent.com/zyjl2m5D_WEY1cgqMgGPeLXmayvhxZGDu_uWI15sOP038dfpa6T9SY9PhvHk7LDcsAIKJceWxr8r61DqQBFuQ2_QzUlhqz2WqYc192rUr94EsJ6xLmmsELLkoPasVJAxwQ=w1280" width="350" height="350" />
+</p>
 
 https://www.chsrobotics.org/
 
