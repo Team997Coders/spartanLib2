@@ -25,6 +25,7 @@ import org.junit.Test;
 
 public class DashboardChooserTests {
     @Test
+    @SuppressWarnings("unchecked")
     public void enumDashboardChooserMatchesSendableChooser()
             throws NoSuchFieldException, IllegalAccessException {
         // Expected SendableChooser
@@ -46,10 +47,8 @@ public class DashboardChooserTests {
         Field shuffleboardMapField = DashboardChooser.class.getDeclaredField("optionMap");
         shuffleboardMapField.setAccessible(true);
 
-        @SuppressWarnings("unchecked")
         Map<String, OptionEnum> expectedMap =
                 (Map<String, OptionEnum>) sendableMapField.get(expectedChooser);
-        @SuppressWarnings("unchecked")
         Map<String, OptionEnum> actualMap =
                 (Map<String, OptionEnum>) shuffleboardMapField.get(actualChooser);
 
@@ -62,6 +61,7 @@ public class DashboardChooserTests {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void genericDashboardChooserMatchesSendableChooser()
             throws NoSuchFieldException, IllegalAccessException {
         // Expected SendableChooser
@@ -89,10 +89,8 @@ public class DashboardChooserTests {
         Field shuffleboardMapField = DashboardChooser.class.getDeclaredField("optionMap");
         shuffleboardMapField.setAccessible(true);
 
-        @SuppressWarnings("unchecked")
         Map<String, OptionEnum> expectedMap =
                 (Map<String, OptionEnum>) sendableMapField.get(expectedChooser);
-        @SuppressWarnings("unchecked")
         Map<String, OptionEnum> actualMap =
                 (Map<String, OptionEnum>) shuffleboardMapField.get(actualChooser);
 

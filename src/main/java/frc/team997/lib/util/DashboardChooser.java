@@ -96,11 +96,8 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
      * @param options The option list, as a Map<title, value>.
      * @param defaultOption The title of the default option.
      * @param logChanges Whether to log changes in the chosen value to an on-robot log.
-     * @throws InvalidParameterException If the default option is neither {@code null} or part of
-     *     the options.
      */
-    public DashboardChooser(Map<String, T> options, String defaultOption, boolean logChanges)
-            throws InvalidParameterException {
+    public DashboardChooser(Map<String, T> options, String defaultOption, boolean logChanges) {
         if (defaultOption != null && !options.containsKey(defaultOption)) {
             throw new InvalidParameterException(
                     "defaultOption must be either null or a valid option value");
@@ -133,11 +130,8 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
      *
      * @param options The option list, as a Map<title, value>.
      * @param defaultOption The title of the default option.
-     * @throws InvalidParameterException If the default option is neither {@code null} or part of
-     *     the options.
      */
-    public DashboardChooser(Map<String, T> options, String defaultOption)
-            throws InvalidParameterException {
+    public DashboardChooser(Map<String, T> options, String defaultOption) {
         this(options, defaultOption, true);
     }
 
