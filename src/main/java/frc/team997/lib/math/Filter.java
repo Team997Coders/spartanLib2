@@ -22,8 +22,7 @@ public interface Filter {
      * Adds the value to the window and calculates the current output of the filter
      *
      * @param value The value to input to the filter.
-     * @return The current output of the filter (0 if no values have been given to {@code
-     *     calculate()}).
+     * @return The current output of the filter.
      */
     double calculate(double value);
 

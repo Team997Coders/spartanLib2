@@ -19,10 +19,13 @@ package frc.team997.lib.trajectory;
 import java.util.Objects;
 
 /**
- * A motion profile that allows for smooth motion between two states. The dx/dt of this motion
- * (velocity) forms the trapezoid shape on a graph. The particular elements of motion are velocity
- * and acceleration limited, with acceleration limiting having different constraints for the initial
- * phase of motion ("maxAcceleration"), and the final phase of motion ("maxDeceleration").
+ * A MotionProfile that allows for smooth motion between two states, generated with acceleration,
+ * velocity, and deceleration constraints.
+ *
+ * <p>The dx/dt of this motion (velocity) forms the trapezoid shape on a graph. The particular
+ * elements of motion are velocity and acceleration limited, with acceleration limiting having
+ * different constraints for the initial phase of motion ("maxAcceleration"), and the final phase of
+ * motion ("maxDeceleration").
  *
  * <p>The most useful practical application of this is use defining the setpoint for a PID (or
  * similar) controller, to avoid control effort saturation or the initial spike in input from the P
@@ -35,7 +38,8 @@ import java.util.Objects;
 public class AsymmetricTrapezoidProfile extends MotionProfile {
 
     /**
-     * Data class holding allowable rates for the profile's setpoint.
+     * A data class to hold the maximum allowable rates for the output of a
+     * AsymmetricTrapezoidProfile.
      *
      * <p>Because of the number of cases this profile has to handle, acceleration and deceleration
      * don't coorespond to acceleration in a specific direction, or towards higher/lower absolute
@@ -48,7 +52,7 @@ public class AsymmetricTrapezoidProfile extends MotionProfile {
         public final double maxDeceleration;
 
         /**
-         * Construct Constraints for a AsymmetricTrapezoidProfile.
+         * Constructs Constraints for a AsymmetricTrapezoidProfile.
          *
          * @param maxVelocity maximum velocity.
          * @param maxAcceleration maximum acceleration.

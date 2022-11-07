@@ -21,7 +21,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A motion profile provides a trajectory, most often used as the setpoint for a PID (or similar)
+ * A group of ProfilePhases that represents an arbitrary trajectory of compound accelerations,
+ * coasts, and decelerations.
+ *
+ * <p>A motion profile provides a trajectory, most often used as the setpoint for a PID (or similar)
  * controller.
  *
  * <p>This can be useful to avoid control effort saturation, or to decrease the initial large input
@@ -35,7 +38,7 @@ public class MotionProfile {
     protected List<ProfilePhase> phases = new ArrayList<>();
     protected State initialState;
 
-    /** Holds position and velocity outputs from a MotionProfile. */
+    /** Holds the velocity and position states of a MotionProfile at a time in its span. */
     public static class State {
         public final double position;
         public final double velocity;
@@ -75,7 +78,7 @@ public class MotionProfile {
     }
 
     /**
-     * Constructor for a MotionProfile with arbitrary phaes.
+     * Constructs a MotionProfile with arbitrary phases.
      *
      * @param initialState The initial state of the motion profile.
      * @param phases The ProfilePhases of the motion profile.
@@ -88,7 +91,7 @@ public class MotionProfile {
     }
 
     /**
-     * Constructor for a MotionProfile with no phases and a defined initial state.
+     * Constructs a MotionProfile with no phases and a defined initial state.
      *
      * <p>This constructor is protected because it encourages users to create empty profiles and
      * then add phases to the (also protected) {@code phases}, when this can cause undefined
@@ -101,8 +104,8 @@ public class MotionProfile {
     }
 
     /**
-     * Constructor for a MotionProfile of arbitrary phases with an initial state of zero
-     * displacement and zero velocity.
+     * Constructs a MotionProfile of arbitrary phases with an initial state of zero displacement and
+     * zero velocity.
      *
      * @param phases The ProfilePhases of the profile.
      */

@@ -20,12 +20,10 @@ import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
 import edu.wpi.first.util.datalog.StringLogEntry;
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 /**
- * The Logger class conveniently packages publishing telemetry data to a off-robot dashboard
- * (Shuffleboard) and saving that telemetry to an on-robot log file.
+ * Utility to streamline publishing data to NetworkTables and save it to an on-robot log file.
  *
  * <p>Parameterized to the type of data to publish/log.
  *
@@ -95,7 +93,7 @@ public class Logger<T> {
      *     capitalization/whitespace.
      */
     public Logger(String key, String tabName) {
-        this(DataLogManager.getLog(), key, tabName, true, true);
+        this(HighLevelLogger.getLog(), key, tabName, true, true);
     }
 
     /**

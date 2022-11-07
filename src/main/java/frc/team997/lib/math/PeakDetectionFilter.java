@@ -20,7 +20,7 @@ import java.security.InvalidParameterException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 /**
- * Implements a filter to isolate peaks in a stream of data.
+ * A filter to isolate peaks in a stream of data.
  *
  * <p>Returns 1 if a given value is greater than a rolling average of standard deviations away from
  * the median, -1 if it's smaller by that amount or more.

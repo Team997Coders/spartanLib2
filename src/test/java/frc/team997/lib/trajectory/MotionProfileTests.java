@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import frc.team997.lib.trajectory.MotionProfile.State;
 import org.junit.Test;
 
+/** Tests for the MotionProfile. */
 public class MotionProfileTests {
     private final double epsilon = 0.0001;
 

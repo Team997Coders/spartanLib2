@@ -24,7 +24,7 @@ public class UtilityMath {
     /**
      * Normalizes an angle in radians between 0 and 2 pi.
      *
-     * @param angleRadians Value of the angle.
+     * @param angleRadians Value in radians of the angle.
      * @return The normalized value.
      */
     public static double normalizeAngleRadians(double angleRadians) {
@@ -44,8 +44,9 @@ public class UtilityMath {
     }
 
     /**
-     * Interpolates a value between two points. For more complex, multi-point interpolation, use the
-     * {@link MultiPointInterpolator} class.
+     * Interpolates a value between two points.
+     *
+     * <p>For more complex, multi-point interpolation, use the {@link MultiPointInterpolator} class.
      *
      * @param y0 The initial value of the dependent variable.
      * @param x0 The initial value of the independent variable.
@@ -62,7 +63,7 @@ public class UtilityMath {
     }
 
     /**
-     * Scales a set of doubles symmetrically to ensure that none of them exceed the maximum absolute
+     * Scales a set of doubles symmetrically to ensure that none of them exceed a maximum absolute
      * value, while still maintaining the same ratio.
      *
      * @param inputs An array of the input values.
