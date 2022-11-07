@@ -18,16 +18,23 @@ package frc.team997.lib.math;
 
 /** Common interface for this library's filters. */
 public interface Filter {
-    public double calculate(double value);
+    /**
+     * Adds the value to the window and calculates the current output of the filter
+     *
+     * @param value The value to input to the filter.
+     * @return The current output of the filter (0 if no values have been given to {@code
+     *     calculate()}).
+     */
+    double calculate(double value);
 
     /** Resets the history of the filter. */
-    public void reset();
+    void reset();
 
     /**
      * Returns the current output of the filter without updating with a new value.
      *
      * @return The current output of the filter (0 if no values have been given to {@code
-     *     update()}).
+     *     calculate()}).
      */
-    public double getCurrentOutput();
+    double getCurrentOutput();
 }

@@ -46,13 +46,13 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  * (version: 2020-11-08).
  */
 public class PeakDetectionFilter implements Filter {
-    private double threshold;
-    private double standardDeviationInfluence;
-    private double meanInfluence;
-    private double minimumDelta;
-    private DescriptiveStatistics standardDeviationSeries;
-    private DescriptiveStatistics meanSeries;
-    private DescriptiveStatistics series;
+    private final double threshold;
+    private final double standardDeviationInfluence;
+    private final double meanInfluence;
+    private final double minimumDelta;
+    private final DescriptiveStatistics standardDeviationSeries;
+    private final DescriptiveStatistics meanSeries;
+    private final DescriptiveStatistics series;
 
     private int returnValue = 0;
 
@@ -159,6 +159,7 @@ public class PeakDetectionFilter implements Filter {
         return returnValue;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void reset() {
         standardDeviationSeries.clear();
@@ -166,6 +167,7 @@ public class PeakDetectionFilter implements Filter {
         series.clear();
     }
 
+    /** {@inheritDoc} */
     @Override
     public double getCurrentOutput() {
         return returnValue;

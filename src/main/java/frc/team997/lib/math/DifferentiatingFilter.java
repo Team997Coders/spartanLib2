@@ -27,8 +27,8 @@ public class DifferentiatingFilter implements Filter {
     private double currentDeriv = 0;
 
     /**
-     * Calculates the rate of change (derivative) of a value relative to previous values in input to
-     * the filter, using a given change in time.
+     * Calculates the rate of change (derivative) of a value relative to the filter's previous
+     * input, using a given change in time.
      *
      * <p>The initial previous value is 0.
      *
@@ -49,8 +49,8 @@ public class DifferentiatingFilter implements Filter {
     }
 
     /**
-     * Calculates the rate of change (derivative) of a value relative to previous values in input to
-     * the filter, using a the default loop time of the robot.
+     * Calculates the rate of change (derivative) of a value relative to the filter's previous
+     * input, using the default loop time of the robot.
      *
      * <p>The initial previous value is 0.
      *
@@ -63,12 +63,14 @@ public class DifferentiatingFilter implements Filter {
         return calculate(value, defaultRobotPeriodSeconds);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void reset() {
         lastValue = 0;
         currentDeriv = 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     public double getCurrentOutput() {
         return currentDeriv;
