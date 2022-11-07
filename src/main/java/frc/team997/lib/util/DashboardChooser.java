@@ -49,23 +49,26 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
     private final boolean logChanges;
 
     /**
-     * Interface implemented by all enums which DashboardChooser can automatically create a chooser
-     * from.
+     * Interface implemented by enums which allows DashboardChooser to automatically create
+     * choosers.
      */
     public interface Option {
         String getDisplayName();
     }
 
-    /**
-     * Interface which allows implementing classes to have a method called when a value in
-     * DashboardChooser is changed.
-     */
+    /** Interface which defines a lambda for receiving DashboardChooser updates. */
     public interface ValueUpdater<T> {
+        /**
+         * Called when a new option has been selected in the dashboard
+         *
+         * @param oldOption The previous option
+         * @param newOption The selected option
+         */
         void onOptionSelected(T oldOption, T newOption);
     }
 
     /**
-     * Returns a DashboardChooser from an enum implementing {@link Option}.
+     * Constructs a DashboardChooser from an enum implementing {@link Option}.
      *
      * @param enumClass The {@code <enum>.class}
      * @param defaultOption The default enum option

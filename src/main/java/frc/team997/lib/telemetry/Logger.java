@@ -23,8 +23,7 @@ import edu.wpi.first.util.datalog.StringLogEntry;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 /**
- * Utility to streamline publishing data to NetworkTables and saving that data to an on-robot log
- * file.
+ * Utility to streamline publishing data to NetworkTables and save it to an on-robot log file.
  *
  * <p>Parameterized to the type of data to publish/log.
  *

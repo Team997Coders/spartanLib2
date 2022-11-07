@@ -34,7 +34,10 @@ publishing {
 
 spotless {
 	format 'misc', {
-		target '*.gradle', '*.md', '.gitignore'
+		target project.fileTree(project.rootDir) {
+			include '*.gradle', '*.md', '.gitignore'
+			exclude 'LICENSE.md'
+		}
 
 		trimTrailingWhitespace()
 		indentWithTabs()
