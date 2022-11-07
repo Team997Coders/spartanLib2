@@ -33,7 +33,6 @@ public class ProfilePhase {
      *     unit).
      * @param initialVelocity The velocity at the start of the phase (displacement units/time unit).
      * @param time The duration of the phase (time units).
-     * @return A ProfilePhase with the given values and a calculated displacement.
      */
     public ProfilePhase(double acceleration, double initialVelocity, double time) {
         double displacement = (0.5 * (acceleration) * (time * time)) + time * initialVelocity;
