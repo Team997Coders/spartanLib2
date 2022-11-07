@@ -20,7 +20,7 @@ import edu.wpi.first.networktables.NTSendable;
 import edu.wpi.first.networktables.NTSendableBuilder;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.util.sendable.SendableRegistry;
-import edu.wpi.first.wpilibj.DataLogManager;
+import frc.team997.lib.telemetry.HighLevelLogger;
 import frc.team997.lib.telemetry.Logger;
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -48,20 +48,29 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
     private Logger<T> logger;
     private final boolean logChanges;
 
+    /**
+     * Interface implemented by all enums which DashboardChooser can automatically create a chooser
+     * from.
+     */
     public interface Option {
         String getDisplayName();
     }
 
+    /**
+     * Interface which allows implementing classes to have a method called when a value in
+     * DashboardChooser is changed.
+     */
     public interface ValueUpdater<T> {
         void onOptionSelected(T oldOption, T newOption);
     }
 
     /**
-     * Constructs a DashboardChooser from an enum implementing {@link Option}.
+     * Returns a DashboardChooser from an enum implementing {@link Option}.
      *
      * @param enumClass The {@code <enum>.class}
      * @param defaultOption The default enum option
-     * @param logChanges Whether to log changes in the chosen value to an on-robot log.
+     * @param logChanges Whether to log changes in the chosen value to the default robot log at
+     *     {@code HighLevelLogger.getLog()}.
      * @return A new DashboardChooser object.
      * @param <T> The enum's type.
      */
@@ -77,8 +86,8 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
     }
 
     /**
-     * Constructs a DashboardChooser from an enum implementing {@link Option}, saving changes to an
-     * on-robot log.
+     * Returns a DashboardChooser from an enum implementing {@link Option}, saving changes to the
+     * default log from {@code HighLevelLogger.getLog()}
      *
      * @param enumClass The {@code <enum>.class}
      * @param defaultOption The default enum option
@@ -95,7 +104,8 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
      *
      * @param options The option list, as a {@code Map<title, value>}.
      * @param defaultOption The title of the default option.
-     * @param logChanges Whether to log changes in the chosen value to an on-robot log.
+     * @param logChanges Whether to log changes in the chosen value to the default on-robot log at
+     *     {@code HighLevelLogger.getLog()}.
      */
     public DashboardChooser(Map<String, T> options, String defaultOption, boolean logChanges) {
         if (defaultOption != null && !options.containsKey(defaultOption)) {
@@ -108,7 +118,7 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
         if (logChanges) {
             logger =
                     new Logger<T>(
-                            DataLogManager.getLog(),
+                            HighLevelLogger.getLog(),
                             "DashboardChooser" + channel,
                             "DashboardChooser",
                             false,
@@ -126,7 +136,7 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
 
     /**
      * Constructs a DashboardChooser from a {@code Map<String, T>}, recording changes to the chosen
-     * value in an on-robot log.
+     * value to the default on-robot log at {@code HighLevelLogger.getLog()}.
      *
      * @param options The option list, as a {@code Map<title, value>}.
      * @param defaultOption The title of the default option.
@@ -141,9 +151,9 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
     }
 
     /**
-     * Gets the currently selected option's value
+     * Gets the currently selected option's value.
      *
-     * @return T value
+     * @return The option's value, of type T.
      */
     public T getSelected() {
         mutex.lock();
@@ -214,18 +224,18 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
     }
 
     /**
-     * Register a listener to be called when the option is updated
+     * Register a listener to be called when the option is updated.
      *
-     * @param updater The lambda to be called on update
+     * @param updater The lambda to be called on update.
      */
     public void registerListener(ValueUpdater<T> updater) {
         listeners.add(updater);
     }
 
     /**
-     * Unregister a listener when no longer needed
+     * Unregister a listener when no longer needed.
      *
-     * @param updater the lambda to remove
+     * @param updater the lambda to remove.
      */
     public void unregisterListener(ValueUpdater<T> updater) {
         listeners.remove(updater);
