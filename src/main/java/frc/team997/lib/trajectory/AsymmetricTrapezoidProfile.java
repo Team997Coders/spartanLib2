@@ -16,63 +16,39 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package frc.team997.lib.trajectory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
- * An asymmetric trapezoid-shaped velocity profile.
+ * A motion profile that allows for smooth motion between two states. The dx/dt of this motion
+ * (velocity) forms the trapezoid shape on a graph. The particular elements of motion are velocity
+ * and acceleration limited, with acceleration limiting having different constraints for the initial
+ * phase of motion ("maxAcceleration"), and the final phase of motion ("maxDeceleration").
  *
- * <p>While this class can be used for a profiled movement from start to finish, the intended usage
- * is to filter a reference's dynamics based on trapezoidal velocity constraints. To compute the
- * reference obeying this constraint, do the following.
+ * <p>The most useful practical application of this is use defining the setpoint for a PID (or
+ * similar) controller, to avoid control effort saturation or the initial spike in input from the P
+ * term.
  *
- * <p>Initialization:
- *
- * <pre><code>
- * AsymmetricTrapezoidProfile.Constraints constraints =
- *   new AsymmetricTrapezoidProfile.Constraints(kMaxV, kMaxA, kMaxD);
- * AsymmetricTrapezoidProfile.State previousProfiledReference =
- *   new AsymmetricTrapezoidProfile.State(initialReference, 0.0);
- * </code></pre>
- *
- * <p>Run on update:
- *
- * <pre><code>
- * AsymmetricTrapezoidProfile profile =
- *   new AsymmetricTrapezoidProfile(constraints, unprofiledReference, previousProfiledReference);
- * previousProfiledReference = profile.calculate(timeSincePreviousUpdate);
- * </code></pre>
- *
- * <p>where `unprofiledReference` is free to change between calls. Note that when the unprofiled
- * reference is within the constraints, `calculate()` returns the unprofiled reference unchanged.
- *
- * <p>Otherwise, a timer can be started to provide monotonic values for `calculate()` and to
- * determine when the profile has completed via `isFinished()`.
+ * <p>Also could be used to meet physical constraints from a mechanism (can't go too fast or the
+ * wires might tangle, has to decelerate at a different rate depending on the location in its track,
+ * etc...).
  */
-public class AsymmetricTrapezoidProfile {
-    // holds all the phases in order
-    private final List<ProfilePhase> phases = new ArrayList<>(3);
-    private final Constraints constraints;
-    private final State initial;
-    private final State target;
-    private final double direction;
+public class AsymmetricTrapezoidProfile extends MotionProfile {
 
     /**
-     * Gets all the phases in the profile
+     * Data class holding allowable rates for the profile's setpoint.
      *
-     * @return An ordered list of Phases
+     * <p>Because of the number of cases this profile has to handle, acceleration and deceleration
+     * don't coorespond to acceleration in a specific direction, or towards higher/lower absolute
+     * values. It's probably best to think of them as the acceleration constraint for the first
+     * phase of motion, and deceleration constraint for the final phase of motion.
      */
-    public List<ProfilePhase> getPhases() {
-        return List.copyOf(phases);
-    }
-
     public static class Constraints {
         public final double maxVelocity;
         public final double maxAcceleration;
         public final double maxDeceleration;
+
         /**
-         * Construct constraints for a AsymmetricTrapezoidProfile.
+         * Construct Constraints for a AsymmetricTrapezoidProfile.
          *
          * @param maxVelocity maximum velocity.
          * @param maxAcceleration maximum acceleration.
@@ -104,7 +80,7 @@ public class AsymmetricTrapezoidProfile {
 
         @Override
         public String toString() {
-            return "Constraints[maxVelocity: "
+            return "AsymmetricTrapezoidProfileConstraints[maxVelocity: "
                     + maxVelocity
                     + ", maxAcceleration: "
                     + maxAcceleration
@@ -114,46 +90,8 @@ public class AsymmetricTrapezoidProfile {
         }
     }
 
-    public static class State {
-        public final double position;
-        public final double velocity;
-
-        /**
-         * Construct a state for a AsymmetricTrapezoidProfile.
-         *
-         * @param position state position.
-         * @param velocity state velocity.
-         */
-        public State(double position, double velocity) {
-            this.position = position;
-            this.velocity = velocity;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            double epsilon = 0.0001;
-            if (other instanceof State) {
-                State rhs = (State) other;
-                return Math.abs(this.position - rhs.position) < epsilon
-                        && Math.abs(this.velocity - rhs.velocity) < epsilon;
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(position, velocity);
-        }
-
-        @Override
-        public String toString() {
-            return "State[position: " + position + ", velocity: " + velocity + "]";
-        }
-    }
-
     /**
-     * Construct an AsymmetricTrapezoidProfile with an initial position and velocity of 0,0.
+     * Constructs an AsymmetricTrapezoidProfile with an initial position and velocity of 0,0.
      *
      * @param constraints The constraints on the profile, like maximum velocity.
      * @param target The desired state when the profile is complete.
@@ -161,25 +99,27 @@ public class AsymmetricTrapezoidProfile {
     public AsymmetricTrapezoidProfile(Constraints constraints, State target) {
         this(constraints, target, new State(0, 0));
     }
+
     /**
-     * Construct an AsymmetricTrapezoidProfile.
+     * Constructs an AsymmetricTrapezoidProfile.
      *
-     * @param constraints The constraints on the profile, like maximum velocity.
+     * @param AsymmetricTrapezoidProfileConstraints The constraints on the profile, like maximum
+     *     velocity.
      * @param target The desired state when the profile is complete.
      * @param initial The initial state (usually the current state).
      */
     public AsymmetricTrapezoidProfile(Constraints constraints, State target, State initial) {
+        super(initial);
+
         // in the case the target position is before the initial, we should calculate it all
         // positive,
         // and flip the sign of the resulting acceleration and position
         double targetPosition = target.position - initial.position;
-        direction = targetPosition < 0 ? -1 : 1;
+        int direction = targetPosition < 0 ? -1 : 1;
 
         double maxVelocity = constraints.maxVelocity * direction;
         double maxAccel = Math.abs(constraints.maxAcceleration) * direction;
         double maxDecel = Math.abs(constraints.maxDeceleration) * direction * -1;
-
-        this.constraints = new Constraints(maxVelocity, maxAccel, maxDecel);
 
         // constrain the initial and target velocities to bellow maxVelocity (this is how wpilib
         // does it)
@@ -194,8 +134,7 @@ public class AsymmetricTrapezoidProfile {
                         ? Math.min(target.velocity, maxVelocity)
                         : Math.max(target.velocity, maxVelocity);
 
-        this.initial = new State(initial.position, initialVelocity);
-        this.target = new State(target.position, targetVelocity);
+        initialState = new State(initial.position, initialVelocity);
 
         // calculate the time and position to reach max velocity (don't worry if we go over max
         // position)
@@ -279,83 +218,8 @@ public class AsymmetricTrapezoidProfile {
                 new ProfilePhase(
                         decelTime, decelPos, maxDecel, accelTime * maxAccel + initialVelocity);
 
-        if (accelPhase.time > 0) phases.add(accelPhase);
-        if (coastPhase.time > 0) phases.add(coastPhase);
-        if (decelPhase.time > 0) phases.add(decelPhase);
-    }
-    /**
-     * Calculate the correct position and velocity for the profile at a given time
-     *
-     * @param time The time since the beginning of the profile.
-     * @return The position and velocity of the profile at the time.
-     */
-    public State calculate(double time) {
-        double position = initial.position;
-        for (ProfilePhase phase : phases) {
-            if (time - phase.time < 0) {
-                return new State(
-                        position
-                                + 0.5 * phase.acceleration * Math.pow(time, 2)
-                                + phase.initialVelocity * time,
-                        time * phase.acceleration + phase.initialVelocity);
-            } else {
-                time -= phase.time;
-                position += phase.position;
-            }
-        }
-        return new State(position, target.velocity);
-    }
-    /**
-     * Returns the time as a function of the target position.
-     *
-     * @param targetPosition The target position.
-     * @return The time left until a target position in the profile is reached. Returns NaN if
-     *     targetPosition < initial.position, and the total time if targetPosition > target.position
-     */
-    public double timeLeftUntil(double targetPosition) {
-        targetPosition = targetPosition - initial.position;
-        double time = 0;
-        for (ProfilePhase phase : phases) {
-            if ((targetPosition - phase.position) * direction < 0) {
-                if (phase.acceleration == 0) {
-                    time += targetPosition / constraints.maxVelocity;
-                } else {
-                    double sqrt =
-                            Math.sqrt(
-                                    Math.pow(phase.initialVelocity, 2)
-                                            + 2 * phase.acceleration * targetPosition);
-                    time += (-phase.initialVelocity + direction * sqrt) / phase.acceleration;
-                }
-                return time;
-            } else {
-                time += phase.time;
-                targetPosition -= phase.position;
-            }
-        }
-        return time;
-    }
-    /**
-     * Returns the total time the profile takes to reach the goal.
-     *
-     * @return The total time the profile takes to reach the goal.
-     */
-    public double totalTime() {
-        double time = 0;
-        for (ProfilePhase phase : phases) {
-            time += phase.time;
-        }
-        return time;
-    }
-    /**
-     * Returns true if the profile has reached the goal.
-     *
-     * <p>The profile has reached the goal if the time since the profile started has exceeded the
-     * profile's total time.
-     *
-     * @param time The time since the beginning of the profile.
-     * @return True if the profile has reached the goal.
-     */
-    public boolean isFinished(double time) {
-        return time >= totalTime();
+        if (accelPhase.time > 0) super.phases.add(accelPhase);
+        if (coastPhase.time > 0) super.phases.add(coastPhase);
+        if (decelPhase.time > 0) super.phases.add(decelPhase);
     }
 }
