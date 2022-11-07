@@ -33,20 +33,31 @@ publishing {
 }
 
 spotless {
+	format 'misc', {
+		target '*.gradle', '*.md', '.gitignore'
 
-format 'misc', {
-	target '*.gradle', '*.md', '.gitignore'
+		trimTrailingWhitespace()
+		indentWithTabs()
+		endWithNewline()
+	}
+	java {
+		googleJavaFormat('1.15.0').aosp().reflowLongStrings()
+		formatAnnotations()
 
-	trimTrailingWhitespace()
-	indentWithTabs()
-	endWithNewline()
+		licenseHeaderFile 'licenseHeader.txt'
+	}
 }
-java {
-	googleJavaFormat('1.15.0').aosp().reflowLongStrings()
-	formatAnnotations()
 
-	licenseHeaderFile 'licenseHeader.txt'
+tasks.register('updateGitHooks', Copy) {
+	from new File(rootProject.rootDir, 'scripts/pre-commit')
+	into { new File(rootProject.rootDir, '.git/hooks') }
+	fileMode 0775
 }
+compileJava.dependsOn updateGitHooks
+
+tasks.register('buildDocs', Javadoc) {
+	source = sourceSets.main.allJava
+	classpath = sourceSets.main.runtimeClasspath
 }
 
 repositories {

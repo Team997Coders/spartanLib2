@@ -91,6 +91,8 @@ public class HighLevelLogger {
     /**
      * Logs a String message (warning, state transition, startup information, etc.) to the log (not
      * NetworkTables).
+     *
+     * @param message The message to log
      */
     public static void logMessage(String message) {
         if (!hasStarted) {
