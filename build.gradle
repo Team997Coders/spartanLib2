@@ -81,9 +81,9 @@ repositories {
 publishing {
 	publications {
 		maven(MavenPublication) {
-			groupId 'frc.team997.lib'
+			groupId 'org.chsrobotics.lib'
 			artifactId 'spartanLib2'
-			version '1.0-SNAPSHOT'
+			version '1.0'
 
 			from components.java
 
