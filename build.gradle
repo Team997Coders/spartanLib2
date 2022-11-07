@@ -3,6 +3,7 @@ plugins {
 	id "edu.wpi.first.GradleRIO" version "2022.4.1"
 	id 'com.diffplug.spotless' version '6.11.0'
 	id 'maven-publish'
+	id 'signing'
 }
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -20,21 +21,9 @@ test {
 	testLogging.showStandardStreams = true
 }
 
-publishing {
-	publications {
-		maven(MavenPublication) {
-			groupId 'frc.team997.lib'
-			artifactId 'spartanLib2'
-			version '1.0-SNAPSHOT'
-
-			from components.java
-		}
-	}
-}
-
 spotless {
 	format 'misc', {
-		target project.fileTree(project.rootDir) {
+		target fileTree(rootDir) {
 			include '*.gradle', '*.md', '.gitignore'
 			exclude 'LICENSE.md'
 		}
@@ -51,6 +40,12 @@ spotless {
 	}
 }
 
+javadoc {
+	if(JavaVersion.current().isJava9Compatible()) {
+		options.addBooleanOption('html5', true)
+	}
+}
+
 tasks.register('updateGitHooks', Copy) {
 	from new File(rootProject.rootDir, 'scripts/pre-commit')
 	into { new File(rootProject.rootDir, '.git/hooks') }
@@ -58,12 +53,83 @@ tasks.register('updateGitHooks', Copy) {
 }
 compileJava.dependsOn updateGitHooks
 
-tasks.register('buildDocs', Javadoc) {
-	source = sourceSets.main.allJava
-	classpath = sourceSets.main.runtimeClasspath
+tasks.register('sourceJar', Jar) {
+	classifier "sources"
+	from sourceSets.main.allJava
+}
+
+tasks.register('javadocJar', Jar) {
+	classifier "javadoc"
+	from javadoc.destinationDir
+}.configure {
+	mustRunAfter javadoc
+}
+
+publishToMavenLocal.dependsOn build
+
+artifacts {
+	archives jar
+	archives sourceJar
+	archives javadocJar
 }
 
 repositories {
 	mavenLocal()
 	mavenCentral()
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			groupId 'frc.team997.lib'
+			artifactId 'spartanLib2'
+			version '1.0-SNAPSHOT'
+
+			from components.java
+
+			pom {
+				name = 'spartanLib2'
+				description = 'FRC library for team 997. Provides common reusable components for interfacing with WPILib.'
+				url = 'https://github.com/Team997Coders/spartanLib2'
+
+				licenses {
+					license {
+						name = 'GPL-v3.0'
+						url = 'https://www.gnu.org/licenses/gpl-3.0.txt'
+					}
+				}
+
+				organization {
+					name = 'Team997Coders'
+					url = 'https://www.chsrobotics.org'
+				}
+
+				developers {
+					developer {
+						id = 'TandeJ'
+						name = 'Thomas Anderson'
+						email = 'tande92834@gmail.com'
+					}
+					developer {
+						id = 'elliotnash'
+						name = 'Elliot Nash'
+						email = 'elliotnash@gmail.com'
+					}
+				}
+
+				scm {
+					connection = 'scm:git:https://github.com/Team997Coders/spartanLib2.git'
+					developerConnection = 'scm:git:https://github.com/Team997Coders/spartanLib2.git'
+					url = 'https://github.com/Team997Coders/spartanLib2'
+				}
+			}
+
+			artifact(sourceJar) {
+				classifier = 'sources'
+			}
+			artifact(javadocJar) {
+				classifier = 'javadoc'
+			}
+		}
+	}
 }
