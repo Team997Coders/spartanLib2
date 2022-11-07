@@ -1,10 +1,10 @@
 # spartanLib2
-[![CI](https://github.com/Team997Coders/spartanLib2/actions/workflows/main.yml/badge.svg?branch=dev)](https://github.com/Team997Coders/spartanLib2/actions/workflows/main.yml)
-[![Deploy Javadoc](https://github.com/Team997Coders/spartanLib2/actions/workflows/docs.yml/badge.svg)](https://github.com/Team997Coders/spartanLib2/actions/workflows/docs.yml)
+[![Build](https://github.com/Team997Coders/spartanLib2/actions/workflows/main.yml/badge.svg?branch=dev)](https://github.com/Team997Coders/spartanLib2/actions/workflows/main.yml)
+[![Javadocs](https://github.com/Team997Coders/spartanLib2/actions/workflows/docs.yml/badge.svg)](https://team997coders.github.io/spartanLib2)
 
 Reusable code for FRC team 997.
 
-<img src="https://lh4.googleusercontent.com/zyjl2m5D_WEY1cgqMgGPeLXmayvhxZGDu_uWI15sOP038dfpa6T9SY9PhvHk7LDcsAIKJceWxr8r61DqQBFuQ2_QzUlhqz2WqYc192rUr94EsJ6xLmmsELLkoPasVJAxwQ=w1280" alt="997-logo" width="350">
+<img src="https://lh4.googleusercontent.com/zyjl2m5D_WEY1cgqMgGPeLXmayvhxZGDu_uWI15sOP038dfpa6T9SY9PhvHk7LDcsAIKJceWxr8r61DqQBFuQ2_QzUlhqz2WqYc192rUr94EsJ6xLmmsELLkoPasVJAxwQ=w1280" width="350" height="350" />
 
 https://www.chsrobotics.org/
 
