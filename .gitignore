@@ -1,6 +1,5 @@
 .gradle/*
 .vscode/*
-.idea/*
 build/*
 
 # github-provided Java gitignore
