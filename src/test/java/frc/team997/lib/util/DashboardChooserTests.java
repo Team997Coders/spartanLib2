@@ -25,6 +25,7 @@ import org.junit.Test;
 
 public class DashboardChooserTests {
     @Test
+    @SuppressWarnings("unchecked")
     public void enumDashboardChooserMatchesSendableChooser()
             throws NoSuchFieldException, IllegalAccessException {
         // Expected SendableChooser
@@ -36,7 +37,7 @@ public class DashboardChooserTests {
 
         // Actual ShuffleboardChooser
         DashboardChooser<OptionEnum> actualChooser =
-                DashboardChooser.fromEnum(OptionEnum.class, OptionEnum.OPTION_2);
+                DashboardChooser.fromEnum(OptionEnum.class, OptionEnum.OPTION_2, false);
 
         // reflectively access sendable chooser's display name to value map.
         Field sendableMapField = SendableChooser.class.getDeclaredField("m_map");
@@ -60,6 +61,7 @@ public class DashboardChooserTests {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void genericDashboardChooserMatchesSendableChooser()
             throws NoSuchFieldException, IllegalAccessException {
         // Expected SendableChooser
@@ -76,7 +78,8 @@ public class DashboardChooserTests {
                                 "Option 1", "Value 1",
                                 "Option 2", "Value 2",
                                 "Option 3", "Value 3"),
-                        "Option 3");
+                        "Option 3",
+                        false);
 
         // reflectively access sendable chooser's display name to value map.
         Field sendableMapField = SendableChooser.class.getDeclaredField("m_map");
