@@ -66,6 +66,7 @@ public class DifferentiatingFilter implements Filter {
     @Override
     public void reset() {
         lastValue = 0;
+        currentDeriv = 0;
     }
 
     @Override
