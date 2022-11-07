@@ -103,7 +103,8 @@ public class AsymmetricTrapezoidProfile extends MotionProfile {
     /**
      * Constructs an AsymmetricTrapezoidProfile.
      *
-     * @param constraints The constraints on the profile, like maximum velocity.
+     * @param AsymmetricTrapezoidProfileConstraints The constraints on the profile, like maximum
+     *     velocity.
      * @param target The desired state when the profile is complete.
      * @param initial The initial state (usually the current state).
      */
