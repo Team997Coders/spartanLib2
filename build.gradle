@@ -133,12 +133,14 @@ publishing {
 		}
 	}
 	repositories {
-		maven {
-			name = "OSSRH"
-			setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-			credentials {
-				username = ossrhUsername
-				password = ossrhPassword
+		if (project.hasProperty('ossrhUsername')) {
+			maven {
+				name = "OSSRH"
+				setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+				credentials {
+					username = ossrhUsername
+					password = ossrhPassword
+				}
 			}
 		}
 	}
