@@ -83,7 +83,7 @@ publishing {
 		maven(MavenPublication) {
 			groupId 'org.chsrobotics.lib'
 			artifactId 'spartanLib2'
-			version '1.0'
+			version '1.1.0-SNAPSHOT'
 
 			from components.java
 
@@ -132,4 +132,18 @@ publishing {
 			}
 		}
 	}
+	repositories {
+		maven {
+			name = "OSSRH"
+			setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+			credentials {
+				username = ossrhUsername
+				password = ossrhPassword
+			}
+		}
+	}
+}
+
+signing {
+	sign publishing.publications["maven"]
 }
