@@ -3,7 +3,8 @@
 .idea/*
 build/*
 
-# github-provided Java gitignore
+# Secrets
+gradle.properties
 
 # Compiled class file
 *.class
