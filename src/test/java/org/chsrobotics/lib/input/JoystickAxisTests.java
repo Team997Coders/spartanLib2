@@ -36,13 +36,28 @@ public class JoystickAxisTests {
 
     @Test
     public void JoystickAxisGetValueWorks() {
-        assertEquals(0, axis.getValue(), epsilon);
+        assertEquals(0, axis.getValue(), 0);
 
         value = 0.2;
-        assertEquals(0.2, axis.getValue(), epsilon);
+        assertEquals(0.2, axis.getValue(), 0);
 
         value = -0.8;
-        assertEquals(-0.8, axis.getValue(), epsilon);
+        assertEquals(-0.8, axis.getValue(), 0);
+    }
+
+    @Test
+    public void JoystickAxisDeadbandWorks() {
+        axis.addDeadband(0.1);
+        value = 0.05;
+        assertEquals(0, axis.getValue(), 0);
+        value = -0.1;
+        assertEquals(0, axis.getValue(), 0);
+
+        axis.addDeadband(-0.5);
+        value = 0.45;
+        assertEquals(0, axis.getValue(), 0);
+        value = -0.55;
+        assertEquals(-0.55, axis.getValue(), 0);
     }
 
     @Test

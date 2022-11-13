@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 public class JoystickAxis {
     private final Supplier<Double> valueLambda;
     private double lastValue = 0;
+    private double deadband = 0;
     private final String name;
     private final boolean isReal;
 
@@ -39,13 +40,22 @@ public class JoystickAxis {
     }
 
     /**
-     * Returns the current value of the axis.
+     * Returns the current value of the axis, with deadband applied.
      *
      * @return Value of the axis, in [-1,1] (inclusive).
      */
     public double getValue() {
-        lastValue = valueLambda.get();
-        return valueLambda.get();
+        lastValue = (Math.abs(valueLambda.get()) > deadband) ? valueLambda.get() : 0;
+        return lastValue;
+    }
+
+    /**
+     * Adds a deadband to the axis such that axis absolute values below this will be returned as 0.
+     *
+     * @param magnitude The minimum absolute value required for the controller to not return 0.
+     */
+    public void addDeadband(double magnitude) {
+        deadband = Math.abs(magnitude);
     }
 
     /**
