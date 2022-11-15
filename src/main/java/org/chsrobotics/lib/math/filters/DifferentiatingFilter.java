@@ -14,7 +14,7 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.math;
+package org.chsrobotics.lib.math.filters;
 
 /**
  * A filter that returns the rate of change (derivative) of a stream of data.
