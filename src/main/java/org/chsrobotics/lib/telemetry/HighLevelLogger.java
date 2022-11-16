@@ -50,6 +50,23 @@ public class HighLevelLogger {
             DataLogManager.logNetworkTables(false);
             logMessage("Log init");
 
+            logMessage("Real time: " + LocalDateTime.now().toString());
+            logMessage("Robot is: " + (RobotBase.isReal() ? "real" : "simulated"));
+            logMessage(
+                    "Event: "
+                            + (DriverStation.isFMSAttached()
+                                    ? DriverStation.getEventName()
+                                    : "N/A"));
+            logMessage(
+                    "Match type: "
+                            + (DriverStation.isFMSAttached()
+                                    ? DriverStation.getMatchType().toString()
+                                    : "N/A"));
+            logMessage(
+                    "Match number: "
+                            + (DriverStation.isFMSAttached()
+                                    ? DriverStation.getMatchNumber()
+                                    : "N/A"));
             try {
                 File commitTxt = new File(Filesystem.getDeployDirectory(), commitDataFilename);
                 File branchTxt = new File(Filesystem.getDeployDirectory(), branchDataFilename);
@@ -57,27 +74,9 @@ public class HighLevelLogger {
                 logMessage("Git commit: " + Files.readString(commitTxt.toPath()));
                 logMessage("Git branch: " + Files.readString(branchTxt.toPath()));
             } catch (IOException exc) {
-                DriverStation.reportWarning("Git branch / commit data could not be read!", false);
                 logMessage("Git branch / commit data could not be read!");
             }
-
-        } else {
-            DriverStation.reportWarning("HighLevelLogger already started!", false);
-            logMessage("HighLevelLogger already started!");
         }
-
-        logMessage("Real time: " + LocalDateTime.now().toString());
-        logMessage("Robot is: " + (RobotBase.isReal() ? "real" : "simulated"));
-        logMessage(
-                "Event: " + (DriverStation.isFMSAttached() ? DriverStation.getEventName() : "N/A"));
-        logMessage(
-                "Match type: "
-                        + (DriverStation.isFMSAttached()
-                                ? DriverStation.getMatchType().toString()
-                                : "N/A"));
-        logMessage(
-                "Match number: "
-                        + (DriverStation.isFMSAttached() ? DriverStation.getMatchNumber() : "N/A"));
     }
 
     /**
@@ -93,10 +92,10 @@ public class HighLevelLogger {
     }
 
     /**
-     * Logs a String message (warning, state transition, startup information, etc.) to the log (not
-     * NetworkTables).
+     * Logs a String message (warning, state transition, startup information, etc.), and prints it
+     * to the standard output (DriverStation console).
      *
-     * @param message The message to log
+     * @param message The message to log.
      */
     public static void logMessage(String message) {
         if (!hasStarted) {
