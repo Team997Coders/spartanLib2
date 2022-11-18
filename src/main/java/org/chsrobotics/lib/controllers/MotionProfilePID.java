@@ -19,9 +19,15 @@ package org.chsrobotics.lib.controllers;
 import org.chsrobotics.lib.controllers.PID.PIDConstants;
 import org.chsrobotics.lib.trajectory.MotionProfile;
 
-// TODO: Docs
-
-/** */
+/**
+ * A PID controller with built-in motion profile following. The setpoint of the controller at a time
+ * is the position value of the motion profile at that time.
+ *
+ * <p>For more information on PID controllers and motion profiles, see {@link
+ * org.chsrobotics.lib.controllers.PID}, {@link org.chsrobotics.lib.trajectory.MotionProfile}, and
+ * {@link org.chsrobotics.lib.trajectory.AsymmetricTrapezoidProfile} and {@link
+ * org.chsrobotics.lib.trajectory.TrapezoidProfile}.
+ */
 public class MotionProfilePID {
     private final PID controller;
 
@@ -32,8 +38,10 @@ public class MotionProfilePID {
     private double lastReference = 0;
 
     /**
-     * @param constants
-     * @param profile
+     * Constructs a MotionProfilePID out of provided PIDConstants and a MotionProfile to follow.
+     *
+     * @param constants The gains of the PID controller.
+     * @param profile The motion profile for the setpoint of the controller to follow.
      */
     public MotionProfilePID(PID.PIDConstants constants, MotionProfile profile) {
         controller = new PID(constants, profile.calculate(0).position);
@@ -41,10 +49,12 @@ public class MotionProfilePID {
     }
 
     /**
-     * @param kP
-     * @param kI
-     * @param kD
-     * @param profile
+     * Constructs a MotionProfilePID out of kP, kI, and kD gains, and a MotionProfile to follow.
+     *
+     * @param kP The Proportional gain of the controller.
+     * @param kI The Integral gain of the controller.
+     * @param kD The Derivative gain of the controller.
+     * @param profile The motion profile for the setpoint of the controller to follow.
      */
     public MotionProfilePID(double kP, double kI, double kD, MotionProfile profile) {
         controller = new PID(kP, kI, kD, profile.calculate(0).position);
@@ -219,8 +229,7 @@ public class MotionProfilePID {
      * <p>For this to work, the value of {@code reference} must increment by the same amount of
      * times between calls of this.
      *
-     * @param measurement The value of the measured feedback. If this controller is operating in
-     *     angular mode, this *must* be in radians.
+     * @param measurement The value of the measured feedback.
      * @param reference The time, in seconds greater than zero, to sample into the profile.
      * @return The sum of the P, I, and D terms.
      */
@@ -235,8 +244,7 @@ public class MotionProfilePID {
      * Returns an output from the controller, provided a feedback measurement, place into the
      * MotionProfile, and delta-time.
      *
-     * @param measurement The value of the measured feedback. If this controller is operating in
-     *     angular mode, this *must* be in radians.
+     * @param measurement The value of the measured feedback.
      * @param reference The time, in seconds greater than zero, to sample into the profile.
      * @param dt The elapsed time since the last call of any of this class's {@code calculate()}
      *     methods.

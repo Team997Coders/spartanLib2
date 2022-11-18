@@ -63,6 +63,6 @@ public class MotionProfilePIDTests {
         assertEquals(0, controller.calculate(0, 0), epsilon);
         assertEquals(0.5, controller.calculate(0, 0.5), epsilon);
         assertEquals(1.5, controller.calculate(0, 1), epsilon);
-        // TODO: more D tests
+        assertEquals(1, controller.calculate(1, 2), epsilon);
     }
 }

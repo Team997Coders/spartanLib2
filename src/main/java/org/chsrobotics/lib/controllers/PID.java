@@ -26,7 +26,7 @@ import java.util.Objects;
  * the past state(s) of a controlled system are leveraged to find the current output.
  *
  * <p>Since the values of the gains are tuned, they and the output are dimensionless. However, the
- * gains should be optimized to output what would be sensible values of other units, such as motor
+ * gains need to be optimized to output what would be sensible values of other units, such as motor
  * controller voltage or duty cycle.
  *
  * <p>The PID controller has three internal components: fittingly, P, I, and D.
@@ -346,8 +346,7 @@ public class PID {
     /**
      * Returns an output from the controller with a given dt.
      *
-     * @param measurement The value of the measured feedback. If this controller is operating in
-     *     angular mode, *must* be in radians.
+     * @param measurement The value of the measured feedback.
      * @param dt The time, in seconds, since the last update of this controller.
      * @return The sum of the P, I, and D terms of the controller.
      */
