@@ -50,8 +50,8 @@ public class UtilityMath {
      *
      * @param angleA The first angle, in radians.
      * @param angleB The second angle, in raidans.
-     * @return A signed angle in radians representing the smallest counterclockwise angle between
-     *     angles a and b.
+     * @return A signed angle in radians representing the smallest (positive is counterclockwise)
+     *     angle between angles a and b.
      */
     public static double smallestAngleRadiansBetween(double angleA, double angleB) {
         double normA = UtilityMath.normalizeAngleRadians(angleA);
@@ -68,8 +68,8 @@ public class UtilityMath {
      *
      * @param angleA The first angle, in degrees.
      * @param angleB The second angle, in degrees.
-     * @return A signed angle in degrees representing the smallest counterclockwise angle between
-     *     angles a and b.
+     * @return A signed angle in degrees representing the smallest (positive is counterclockwise)
+     *     angle between angles a and b.
      */
     public static double smallestAngleDegreesBetween(double angleA, double angleB) {
         double normA = UtilityMath.normalizeAngleDegrees(angleA);
