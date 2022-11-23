@@ -44,6 +44,42 @@ public class UtilityMath {
     }
 
     /**
+     * Returns the angle in radians between two other angles with the smallest absolute value.
+     *
+     * <p>A negative number indicates a clockwise rotation from angle a to angle b.
+     *
+     * @param angleA The first angle, in radians.
+     * @param angleB The second angle, in raidans.
+     * @return A signed angle in radians representing the smallest (positive is counterclockwise)
+     *     angle between angles a and b.
+     */
+    public static double smallestAngleRadiansBetween(double angleA, double angleB) {
+        double normA = UtilityMath.normalizeAngleRadians(angleA);
+        double normB = UtilityMath.normalizeAngleRadians(angleB);
+
+        double diff = (normB - normA + Math.PI) % (2 * Math.PI) - Math.PI;
+        return (diff < -Math.PI) ? diff + (2 * Math.PI) : diff;
+    }
+
+    /**
+     * Returns the angle in degrees between two other angles with the smallest absolute value.
+     *
+     * <p>A negative number indicates a clockwise rotation from angle a to angle b.
+     *
+     * @param angleA The first angle, in degrees.
+     * @param angleB The second angle, in degrees.
+     * @return A signed angle in degrees representing the smallest (positive is counterclockwise)
+     *     angle between angles a and b.
+     */
+    public static double smallestAngleDegreesBetween(double angleA, double angleB) {
+        double normA = UtilityMath.normalizeAngleDegrees(angleA);
+        double normB = UtilityMath.normalizeAngleDegrees(angleB);
+
+        double diff = (normB - normA + 180) % 360 - 180;
+        return (diff < -180) ? diff + 360 : diff;
+    }
+
+    /**
      * Interpolates a value between two points.
      *
      * <p>For more complex, multi-point interpolation, use the {@link MultiPointInterpolator} class.

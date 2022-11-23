@@ -70,6 +70,41 @@ public class UtilityMathTests {
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // smallestAngleRadiansBetween
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    @Test
+    public void UtilityMathSmallestAngleRadiansBetweenWorksProperly() {
+        assertEquals(0, UtilityMath.smallestAngleRadiansBetween(2 * Math.PI, 0), epsilon);
+        assertEquals(
+                -0.5 * Math.PI,
+                UtilityMath.smallestAngleRadiansBetween(1.5 * Math.PI, Math.PI),
+                epsilon);
+        assertEquals(
+                0.25 * Math.PI,
+                UtilityMath.smallestAngleRadiansBetween(1.75 * Math.PI, 2 * Math.PI),
+                epsilon);
+        assertEquals(-Math.PI, UtilityMath.smallestAngleRadiansBetween(Math.PI, 0), epsilon);
+        assertEquals(-Math.PI, UtilityMath.smallestAngleRadiansBetween(-3 * Math.PI, 0), epsilon);
+        assertEquals(
+                0.25 * Math.PI,
+                UtilityMath.smallestAngleRadiansBetween(-0.125 * Math.PI, 0.125 * Math.PI),
+                epsilon);
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // smallestAngleDegreesBetween
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    @Test
+    public void UtilityMathSmallestAngleDegreesBetweenWorksProperly() {
+        assertEquals(0, UtilityMath.smallestAngleDegreesBetween(360, 0), epsilon);
+        assertEquals(-90, UtilityMath.smallestAngleDegreesBetween(270, 180), epsilon);
+        assertEquals(45, UtilityMath.smallestAngleDegreesBetween(315, 360), epsilon);
+        assertEquals(-180, UtilityMath.smallestAngleDegreesBetween(180, 0), epsilon);
+        assertEquals(-180, UtilityMath.smallestAngleDegreesBetween(-540, 0), epsilon);
+        assertEquals(45, UtilityMath.smallestAngleDegreesBetween(-22.5, 22.5), epsilon);
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // simpleLinearInterpolation
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @Test
