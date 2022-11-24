@@ -156,8 +156,8 @@ public class MotionProfile {
      * @return The position and velocity of the profile at that time.
      */
     public State calculate(double time) {
-        if (time < 0) {
-            return new State(0, 0);
+        if (time <= 0) {
+            return initialState;
         }
         double position = initialState.position;
         for (ProfilePhase phase : phases) {

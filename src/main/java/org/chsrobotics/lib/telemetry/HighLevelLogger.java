@@ -103,4 +103,26 @@ public class HighLevelLogger {
         }
         DataLogManager.log(message);
     }
+
+    /**
+     * Writes a warning, using the provided string, to the DriverStation console, and writes it to
+     * the log.
+     *
+     * @param message The String message to associate with the warning.
+     */
+    public static void logWarning(String message) {
+        logMessage("WARNING " + message);
+        DriverStation.reportWarning(message, false);
+    }
+
+    /**
+     * Writes an error, using the provided string, to the DriverStation console, and writes it to
+     * the log.
+     *
+     * @param message The String message to associate with the error.
+     */
+    public static void logError(String message) {
+        logMessage("ERROR " + message);
+        DriverStation.reportError(message, false);
+    }
 }
