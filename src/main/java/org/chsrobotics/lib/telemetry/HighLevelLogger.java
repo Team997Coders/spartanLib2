@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 
-/** Wrapper for a DataLogManager that includes various robot-agnostic logging features. */
+/** Convenience wrapper class for telemetry/ logging which also logs robot-agnostic data. */
 public class HighLevelLogger {
     private static boolean hasStarted = false;
     private static final String commitDataFilename = "commit.txt";
