@@ -16,8 +16,6 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math;
 
-import java.security.InvalidParameterException;
-
 /** Various useful small math functions. */
 public class UtilityMath {
 
@@ -135,8 +133,7 @@ public class UtilityMath {
      * @param maxAbsoluteValue The maximum absolute value allowed for an output.
      * @return An array of the scaled values, in the same order as they were input.
      */
-    public static double[] normalizeSet(double[] inputs, double maxAbsoluteValue)
-            throws InvalidParameterException {
+    public static double[] normalizeSet(double[] inputs, double maxAbsoluteValue) {
         if (inputs.length == 0) return inputs;
         int highestIndex = 0; // find the largest absolute value element in the list
         for (int i = 0; i < inputs.length; i++) {
