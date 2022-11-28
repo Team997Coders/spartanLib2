@@ -99,19 +99,45 @@ public class UtilityMath {
     }
 
     /**
+     * Scales a set of doubles symmetrically such that they sum to a desired number, while
+     * maintaining the same ratio.
+     *
+     * @param inputs An array of doubles. If empty, this will return an empty array.
+     * @param desiredSum The desired sum, positive or negative, of the outputs. If equal to zero,
+     *     this will return an array of zeros of length equal to the input's length.
+     * @return An array of doubles with the same ratios between each other as the inputs.
+     */
+    public static double[] scaleToSum(double[] inputs, double desiredSum) {
+        if (inputs.length == 0) return inputs;
+        if (desiredSum == 0) return new double[inputs.length];
+
+        double sum = 0;
+        for (double value : inputs) {
+            sum += value;
+        }
+
+        double[] outputs = new double[inputs.length];
+
+        double scalingFactor = desiredSum / sum;
+
+        for (int i = 0; i < inputs.length; i++) {
+            outputs[i] = inputs[i] * (scalingFactor);
+        }
+
+        return outputs;
+    }
+
+    /**
      * Scales a set of doubles symmetrically to ensure that none of them exceed a maximum absolute
      * value, while still maintaining the same ratio.
      *
-     * @param inputs An array of the input values.
+     * @param inputs An array of the input values. If empty, this will return an empty array.
      * @param maxAbsoluteValue The maximum absolute value allowed for an output.
      * @return An array of the scaled values, in the same order as they were input.
-     * @throws InvalidParameterException If the array is empty.
      */
     public static double[] normalizeSet(double[] inputs, double maxAbsoluteValue)
             throws InvalidParameterException {
-        if (inputs.length == 0) {
-            throw new InvalidParameterException("Values must contain an element!");
-        }
+        if (inputs.length == 0) return inputs;
         int highestIndex = 0; // find the largest absolute value element in the list
         for (int i = 0; i < inputs.length; i++) {
             if (Math.abs(inputs[highestIndex]) < Math.abs(inputs[i])) {
