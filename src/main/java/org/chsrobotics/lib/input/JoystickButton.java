@@ -16,12 +16,12 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.input;
 
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import java.util.function.Supplier;
 
 /** Represents a hardware button on an input device which has two states. */
-public class JoystickButton {
+public class JoystickButton extends Trigger {
     private final Supplier<Boolean> pressedLambda;
-    private boolean lastState = false;
     private final String name;
     private final boolean isReal;
 
@@ -43,19 +43,9 @@ public class JoystickButton {
      *
      * @return Whether the button is pressed.
      */
-    public boolean isPressed() {
-        lastState = pressedLambda.get();
+    @Override
+    public boolean get() {
         return pressedLambda.get();
-    }
-
-    /**
-     * Returns whether the button has changed state since the last time {@code isPressed} was
-     * called.
-     *
-     * @return Whether the state has changed from true to false or false to true.
-     */
-    public boolean hasChangedFromPreviousValue() {
-        return (pressedLambda.get() != lastState);
     }
 
     /**

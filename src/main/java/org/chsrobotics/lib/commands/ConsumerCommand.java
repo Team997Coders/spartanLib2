@@ -19,10 +19,9 @@ package org.chsrobotics.lib.commands;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import java.security.InvalidParameterException;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import org.chsrobotics.lib.util.Tuple2;
 
 /**
  * Simple class to allow calling methods with one or two parameters (of the same type) in the
@@ -42,8 +41,8 @@ public class ConsumerCommand<T> extends CommandBase {
     private final T init;
     private final T end;
 
-    private final List<T> biInit;
-    private final List<T> biEnd;
+    private final Tuple2<T> biInit;
+    private final Tuple2<T> biEnd;
 
     private boolean runsWhileDisabled = false;
 
@@ -93,29 +92,22 @@ public class ConsumerCommand<T> extends CommandBase {
      * Constructs a ConsumerCommand for a method with two parameters.
      *
      * @param biConsumer A method with two parameters of type {@code T}.
-     * @param init A list of exactly two {@code T}s to feed to the consumer when this command is
-     *     initialized. If {@code null}, will not be fed. The order should match the order of
-     *     parameters in the actual method.
-     * @param end A list of exactly two {@code T}s to feed to the consumer when this command ends.
-     *     If {@code null}, will not be fed. The order should match the order of parameters in the
-     *     actual method.
+     * @param init A Tuple2 of Ts to feed to the consumer when the command is initialized. The order
+     *     should match the order of parameters in the actual method.
+     * @param end A Tuple2 of Ts to feed to the consumer when the command ends. The order should
+     *     match the order of parameters in the actual method.
      * @param durationSeconds How long this command should be active; if less than zero, this
      *     command won't end; if zero, this command will begin and end on the same command scheduler
      *     loop.
      * @param toRequire Any subsystems required to be freed for the method.
-     * @throws InvalidParameterException If {@code init} or {@code end} are not exactly two items
-     *     long or {@code null}.
      */
     public ConsumerCommand(
             BiConsumer<T, T> biConsumer,
-            List<T> init,
-            List<T> end,
+            Tuple2<T> init,
+            Tuple2<T> end,
             double durationSeconds,
-            Subsystem... toRequire)
-            throws InvalidParameterException {
-        if ((init.size() != 2 && init != null) || (end.size() != 2 && end != null)) {
-            throw new InvalidParameterException("Number of defined parameters must be 2!");
-        }
+            Subsystem... toRequire) {
+
         isBiConsumer = true;
 
         this.biConsumer = biConsumer;
@@ -137,15 +129,11 @@ public class ConsumerCommand<T> extends CommandBase {
      * instantly.
      *
      * @param biConsumer A method with exactly two parameters of type {@code T}.
-     * @param init A list of exactly two {@code T}s to feed to the consumer when this command is
-     *     initialized. If {@code null}, will not be fed. The order should match the order of
-     *     parameters in the actual method.
+     * @param init A Tuple2 of Ts to feed to the consumer upon command initializaiton. The order
+     *     should match the order of parameters in the actual method.
      * @param toRequire Any subsystems required to be freed for the method.
-     * @throws InvalidParameterException If {@code init} is not exactly two items long, or {@code
-     *     null}.
      */
-    public ConsumerCommand(BiConsumer<T, T> biConsumer, List<T> init, Subsystem... toRequire)
-            throws InvalidParameterException {
+    public ConsumerCommand(BiConsumer<T, T> biConsumer, Tuple2<T> init, Subsystem... toRequire) {
         this(biConsumer, init, null, 0, toRequire);
     }
 
@@ -169,7 +157,7 @@ public class ConsumerCommand<T> extends CommandBase {
         timer.start();
 
         if (isBiConsumer && biConsumer != null) {
-            biConsumer.accept(biInit.get(0), biInit.get(1));
+            biConsumer.accept(biInit.firstValue(), biInit.secondValue());
         } else if (consumer != null) {
             consumer.accept(init);
         }
@@ -178,7 +166,7 @@ public class ConsumerCommand<T> extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         if (isBiConsumer && biEnd != null && biConsumer != null) {
-            biConsumer.accept(biEnd.get(0), biEnd.get(1));
+            biConsumer.accept(biEnd.firstValue(), biEnd.secondValue());
         } else if (end != null && consumer != null) {
             consumer.accept(end);
         }
