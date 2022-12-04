@@ -50,6 +50,11 @@ public class LogMessageCommand extends CommandBase {
     }
 
     @Override
+    public boolean runsWhenDisabled() {
+        return true;
+    }
+
+    @Override
     public void initialize() {
         HighLevelLogger.logMessage(messageLambda.get());
     }
