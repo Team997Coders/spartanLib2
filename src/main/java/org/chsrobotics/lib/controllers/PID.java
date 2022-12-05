@@ -53,9 +53,9 @@ import java.util.Objects;
  * the controller to overshoot the setpoint.
  *
  * <p>When docs in this class refer to "position" or "velocity", "position" refers to the quantity
- * of the thing being controller, "velocity" to the rate of change of that thing. So it's possible
- * to make a velocity PID controller, or something else that doesn't line up exactly with the names
- * given.
+ * of the thing being controlled, "velocity" to the rate of change of that thing. So it's possible
+ * to make a velocity PID controller, or something else with a controlled quantity other than
+ * position.
  */
 public class PID {
 
@@ -258,8 +258,7 @@ public class PID {
     }
 
     /**
-     * Sets the setpoint (target) of the controller. If this controller is angular, this value
-     * *must* be in radians.
+     * Sets the setpoint (target) of the controller.
      *
      * @param value The new target of the controller.
      */
@@ -375,8 +374,7 @@ public class PID {
      *
      * <p>This must be called at a rate of once every robot loop to be consistent.
      *
-     * @param measurement The value of the measured feedback. If this controller is operating in
-     *     angular mode, *must* be in radians.
+     * @param measurement The value of the measured feedback.
      * @return The sum of the P, I, and D terms of the controller.
      */
     public double calculate(double measurement) {
