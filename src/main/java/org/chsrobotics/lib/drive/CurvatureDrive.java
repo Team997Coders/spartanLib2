@@ -38,7 +38,8 @@ public class CurvatureDrive implements DifferentialDriveMode {
      * @param turnModifier Adjusts the turn sensitivity.
      * @param driveLimiter The linear rate limit.
      * @param turnLimiter The rotational rate limit.
-     * @param invertReverseTurning Whether turning in reverse should be inverted
+     * @param invertReverseTurning Whether turning in reverse should be inverted. This should be
+     *     true when used in a MixedDrive.
      */
     public CurvatureDrive(
             JoystickAxis linearAxis,

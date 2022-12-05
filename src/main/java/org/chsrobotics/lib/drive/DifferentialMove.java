@@ -24,14 +24,14 @@ public class DifferentialMove {
     public final double right;
 
     /**
-     * A data class that holds differential drivetrain outputs
+     * A data class that holds differential drivetrain outputs.
      *
-     * @param left : value between [-1,1] (inclusive) corresponding with left motor output
-     * @param right : value between [-1,1] (inclusive) corresponding with right motor output
+     * @param left : value between [-1,1] (inclusive) corresponding with left motor output.
+     * @param right : value between [-1,1] (inclusive) corresponding with right motor output.
      */
     public DifferentialMove(double left, double right) {
-        this.left = left;
-        this.right = right;
+        this.left = Math.min(1, Math.max(-1, left));
+        this.right = Math.min(1, Math.max(-1, right));
     }
 
     /**

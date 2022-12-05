@@ -31,12 +31,12 @@ public class ArcadeDrive implements DifferentialDriveMode {
      * Moves the robot in teleoperated mode using separate inputs for linear and rotational
      * movement.
      *
-     * @param linearAxis The {@link JoystickAxis} to be used for linear movement
-     * @param rotationalAxis The {@link JoystickAxis} to be used for rotational movement
-     * @param driveModifier Adjusts the linear sensitivity
-     * @param turnModifier Adjusts the turn sensitivity
-     * @param driveLimiter The linear rate limit
-     * @param turnLimiter The rotational rate limit
+     * @param linearAxis The {@link JoystickAxis} to be used for linear movement.
+     * @param rotationalAxis The {@link JoystickAxis} to be used for rotational movement.
+     * @param driveModifier Adjusts the linear sensitivity.
+     * @param turnModifier Adjusts the turn sensitivity.
+     * @param driveLimiter The linear rate limit.
+     * @param turnLimiter The rotational rate limit.
      */
     public ArcadeDrive(
             JoystickAxis linearAxis,

@@ -26,7 +26,7 @@ public class MixedDrive implements DifferentialDriveMode {
      * Mixture of {@link ArcadeDrive} and {@link CurvatureDrive}. Proportions between the two set in
      * Constants.
      *
-     * @param driveModes A map of DriveModes to mode weight
+     * @param driveModes A map of DriveModes to mode weight.
      */
     public MixedDrive(Map<DifferentialDriveMode, Double> driveModes) {
         if (driveModes.values().stream().anyMatch(Predicate.isEqual(null))) {
