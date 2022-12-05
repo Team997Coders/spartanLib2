@@ -30,8 +30,8 @@ public class TankDrive implements DifferentialDriveMode {
     /**
      * Constructs a TankDrive.
      *
-     * @param leftAxis The {@link JoystickAxis} to be used for the left wheel.
-     * @param rightAxis The {@link JoystickAxis} to be used for the right wheel.
+     * @param leftAxis The {@link JoystickAxis} to be used for the left side.
+     * @param rightAxis The {@link JoystickAxis} to be used for the right side.
      * @param driveModifier A scalar to multiply each input by.
      * @param driveLimiter The maximum rate of change for each input, in units of input / second. If
      *     equal to 0, no rate limiting will be applied.
@@ -48,15 +48,25 @@ public class TankDrive implements DifferentialDriveMode {
         this.rightDriveLimiter = new RateLimiter(driveLimiter);
     }
 
+    /**
+     * Constructs a TankDrive with no rate limiting.
+     *
+     * @param leftAxis The {@link JoystickAxis} to be used for the left side.
+     * @param rightAxis The {@link JoystickAxis} to be used for the right side.
+     */
+    public TankDrive(JoystickAxis leftAxis, JoystickAxis rightAxis) {
+        this(leftAxis, rightAxis, 0, 0);
+    }
+
     /** {@inheritDoc} */
     @Override
-    public DifferentialDriveInput execute() {
+    public DifferentialDrivetrainInput execute() {
         double left = leftAxis.getValue() * driveModifier;
         double right = rightAxis.getValue() * driveModifier;
-        if (leftDriveLimiter != null && rightDriveLimiter != null) {
-            left = leftDriveLimiter.calculate(left);
-            right = rightDriveLimiter.calculate(right);
-        }
-        return new DifferentialDriveInput(left, right);
+
+        left = leftDriveLimiter.calculate(left);
+        right = rightDriveLimiter.calculate(right);
+
+        return new DifferentialDrivetrainInput(left, right).clamp(1);
     }
 }

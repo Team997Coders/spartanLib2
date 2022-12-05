@@ -21,8 +21,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 /**
- * DifferentialDriveMode composed of an ArcadeDrive and CurvatureDrive, with configurable influence
- * over the total value.
+ * DifferentialDriveMode composed of any number of DifferentialDriveModes, with configurable
+ * influences over the total value.
  */
 public class MixedDrive implements DifferentialDriveMode {
     final Map<DifferentialDriveMode, Double> driveModes;
@@ -44,8 +44,8 @@ public class MixedDrive implements DifferentialDriveMode {
 
     /** {@inheritDoc} */
     @Override
-    public DifferentialDriveInput execute() {
-        DifferentialDriveInput total = new DifferentialDriveInput(0, 0);
+    public DifferentialDrivetrainInput execute() {
+        DifferentialDrivetrainInput total = new DifferentialDrivetrainInput(0, 0);
         for (Map.Entry<DifferentialDriveMode, Double> entry : driveModes.entrySet()) {
             // get move for each drive mode, multiply it by that drive mode's proportion, and add it
             // to the total move

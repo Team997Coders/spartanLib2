@@ -64,7 +64,7 @@ public class CurvatureDrive implements DifferentialDriveMode {
 
     /** {@inheritDoc} */
     @Override
-    public DifferentialDriveInput execute() {
+    public DifferentialDrivetrainInput execute() {
         double rotationMultiplier =
                 invertReverseTurning ? Math.abs(linearAxis.getValue()) : linearAxis.getValue();
         // rotation = (linear * rotational input)
@@ -76,6 +76,6 @@ public class CurvatureDrive implements DifferentialDriveMode {
         double left = linear + rotation;
         double right = linear - rotation;
 
-        return new DifferentialDriveInput(left, right);
+        return new DifferentialDrivetrainInput(left, right).clamp(1);
     }
 }

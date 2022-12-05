@@ -57,13 +57,13 @@ public class ArcadeDrive implements DifferentialDriveMode {
 
     /** {@inheritDoc} */
     @Override
-    public DifferentialDriveInput execute() {
+    public DifferentialDrivetrainInput execute() {
         double linear = driveLimiter.calculate(linearAxis.getValue() * driveModifier);
         double rotation = turnLimiter.calculate(rotationalAxis.getValue() * turnModifier);
 
         double left = linear + rotation;
         double right = linear - rotation;
 
-        return new DifferentialDriveInput(left, right);
+        return new DifferentialDrivetrainInput(left, right).clamp(1);
     }
 }

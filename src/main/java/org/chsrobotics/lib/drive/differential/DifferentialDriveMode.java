@@ -23,5 +23,5 @@ public interface DifferentialDriveMode {
      *
      * @return The input, mapped to left and right side inputs.
      */
-    DifferentialDriveInput execute();
+    DifferentialDrivetrainInput execute();
 }

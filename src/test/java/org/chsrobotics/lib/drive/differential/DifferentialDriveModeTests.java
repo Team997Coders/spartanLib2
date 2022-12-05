@@ -42,24 +42,23 @@ public class DifferentialDriveModeTests {
         JoystickAxis left = constructTestAxis(0.5);
         JoystickAxis right = constructTestAxis(0.25);
         DifferentialDriveMode drive = new TankDrive(left, right, 1, 0);
-        assertEquals(drive.execute(), new DifferentialDriveInput(0.5, 0.25));
+        assertEquals(drive.execute(), new DifferentialDrivetrainInput(0.5, 0.25));
     }
 
     @Test
     public void arcadeDriveExecute() {
         JoystickAxis linear = constructTestAxis(0.5);
         JoystickAxis rotational = constructTestAxis(0.25);
-        DifferentialDriveMode drive = new ArcadeDrive(linear, rotational, 1.0, 1.0, 100, 100);
-        assertEquals(drive.execute(), new DifferentialDriveInput(0.75, 0.25));
+        DifferentialDriveMode drive = new ArcadeDrive(linear, rotational, 1.0, 1.0, 0, 0);
+        assertEquals(drive.execute(), new DifferentialDrivetrainInput(0.75, 0.25));
     }
 
     @Test
     public void curvatureDriveExecute() {
         JoystickAxis linear = constructTestAxis(0.5);
         JoystickAxis rotational = constructTestAxis(0.25);
-        DifferentialDriveMode drive =
-                new CurvatureDrive(linear, rotational, 1.0, 1.0, 100, 100, false);
-        assertEquals(drive.execute(), new DifferentialDriveInput(0.625, 0.375));
+        DifferentialDriveMode drive = new CurvatureDrive(linear, rotational, 1.0, 1.0, 0, 0, false);
+        assertEquals(drive.execute(), new DifferentialDrivetrainInput(0.625, 0.375));
     }
 
     @Test
@@ -69,9 +68,8 @@ public class DifferentialDriveModeTests {
         DifferentialDriveMode drive =
                 new MixedDrive(
                         Map.of(
-                                new ArcadeDrive(linear, rotational, 1.0, 1.0, 100, 100), 0.5,
-                                new CurvatureDrive(linear, rotational, 1.0, 1.0, 100, 100, true),
-                                        0.5));
-        assertEquals(drive.execute(), new DifferentialDriveInput(0.6875, 0.3125));
+                                new ArcadeDrive(linear, rotational, 1.0, 1.0, 0, 0), 0.5,
+                                new CurvatureDrive(linear, rotational, 1.0, 1.0, 0, 0, true), 0.5));
+        assertEquals(drive.execute(), new DifferentialDrivetrainInput(0.6875, 0.3125));
     }
 }

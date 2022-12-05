@@ -23,16 +23,18 @@ import org.junit.Test;
 public class DifferentialDriveInputTests {
     @Test
     public void differentialMoveAdd() {
-        DifferentialDriveInput actual =
-                new DifferentialDriveInput(0.5, 0.5).add(new DifferentialDriveInput(0.5, -0.2));
-        DifferentialDriveInput expected = new DifferentialDriveInput(1.0, 0.3);
+        DifferentialDrivetrainInput actual =
+                new DifferentialDrivetrainInput(0.5, 0.5)
+                        .add(new DifferentialDrivetrainInput(0.5, -0.2));
+        DifferentialDrivetrainInput expected = new DifferentialDrivetrainInput(1.0, 0.3);
         assertEquals(actual, expected);
     }
 
     @Test
     public void differentialMoveMultiply() {
-        DifferentialDriveInput actual = new DifferentialDriveInput(1.0, 0.0).multiply(-0.5);
-        DifferentialDriveInput expected = new DifferentialDriveInput(-0.5, 0.0);
+        DifferentialDrivetrainInput actual =
+                new DifferentialDrivetrainInput(1.0, 0.0).multiply(-0.5);
+        DifferentialDrivetrainInput expected = new DifferentialDrivetrainInput(-0.5, 0.0);
         assertEquals(actual, expected);
     }
 }
