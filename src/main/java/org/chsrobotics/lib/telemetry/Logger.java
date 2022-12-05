@@ -124,7 +124,7 @@ public class Logger<T> {
 
     /**
      * Feeds a new value to the Logger, which may be sent to NetworkTables, an off-robot log, both,
-     * or neither, depending on how this class is configured.
+     * or neither, depending on how this instance is configured.
      *
      * @param value An instance of T (whatever this class was parameterized with).
      */

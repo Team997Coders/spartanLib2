@@ -25,8 +25,7 @@ import org.chsrobotics.lib.trajectory.MotionProfile;
  *
  * <p>For more information on PID controllers and motion profiles, see {@link
  * org.chsrobotics.lib.controllers.PID}, {@link org.chsrobotics.lib.trajectory.MotionProfile}, and
- * {@link org.chsrobotics.lib.trajectory.AsymmetricTrapezoidProfile} and {@link
- * org.chsrobotics.lib.trajectory.TrapezoidProfile}.
+ * {@link org.chsrobotics.lib.trajectory.AsymmetricTrapezoidProfile}.
  */
 public class MotionProfilePID {
     private final PID controller;

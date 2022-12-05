@@ -16,7 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.input;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -57,28 +57,5 @@ public class JoystickAxisTests {
         assertEquals(0, axis.getValue(), 0);
         value = -0.55;
         assertEquals(-0.55, axis.getValue(), 0);
-    }
-
-    @Test
-    public void JoystickAxisGetIsRisingOrFallingOrHasChangedWorks() {
-        value = 1;
-        assertTrue(axis.isRising());
-        assertFalse(axis.isFalling());
-        assertTrue(axis.hasChangedFromPreviousValue());
-
-        value = 0.5;
-        assertTrue(axis.isRising());
-        assertFalse(axis.isFalling());
-        assertTrue(axis.hasChangedFromPreviousValue());
-
-        axis.getValue();
-        assertFalse(axis.isRising());
-        assertFalse(axis.isFalling());
-        assertFalse(axis.hasChangedFromPreviousValue());
-
-        value = -0.2;
-        assertFalse(axis.isRising());
-        assertTrue(axis.isFalling());
-        assertTrue(axis.hasChangedFromPreviousValue());
     }
 }
