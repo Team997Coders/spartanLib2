@@ -25,6 +25,8 @@ public class JoystickButton extends Trigger {
     private final String name;
     private final boolean isReal;
 
+    private boolean inverted = false;
+
     /**
      * Constructs a JoystickButton.
      *
@@ -45,7 +47,8 @@ public class JoystickButton extends Trigger {
      */
     @Override
     public boolean get() {
-        return pressedLambda.get();
+        if (inverted) return !pressedLambda.get();
+        else return pressedLambda.get();
     }
 
     /**
@@ -55,6 +58,24 @@ public class JoystickButton extends Trigger {
      */
     public boolean isReal() {
         return isReal;
+    }
+
+    /**
+     * Sets whether the button should be inverted (a pressed state returns false instead of true).
+     *
+     * @param trueIfInverted Whether to invert the button.
+     */
+    public void invert(boolean trueIfInverted) {
+        inverted = trueIfInverted;
+    }
+
+    /**
+     * Returns whether the button is inverted (a pressed state returns false instead of true).
+     *
+     * @return Whether the button is inverted.
+     */
+    public boolean isInverted() {
+        return inverted;
     }
 
     @Override
