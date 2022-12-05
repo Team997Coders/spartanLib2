@@ -23,16 +23,18 @@ In order to keep this library from going the way of the dinosaurs (and spartanLi
 Ask for admin rights from your software mentor so that you can play a large role in future development. If you have issues getting this role, please reach out to the original author(s).
 
 ## Contents:
-Currently, the library contains 6 sub-packages:
+Currently, the library contains 8 sub-packages:
 
+- `commands`: Command Framework Abstractions
 - `controllers`: Feedback Controllers
+- `drive`: Differential Drive Modes
 - `input`: Joystick Wrappers
 - `math`: Filters, Utility Operations
 - `telemetry`: Logging
 - `trajectory`: Trajectory Generation, Motion Profiles
 - `util`: Utility
 
-Future expansion will likely create a `hardware` package, containing abstractions for various hardware APIs for FRC, and `command` and `subsystem` packages for the WPILib Command-Based paradigm.
+Future expansion will likely create a `hardware` package, containing abstractions for various hardware APIs for FRC, and a `subsystem` packages for the WPILib Command-Based paradigm.
 
 
 ## Contributing:
