@@ -39,6 +39,7 @@ spotless {
 		licenseHeaderFile 'licenseHeader.txt'
 	}
 }
+compileJava.dependsOn spotlessApply
 
 javadoc {
 	if(JavaVersion.current().isJava9Compatible()) {

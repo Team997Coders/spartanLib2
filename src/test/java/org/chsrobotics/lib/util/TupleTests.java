@@ -14,29 +14,25 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.input;
+package org.chsrobotics.lib.util;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
+import java.util.List;
 import org.junit.Test;
 
-/** Tests for the JoystickButton. */
-public class JoystickButtonTests {
-    private boolean value;
-    private final JoystickButton button = new JoystickButton(() -> value, "test", false);
+public class TupleTests {
+    @Test
+    public void Tuple2AsListWorksProperly() {
+        Tuple2<Double> tuple = new Tuple2<>(1.0, 1.0);
 
-    @Before
-    public void reset() {
-        value = false;
-        button.get();
+        assertEquals(List.of(1.0, 1.0), tuple.toList());
     }
 
     @Test
-    public void JoystickButtonIsPressedWorks() {
-        assertEquals(false, button.get());
+    public void Tuple2OfWorksProperly() {
+        Tuple2<Double> tuple = Tuple2.of(1.5, 2.0);
 
-        value = true;
-        assertEquals(true, button.get());
+        assertEquals(1.5, tuple.firstValue(), 0);
     }
 }

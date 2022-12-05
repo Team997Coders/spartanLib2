@@ -18,9 +18,7 @@ package org.chsrobotics.lib.math;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 
-import java.security.InvalidParameterException;
 import org.junit.Test;
 
 /** Tests for the various small math functions in the UtilityMath class. */
@@ -118,18 +116,35 @@ public class UtilityMathTests {
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // scaleToSum
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    @Test
+    public void UtilityMathScaleToSetWorksProperly() {
+        assertArrayEquals(new double[] {1}, UtilityMath.scaleToSum(new double[] {5}, 1), epsilon);
+
+        assertArrayEquals(
+                new double[] {5, 5, 5, 5, 5},
+                UtilityMath.scaleToSum(new double[] {17, 17, 17, 17, 17}, 25),
+                epsilon);
+
+        assertArrayEquals(new double[2], UtilityMath.scaleToSum(new double[] {2, 4}, 0), epsilon);
+
+        assertArrayEquals(new double[0], UtilityMath.scaleToSum(new double[0], 17), epsilon);
+
+        assertArrayEquals(
+                new double[] {0.2, 0.8, 1},
+                UtilityMath.scaleToSum(new double[] {4, 16, 20}, 2),
+                epsilon);
+
+        assertArrayEquals(
+                new double[] {-0.5, 5},
+                UtilityMath.scaleToSum(new double[] {1, -10}, 4.5),
+                epsilon);
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // normalizeSet
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    @Test
-    public void UtilityMathNormalizeSetHandlesEmptyListProperly() {
-        double[] emptyArray = {};
-        assertThrows(
-                InvalidParameterException.class,
-                () -> {
-                    UtilityMath.normalizeSet(emptyArray, 0);
-                });
-    }
 
     @Test
     public void UtilityMathNormalizeSetReturnsZeroCorrectly() throws Exception {

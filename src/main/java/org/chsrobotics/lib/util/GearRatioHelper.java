@@ -26,8 +26,13 @@ public class GearRatioHelper {
     /**
      * Constructs a GearRatioHelper.
      *
-     * <p>The parameters indicate the "input" and "output" sides of the mechanism. Should be
-     * measured in distance of travel.
+     * <p>The parameters indicate the "input" and "output" sides of the mechanism. The input is
+     * typically where the motor is.
+     *
+     * <p>The measurements of the parameters can be of many types that relate the motion of one side
+     * to the other, as long as they're consistent. For example, radius, circumference, number of
+     * gear teeth, angular distance per angular distance of the other, and more, are all valid
+     * parameters.
      *
      * <p>A higher output ratio than input ratio is a reduction (lower speed, higher torque).
      *
@@ -65,11 +70,20 @@ public class GearRatioHelper {
     }
 
     /**
-     * Returns how far the "output" side of the mechanism will have travelled if the "input" has
-     * travelled the indicated distance.
+     * Returns the gear ratio as output/input.
      *
-     * @param inputSide The distance travelled by the *input* side.
-     * @return The distance travelled by the *output* side.
+     * @return The double ratio as output/input.
+     */
+    public double toDoubleRatioOutputToInput() {
+        return outputRatio / inputRatio;
+    }
+
+    /**
+     * Returns how far the "output" side of the mechanism will have travelled if the "input" has
+     * travelled the indicated angular distance.
+     *
+     * @param inputSide The angular distance travelled by the *input* side.
+     * @return The angular distance travelled by the *output* side.
      */
     public double outputFromInput(double inputSide) {
         return (inputSide * inputRatio) / outputRatio;
@@ -77,10 +91,10 @@ public class GearRatioHelper {
 
     /**
      * Returns how far the "input" side of the mechanism will have travelled if the "output" has
-     * travelled the indicated distance.
+     * travelled the indicated angular distance.
      *
-     * @param outputSide The distance travelled by the *output* side.
-     * @return The distance travelled by the *output* side.
+     * @param outputSide The angular distance travelled by the *output* side.
+     * @return The angular distance travelled by the *output* side.
      */
     public double inputFromOutput(double outputSide) {
         return (outputSide * outputRatio) / inputRatio;

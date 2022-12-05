@@ -23,7 +23,6 @@ import org.junit.Test;
 
 /** Tests for the JoystickAxis. */
 public class JoystickAxisTests {
-    private final double epsilon = 0.0001;
     private double value;
 
     private final JoystickAxis axis = new JoystickAxis(() -> value, "test", false);
@@ -58,43 +57,5 @@ public class JoystickAxisTests {
         assertEquals(0, axis.getValue(), 0);
         value = -0.55;
         assertEquals(-0.55, axis.getValue(), 0);
-    }
-
-    @Test
-    public void JoystickAxisGetRateOfChangeWorks() {
-        assertEquals(0, axis.getValue(), epsilon);
-
-        value = 0.02;
-        assertEquals(1, axis.getRateOfChange(), epsilon);
-
-        axis.getValue();
-        value = -0.04;
-        assertEquals(-3, axis.getRateOfChange(), epsilon);
-
-        value = 0.02;
-        assertEquals(0, axis.getRateOfChange(), epsilon);
-    }
-
-    @Test
-    public void JoystickAxisGetIsRisingOrFallingOrHasChangedWorks() {
-        value = 1;
-        assertEquals(true, axis.isRising());
-        assertEquals(false, axis.isFalling());
-        assertEquals(true, axis.hasChangedFromPreviousValue());
-
-        value = 0.5;
-        assertEquals(true, axis.isRising());
-        assertEquals(false, axis.isFalling());
-        assertEquals(true, axis.hasChangedFromPreviousValue());
-
-        axis.getValue();
-        assertEquals(false, axis.isRising());
-        assertEquals(false, axis.isFalling());
-        assertEquals(false, axis.hasChangedFromPreviousValue());
-
-        value = -0.2;
-        assertEquals(false, axis.isRising());
-        assertEquals(true, axis.isFalling());
-        assertEquals(true, axis.hasChangedFromPreviousValue());
     }
 }

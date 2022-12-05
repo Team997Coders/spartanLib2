@@ -21,10 +21,11 @@ import java.util.function.Supplier;
 /** Represents a hardware axis on an input device which has a value in [-1,1] (inclusive). */
 public class JoystickAxis {
     private final Supplier<Double> valueLambda;
-    private double lastValue = 0;
     private double deadband = 0;
     private final String name;
     private final boolean isReal;
+
+    private int invert = 1;
 
     /**
      * Constructs a JoystickAxis.
@@ -45,8 +46,7 @@ public class JoystickAxis {
      * @return Value of the axis, in [-1,1] (inclusive).
      */
     public double getValue() {
-        lastValue = (Math.abs(valueLambda.get()) > deadband) ? valueLambda.get() : 0;
-        return lastValue;
+        return (Math.abs(valueLambda.get()) > deadband) ? valueLambda.get() * invert : 0;
     }
 
     /**
@@ -59,42 +59,22 @@ public class JoystickAxis {
     }
 
     /**
-     * Returns the approximated rate of change of the value of the axis.
+     * Sets whether the axis should be inverted (polarity switched).
      *
-     * <p>Assumes that 20 milliseconds (default robot loop period) have passed between the last call
-     * of {@code getValue} and this.
-     *
-     * @return The current approximate derivative of the axis' values with respect to time.
+     * @param trueIfInverted If the axis should be inverted.
      */
-    public double getRateOfChange() {
-        return (valueLambda.get() - lastValue) / 0.02;
+    public void setInverted(boolean trueIfInverted) {
+        if (trueIfInverted) invert = -1;
+        else invert = 1;
     }
 
     /**
-     * Returns whether the value of the axis has increased since the last call of {@code getValue}.
+     * Returns whether the axis is inverted (polarity switched).
      *
-     * @return True if the axis is increasing in value.
+     * @return True if the axis is inverted.
      */
-    public boolean isRising() {
-        return (valueLambda.get() > lastValue);
-    }
-
-    /**
-     * Returns whether the value of the axis has decreased since the last call of {@code getValue}.
-     *
-     * @return True if the axis is decreasing in value.
-     */
-    public boolean isFalling() {
-        return (valueLambda.get() < lastValue);
-    }
-
-    /**
-     * Returns whether the value of the axis has changed since the last call of {@code getValue}.
-     *
-     * @return True if the axis has changed in value.
-     */
-    public boolean hasChangedFromPreviousValue() {
-        return (valueLambda.get() != lastValue);
+    public boolean isInverted() {
+        return (invert == -1);
     }
 
     /**
