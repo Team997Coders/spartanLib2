@@ -18,18 +18,23 @@ package org.chsrobotics.lib.telemetry;
 
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.util.datalog.BooleanArrayLogEntry;
 import edu.wpi.first.util.datalog.BooleanLogEntry;
 import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
 import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.util.datalog.StringArrayLogEntry;
 import edu.wpi.first.util.datalog.StringLogEntry;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Utility to streamline publishing data to NetworkTables and saving it to an on-robot log file.
  *
  * <p>Parameterized to the type of data to publish/log.
  *
- * <p>If the data isn't numerical (Double, Int, Long, etc) or Boolean/String, this will instead
- * publish and log the result of its {@code .toString()} method.
+ * <p>If the data isn't numerical (Double, Int, Long, etc), Boolean, String, or an Array of one of
+ * those types, this will instead publish and log the result of its {@code .toString()} method.
  *
  * @param <T> The data type of the log entry.
  */
@@ -43,6 +48,10 @@ public class Logger<T> {
     private BooleanLogEntry boolLogEntry;
     private DoubleLogEntry doubleLogEntry;
     private StringLogEntry stringLogEntry;
+
+    private BooleanArrayLogEntry boolArrayLogEntry;
+    private DoubleArrayLogEntry doubleArrayLogEntry;
+    private StringArrayLogEntry stringArrayLogEntry;
 
     private final NetworkTableEntry ntEntry;
 
@@ -123,45 +132,81 @@ public class Logger<T> {
     }
 
     /**
-     * Feeds a new value to the Logger, which may be sent to NetworkTables, an off-robot log, both,
-     * or neither, depending on how this instance is configured.
+     * Feeds a new value to the Logger, which may be sent to NetworkTables, an on-robot log, both,
+     * or neither, depending on how this class is configured.
      *
      * @param value An instance of T (whatever this class was parameterized with).
      */
     public void update(T value) {
-        if (value instanceof Double
-                || value instanceof Integer
-                || value instanceof Long
-                || value instanceof Short
-                || value instanceof Byte
-                || value instanceof Float) {
+        // this looks *terrible* but it's just the same code repeated over and over for various
+        // types
+        if (value instanceof Number) {
+
             if (!logEntryExists) {
                 doubleLogEntry = new DoubleLogEntry(log, logEntryIdentifier);
                 logEntryExists = true;
             }
-            if (recordInLog && !value.equals(previousValue)) doubleLogEntry.append((double) value);
-            if (publishToNT && !value.equals(previousValue)) {
-                ntEntry.forceSetDouble((double) value);
+            if (recordInLog && !value.equals(previousValue))
+                doubleLogEntry.append(((Number) value).doubleValue());
+            if (publishToNT && !value.equals(previousValue))
+                ntEntry.forceSetDouble(((Number) value).doubleValue());
+
+        } else if (value instanceof Number[]) {
+
+            List<Number> list = Arrays.asList((Number[]) value);
+
+            double[] castArray = list.stream().mapToDouble(Number::doubleValue).toArray();
+
+            if (!logEntryExists) {
+                doubleArrayLogEntry = new DoubleArrayLogEntry(log, logEntryIdentifier);
+                logEntryExists = true;
             }
+            if (recordInLog && !value.equals(previousValue)) doubleArrayLogEntry.append(castArray);
+            if (publishToNT && !value.equals(previousValue)) ntEntry.forceSetDoubleArray(castArray);
+
         } else if (value instanceof Boolean) {
+
             if (!logEntryExists) {
                 boolLogEntry = new BooleanLogEntry(log, logEntryIdentifier);
                 logEntryExists = true;
             }
             if (recordInLog && !value.equals(previousValue)) boolLogEntry.append((boolean) value);
-            if (publishToNT && !value.equals(previousValue)) {
+            if (publishToNT && !value.equals(previousValue))
                 ntEntry.forceSetBoolean((boolean) value);
+
+        } else if (value instanceof Boolean[]) {
+
+            if (!logEntryExists) {
+                boolArrayLogEntry = new BooleanArrayLogEntry(log, logEntryIdentifier);
+                logEntryExists = true;
             }
+            if (recordInLog && !value.equals(previousValue))
+                boolArrayLogEntry.append((boolean[]) value);
+            if (publishToNT && !value.equals(previousValue))
+                ntEntry.forceSetBooleanArray((boolean[]) value);
+
         } else if (value instanceof String) {
+
             if (!logEntryExists) {
                 stringLogEntry = new StringLogEntry(log, logEntryIdentifier);
                 logEntryExists = true;
             }
             if (recordInLog && !value.equals(previousValue)) stringLogEntry.append((String) value);
-            if (publishToNT && !value.equals(previousValue)) {
-                ntEntry.forceSetString((String) value);
+            if (publishToNT && !value.equals(previousValue)) ntEntry.forceSetString((String) value);
+
+        } else if (value instanceof String[]) {
+
+            if (!logEntryExists) {
+                stringArrayLogEntry = new StringArrayLogEntry(log, logEntryIdentifier);
+                logEntryExists = true;
             }
+            if (recordInLog && !value.equals(previousValue))
+                stringArrayLogEntry.append((String[]) value);
+            if (publishToNT && !value.equals(previousValue))
+                ntEntry.forceSetStringArray((String[]) value);
+
         } else {
+
             if (!logEntryExists) {
                 stringLogEntry = new StringLogEntry(log, logEntryIdentifier);
                 logEntryExists = true;
