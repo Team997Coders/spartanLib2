@@ -14,7 +14,7 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.drive;
+package org.chsrobotics.lib.drive.differential;
 
 import static org.junit.Assert.assertEquals;
 
@@ -38,11 +38,19 @@ public class DifferentialDriveModeTests {
     }
 
     @Test
+    public void tankDriveExecute() {
+        JoystickAxis left = constructTestAxis(0.5);
+        JoystickAxis right = constructTestAxis(0.25);
+        DifferentialDriveMode drive = new TankDrive(left, right, 1, 0);
+        assertEquals(drive.execute(), new DifferentialDriveInput(0.5, 0.25));
+    }
+
+    @Test
     public void arcadeDriveExecute() {
         JoystickAxis linear = constructTestAxis(0.5);
         JoystickAxis rotational = constructTestAxis(0.25);
         DifferentialDriveMode drive = new ArcadeDrive(linear, rotational, 1.0, 1.0, 100, 100);
-        assertEquals(drive.execute(), new DifferentialMove(0.75, 0.25));
+        assertEquals(drive.execute(), new DifferentialDriveInput(0.75, 0.25));
     }
 
     @Test
@@ -51,7 +59,7 @@ public class DifferentialDriveModeTests {
         JoystickAxis rotational = constructTestAxis(0.25);
         DifferentialDriveMode drive =
                 new CurvatureDrive(linear, rotational, 1.0, 1.0, 100, 100, false);
-        assertEquals(drive.execute(), new DifferentialMove(0.625, 0.375));
+        assertEquals(drive.execute(), new DifferentialDriveInput(0.625, 0.375));
     }
 
     @Test
@@ -64,14 +72,6 @@ public class DifferentialDriveModeTests {
                                 new ArcadeDrive(linear, rotational, 1.0, 1.0, 100, 100), 0.5,
                                 new CurvatureDrive(linear, rotational, 1.0, 1.0, 100, 100, true),
                                         0.5));
-        assertEquals(drive.execute(), new DifferentialMove(0.6875, 0.3125));
-    }
-
-    @Test
-    public void tankDriveExecute() {
-        JoystickAxis left = constructTestAxis(0.5);
-        JoystickAxis right = constructTestAxis(0.25);
-        DifferentialDriveMode drive = new TankDrive(left, right);
-        assertEquals(drive.execute(), new DifferentialMove(0.5, 0.25));
+        assertEquals(drive.execute(), new DifferentialDriveInput(0.6875, 0.3125));
     }
 }

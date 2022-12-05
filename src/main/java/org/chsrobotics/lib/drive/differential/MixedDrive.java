@@ -14,19 +14,23 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.drive;
+package org.chsrobotics.lib.drive.differential;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+/**
+ * DifferentialDriveMode composed of an ArcadeDrive and CurvatureDrive, with configurable influence
+ * over the total value.
+ */
 public class MixedDrive implements DifferentialDriveMode {
     final Map<DifferentialDriveMode, Double> driveModes;
     /**
-     * Mixture of {@link ArcadeDrive} and {@link CurvatureDrive}. Proportions between the two set in
-     * Constants.
+     * Constructs a MixedDrive.
      *
-     * @param driveModes A map of DriveModes to mode weight.
+     * @param driveModes Map of drive modes to the influence they should carry in the total.
+     *     Influences must add to 1.
      */
     public MixedDrive(Map<DifferentialDriveMode, Double> driveModes) {
         if (driveModes.values().stream().anyMatch(Predicate.isEqual(null))) {
@@ -40,8 +44,8 @@ public class MixedDrive implements DifferentialDriveMode {
 
     /** {@inheritDoc} */
     @Override
-    public DifferentialMove execute() {
-        DifferentialMove total = new DifferentialMove(0, 0);
+    public DifferentialDriveInput execute() {
+        DifferentialDriveInput total = new DifferentialDriveInput(0, 0);
         for (Map.Entry<DifferentialDriveMode, Double> entry : driveModes.entrySet()) {
             // get move for each drive mode, multiply it by that drive mode's proportion, and add it
             // to the total move

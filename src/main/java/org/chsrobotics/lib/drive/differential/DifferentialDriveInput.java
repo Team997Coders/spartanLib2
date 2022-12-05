@@ -14,34 +14,38 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.drive;
+package org.chsrobotics.lib.drive.differential;
 
 import java.util.Objects;
 import org.apache.commons.math3.util.Precision;
 
-public class DifferentialMove {
+/**
+ * A data class that holds differential drivetrain inputs, split into drivetrain left and right
+ * sides.
+ */
+public class DifferentialDriveInput {
     public final double left;
     public final double right;
 
     /**
-     * A data class that holds differential drivetrain outputs.
+     * Constructs a DifferentialDriveInput.
      *
-     * @param left : value between [-1,1] (inclusive) corresponding with left motor output.
-     * @param right : value between [-1,1] (inclusive) corresponding with right motor output.
+     * @param left : value corresponding with left side input.
+     * @param right : value corresponding with right side input.
      */
-    public DifferentialMove(double left, double right) {
-        this.left = Math.min(1, Math.max(-1, left));
-        this.right = Math.min(1, Math.max(-1, right));
+    public DifferentialDriveInput(double left, double right) {
+        this.left = left;
+        this.right = right;
     }
 
     /**
-     * Returns a new DifferentialMove with the left and right values multiplied by a scalar.
+     * Returns a new DifferentialDriveInput with the left and right values multiplied by a scalar.
      *
      * @param scalar The multiplicand.
      * @return A scaled DifferentialMove.
      */
-    public DifferentialMove multiply(double scalar) {
-        return new DifferentialMove(left * scalar, right * scalar);
+    public DifferentialDriveInput multiply(double scalar) {
+        return new DifferentialDriveInput(left * scalar, right * scalar);
     }
 
     /**
@@ -50,8 +54,8 @@ public class DifferentialMove {
      * @param other The DifferentialMove to add.
      * @return The sum of the two DifferentialMoves.
      */
-    public DifferentialMove add(DifferentialMove other) {
-        return new DifferentialMove(left + other.left, right + other.right);
+    public DifferentialDriveInput add(DifferentialDriveInput other) {
+        return new DifferentialDriveInput(left + other.left, right + other.right);
     }
 
     @Override
@@ -64,7 +68,7 @@ public class DifferentialMove {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         double epsilon = 0.000001;
-        DifferentialMove that = (DifferentialMove) o;
+        DifferentialDriveInput that = (DifferentialDriveInput) o;
         return Precision.equals(that.left, left, epsilon)
                 && Precision.equals(that.right, right, epsilon);
     }

@@ -32,7 +32,8 @@ public class RateLimiter implements Filter {
     /**
      * Constructs a RateLimiter.
      *
-     * @param rateLimit Maximum rate-of-change of the reference, in units per second.
+     * @param rateLimit Maximum rate-of-change of the reference, in units per second. If equal to
+     *     zero, this will not apply any kind of rate limiting.
      * @param dtSeconds Time, in seconds, expected between calls of this method.
      */
     public RateLimiter(double rateLimit, double dtSeconds) {
@@ -54,8 +55,11 @@ public class RateLimiter implements Filter {
     public double calculate(double value) {
         double delta = value - lastValue;
 
-        lastValue =
-                lastValue + MathUtil.clamp(delta, -rateLimit * dtSeconds, rateLimit * dtSeconds);
+        if (rateLimit != 0)
+            lastValue =
+                    lastValue
+                            + MathUtil.clamp(delta, -rateLimit * dtSeconds, rateLimit * dtSeconds);
+        else lastValue = value;
 
         return lastValue;
     }

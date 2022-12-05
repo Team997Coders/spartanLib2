@@ -25,6 +25,8 @@ public class JoystickAxis {
     private final String name;
     private final boolean isReal;
 
+    private int invert = 1;
+
     /**
      * Constructs a JoystickAxis.
      *
@@ -44,7 +46,7 @@ public class JoystickAxis {
      * @return Value of the axis, in [-1,1] (inclusive).
      */
     public double getValue() {
-        return (Math.abs(valueLambda.get()) > deadband) ? valueLambda.get() : 0;
+        return (Math.abs(valueLambda.get()) > deadband) ? valueLambda.get() * invert : 0;
     }
 
     /**
@@ -54,6 +56,25 @@ public class JoystickAxis {
      */
     public void addDeadband(double magnitude) {
         deadband = Math.abs(magnitude);
+    }
+
+    /**
+     * Sets whether the axis should be inverted (polarity switched).
+     *
+     * @param trueIfInverted If the axis should be inverted.
+     */
+    public void setInverted(boolean trueIfInverted) {
+        if (trueIfInverted) invert = -1;
+        else invert = 1;
+    }
+
+    /**
+     * Returns whether the axis is inverted (polarity switched).
+     *
+     * @return True if the axis is inverted.
+     */
+    public boolean isInverted() {
+        return (invert == -1);
     }
 
     /**

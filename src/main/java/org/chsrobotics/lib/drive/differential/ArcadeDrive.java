@@ -14,64 +14,56 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.drive;
+package org.chsrobotics.lib.drive.differential;
 
 import org.chsrobotics.lib.input.JoystickAxis;
 import org.chsrobotics.lib.math.filters.RateLimiter;
 
-public class CurvatureDrive implements DifferentialDriveMode {
+/** Moves the robot in teleop using separate inputs for linear and rotational motion. */
+public class ArcadeDrive implements DifferentialDriveMode {
     private final JoystickAxis linearAxis;
     private final JoystickAxis rotationalAxis;
-    private final double turnModifier;
     private final double driveModifier;
+    private final double turnModifier;
     private final RateLimiter driveLimiter;
     private final RateLimiter turnLimiter;
-    private final boolean invertReverseTurning;
 
     /**
-     * Moves the robot in teleoperated mode similarly to {@link ArcadeDrive}, but with turning
-     * speeds dependent on linear speeds.
+     * Constructs an ArcadeDrive.
      *
      * @param linearAxis The {@link JoystickAxis} to be used for linear movement.
      * @param rotationalAxis The {@link JoystickAxis} to be used for rotational movement.
-     * @param driveModifier Adjusts the linear sensitivity.
-     * @param turnModifier Adjusts the turn sensitivity.
-     * @param driveLimiter The linear rate limit.
-     * @param turnLimiter The rotational rate limit.
-     * @param invertReverseTurning Whether turning in reverse should be inverted. This should be
-     *     true when used in a MixedDrive.
+     * @param driveModifier A scalar to multiply the linear input by.
+     * @param turnModifier A scalar to multiply the rotational input by.
+     * @param driveLimiter The maximum rate of change of the linear input, in units of input /
+     *     second. If equal to 0, no rate limiting will be applied.
+     * @param turnLimiter The maximum rate of change of the rotational input, in units of input /
+     *     second. If equal to 0, no rate limiting will be applied.
      */
-    public CurvatureDrive(
+    public ArcadeDrive(
             JoystickAxis linearAxis,
             JoystickAxis rotationalAxis,
             double driveModifier,
             double turnModifier,
             double driveLimiter,
-            double turnLimiter,
-            boolean invertReverseTurning) {
+            double turnLimiter) {
         this.linearAxis = linearAxis;
         this.rotationalAxis = rotationalAxis;
         this.driveModifier = driveModifier;
         this.turnModifier = turnModifier;
         this.driveLimiter = new RateLimiter(driveLimiter);
         this.turnLimiter = new RateLimiter(turnLimiter);
-        this.invertReverseTurning = invertReverseTurning;
     }
 
     /** {@inheritDoc} */
     @Override
-    public DifferentialMove execute() {
-        double rotationMultiplier =
-                invertReverseTurning ? Math.abs(linearAxis.getValue()) : linearAxis.getValue();
-        // rotation = (linear * rotational input)
-        double rotation =
-                turnLimiter.calculate((rotationalAxis.getValue() * rotationMultiplier))
-                        * turnModifier;
-        double linear = driveLimiter.calculate(linearAxis.getValue()) * driveModifier;
+    public DifferentialDriveInput execute() {
+        double linear = driveLimiter.calculate(linearAxis.getValue() * driveModifier);
+        double rotation = turnLimiter.calculate(rotationalAxis.getValue() * turnModifier);
 
         double left = linear + rotation;
         double right = linear - rotation;
 
-        return new DifferentialMove(left, right);
+        return new DifferentialDriveInput(left, right);
     }
 }

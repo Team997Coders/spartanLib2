@@ -14,25 +14,25 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.drive;
+package org.chsrobotics.lib.drive.differential;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class DifferentialMoveTests {
+public class DifferentialDriveInputTests {
     @Test
     public void differentialMoveAdd() {
-        DifferentialMove actual =
-                new DifferentialMove(0.5, 0.5).add(new DifferentialMove(0.5, -0.2));
-        DifferentialMove expected = new DifferentialMove(1.0, 0.3);
+        DifferentialDriveInput actual =
+                new DifferentialDriveInput(0.5, 0.5).add(new DifferentialDriveInput(0.5, -0.2));
+        DifferentialDriveInput expected = new DifferentialDriveInput(1.0, 0.3);
         assertEquals(actual, expected);
     }
 
     @Test
     public void differentialMoveMultiply() {
-        DifferentialMove actual = new DifferentialMove(1.0, 0.0).multiply(-0.5);
-        DifferentialMove expected = new DifferentialMove(-0.5, 0.0);
+        DifferentialDriveInput actual = new DifferentialDriveInput(1.0, 0.0).multiply(-0.5);
+        DifferentialDriveInput expected = new DifferentialDriveInput(-0.5, 0.0);
         assertEquals(actual, expected);
     }
 }
