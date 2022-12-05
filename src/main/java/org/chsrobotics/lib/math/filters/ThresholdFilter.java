@@ -20,19 +20,19 @@ package org.chsrobotics.lib.math.filters;
  * A filter that completely attentuates any value (infinite impulse) below or above a defined
  * threshold.
  */
-public class IIRThresholdFilter implements Filter {
+public class ThresholdFilter implements Filter {
     private final double threshold;
     private final boolean invert;
     private double currentValue;
 
     /**
-     * Constructs an IIRThresholdFilter. By default, filters out values above the threshold, but can
-     * be interved to filter out values below the threshold.
+     * Constructs a ThresholdFilter. By default, filters out values above the threshold, but can be
+     * interved to filter out values below the threshold.
      *
      * @param threshold The filter will attentuate values above this threshold.
      * @param invert Whether to attentuate values *below* this threshold instead.
      */
-    public IIRThresholdFilter(double threshold, boolean invert) {
+    public ThresholdFilter(double threshold, boolean invert) {
         this.threshold = threshold;
         this.invert = invert;
     }

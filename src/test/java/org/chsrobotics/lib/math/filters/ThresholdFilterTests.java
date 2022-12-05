@@ -20,28 +20,28 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-/** Tests for the IIRThresholdFilter. */
-public class IIRThresholdFilterTests {
+/** Tests for the ThresholdFilter. */
+public class ThresholdFilterTests {
     @Test
-    public void IIRThresholdFilterWorksForwards() {
-        IIRThresholdFilter filterA = new IIRThresholdFilter(0, false);
+    public void ThresholdFilterWorksForwards() {
+        ThresholdFilter filterA = new ThresholdFilter(0, false);
         assertEquals(-1, filterA.calculate(-1), 0);
         assertEquals(0, filterA.calculate(1), 0);
         assertEquals(0, filterA.calculate(0), 0);
 
-        IIRThresholdFilter filterB = new IIRThresholdFilter(0.2, false);
+        ThresholdFilter filterB = new ThresholdFilter(0.2, false);
         assertEquals(0.1, filterB.calculate(0.1), 0);
         assertEquals(0, filterB.calculate(98.1), 0);
         assertEquals(0.2, filterB.calculate(0.2), 0);
     }
 
     @Test
-    public void IIRThresholdFilterWorksBackwards() {
-        IIRThresholdFilter filterA = new IIRThresholdFilter(0, true);
+    public void ThresholdFilterWorksBackwards() {
+        ThresholdFilter filterA = new ThresholdFilter(0, true);
         assertEquals(0, filterA.calculate(-1), 0);
         assertEquals(1, filterA.calculate(1), 0);
 
-        IIRThresholdFilter filterB = new IIRThresholdFilter(0.2, true);
+        ThresholdFilter filterB = new ThresholdFilter(0.2, true);
         assertEquals(0, filterB.calculate(0.1), 0);
         assertEquals(98.1, filterB.calculate(98.1), 0);
         assertEquals(0.2, filterB.calculate(0.2), 0);
