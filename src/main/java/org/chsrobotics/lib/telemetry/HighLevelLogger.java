@@ -16,21 +16,67 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.telemetry;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 
-/** Wrapper for a DataLogManager that includes various robot-agnostic logging features. */
+/**
+ * Convenience wrapper class for telemetry/ logging with built-in logging for robot-agnostic data
+ * like environment metadata, RoboRio status, and scheduled commands.
+ *
+ * <p>For the internally included loggers of system status to function, the method {@code
+ * logPeriodic()} needs to be called once per robot loop cycle.
+ */
 public class HighLevelLogger {
     private static boolean hasStarted = false;
     private static final String commitDataFilename = "commit.txt";
     private static final String branchDataFilename = "branch.txt";
+
+    private static HashMap<Command, Timer> commandTimeMap = new HashMap<>();
+
+    private static final Logger<String[]> scheduledCommandsLogger =
+            new Logger<>("scheduledCommands", "commandScheduler");
+
+    private static final String subdirString = "System";
+
+    private static final Logger<Boolean> isBrownedOutLogger =
+            new Logger<>("isBrownedOut", subdirString);
+
+    private static final Logger<Double> canUtilizationLogger =
+            new Logger<>("canUtilizationPercent", subdirString);
+
+    private static final Logger<Double> batteryVoltageLogger =
+            new Logger<>("batteryVoltageVolts", subdirString);
+
+    private static final Logger<Double> logger3p3vCurrent =
+            new Logger<>("3p3vCurrentAmps", subdirString);
+    private static final Logger<Double> logger5vCurrent =
+            new Logger<>("5vCurrentAmps", subdirString);
+
+    private static final Logger<Integer> brownoutCounterLogger =
+            new Logger<>("brownoutCounter", subdirString);
+    private static int brownoutCounter = 0;
+
+    private static final NetworkTable sendables =
+            NetworkTableInstance.getDefault().getTable("sendables");
 
     /**
      * Starts the HighLevelLogger.
@@ -46,10 +92,32 @@ public class HighLevelLogger {
      */
     public static void startLogging() {
         if (!hasStarted) {
+            CommandScheduler.getInstance().onCommandInitialize(HighLevelLogger::logCommandInit);
+            CommandScheduler.getInstance().onCommandFinish(HighLevelLogger::logCommandFinished);
+            CommandScheduler.getInstance()
+                    .onCommandInterrupt(HighLevelLogger::logCommandInterrupted);
+
             hasStarted = true;
             DataLogManager.logNetworkTables(false);
             logMessage("Log init");
 
+            logMessage("Real time: " + LocalDateTime.now().toString());
+            logMessage("Robot is: " + (RobotBase.isReal() ? "real" : "simulated"));
+            logMessage(
+                    "Event: "
+                            + (DriverStation.isFMSAttached()
+                                    ? DriverStation.getEventName()
+                                    : "N/A"));
+            logMessage(
+                    "Match type: "
+                            + (DriverStation.isFMSAttached()
+                                    ? DriverStation.getMatchType().toString()
+                                    : "N/A"));
+            logMessage(
+                    "Match number: "
+                            + (DriverStation.isFMSAttached()
+                                    ? DriverStation.getMatchNumber()
+                                    : "N/A"));
             try {
                 File commitTxt = new File(Filesystem.getDeployDirectory(), commitDataFilename);
                 File branchTxt = new File(Filesystem.getDeployDirectory(), branchDataFilename);
@@ -57,27 +125,39 @@ public class HighLevelLogger {
                 logMessage("Git commit: " + Files.readString(commitTxt.toPath()));
                 logMessage("Git branch: " + Files.readString(branchTxt.toPath()));
             } catch (IOException exc) {
-                DriverStation.reportWarning("Git branch / commit data could not be read!", false);
                 logMessage("Git branch / commit data could not be read!");
             }
+        }
+    }
 
-        } else {
-            DriverStation.reportWarning("HighLevelLogger already started!", false);
-            logMessage("HighLevelLogger already started!");
+    /**
+     * Method to be called once per robot loop cycle, updating the various Loggers wrapped by this
+     * class.
+     */
+    public static void logPeriodic() {
+        ArrayList<Command> commands = new ArrayList<>();
+
+        for (Command command : commandTimeMap.keySet()) {
+            commands.add(command);
         }
 
-        logMessage("Real time: " + LocalDateTime.now().toString());
-        logMessage("Robot is: " + (RobotBase.isReal() ? "real" : "simulated"));
-        logMessage(
-                "Event: " + (DriverStation.isFMSAttached() ? DriverStation.getEventName() : "N/A"));
-        logMessage(
-                "Match type: "
-                        + (DriverStation.isFMSAttached()
-                                ? DriverStation.getMatchType().toString()
-                                : "N/A"));
-        logMessage(
-                "Match number: "
-                        + (DriverStation.isFMSAttached() ? DriverStation.getMatchNumber() : "N/A"));
+        scheduledCommandsLogger.update(commands.toArray(new String[] {}));
+
+        if (RobotController.getBatteryVoltage() < RobotController.getBrownoutVoltage()) {
+            brownoutCounter++;
+            isBrownedOutLogger.update(true);
+        } else {
+            isBrownedOutLogger.update(false);
+        }
+
+        brownoutCounterLogger.update(brownoutCounter);
+
+        canUtilizationLogger.update(RobotController.getCANStatus().percentBusUtilization);
+
+        batteryVoltageLogger.update(RobotController.getBatteryVoltage());
+
+        logger3p3vCurrent.update(RobotController.getCurrent3V3());
+        logger5vCurrent.update(RobotController.getCurrent5V());
     }
 
     /**
@@ -93,15 +173,88 @@ public class HighLevelLogger {
     }
 
     /**
-     * Logs a String message (warning, state transition, startup information, etc.) to the log (not
-     * NetworkTables).
+     * Logs a String message (warning, state transition, startup information, etc.), and prints it
+     * to the standard output (DriverStation console).
      *
-     * @param message The message to log
+     * @param message The message to log.
      */
     public static void logMessage(String message) {
         if (!hasStarted) {
             startLogging();
         }
         DataLogManager.log(message);
+    }
+
+    /**
+     * Writes a warning, using the provided string, to the DriverStation console, and writes it to
+     * the log.
+     *
+     * @param message The String message to associate with the warning.
+     */
+    public static void logWarning(String message) {
+        logMessage("WARNING " + message);
+        DriverStation.reportWarning(message, false);
+    }
+
+    /**
+     * Writes an error, using the provided string, to the DriverStation console, and writes it to
+     * the log.
+     *
+     * @param message The String message to associate with the error.
+     */
+    public static void logError(String message) {
+        logMessage("ERROR " + message);
+        DriverStation.reportError(message, false);
+    }
+
+    /**
+     * Publishes a Sendable object to NetworkTables.
+     *
+     * @param key String key to associate with the object.
+     * @param data Sendable object.
+     * @throws InvalidParameterException If the Sendable data is null.
+     */
+    public static synchronized void publishSendable(String key, Sendable data)
+            throws InvalidParameterException {
+        if (data == null) throw new InvalidParameterException("Data was null!");
+        NetworkTable dataTable = sendables.getSubTable(key);
+
+        SendableBuilderImpl builder = new SendableBuilderImpl();
+
+        builder.setTable(dataTable);
+        builder.startListeners();
+        SendableRegistry.publish(data, builder);
+
+        dataTable.getEntry("name").setString(key);
+    }
+
+    private static void logCommandInit(Command command) {
+        logMessage("Command initialized: " + command.getName());
+
+        Timer timer = new Timer();
+        timer.reset();
+        timer.start();
+
+        commandTimeMap.put(command, timer);
+    }
+
+    private static void logCommandFinished(Command command) {
+        logMessage(
+                "Command finished after "
+                        + commandTimeMap.get(command).get()
+                        + " seconds: "
+                        + command.getName());
+
+        commandTimeMap.remove(command);
+    }
+
+    private static void logCommandInterrupted(Command command) {
+        logMessage(
+                "Command interrupted after "
+                        + commandTimeMap.get(command).get()
+                        + " seconds: "
+                        + command.getName());
+
+        commandTimeMap.remove(command);
     }
 }

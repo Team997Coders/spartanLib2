@@ -16,8 +16,6 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math;
 
-import java.security.InvalidParameterException;
-
 /** Various useful small math functions. */
 public class UtilityMath {
 
@@ -44,6 +42,42 @@ public class UtilityMath {
     }
 
     /**
+     * Returns the angle in radians between two other angles with the smallest absolute value.
+     *
+     * <p>A negative number indicates a clockwise rotation from angle a to angle b.
+     *
+     * @param angleA The first angle, in radians.
+     * @param angleB The second angle, in raidans.
+     * @return A signed angle in radians representing the smallest (positive is counterclockwise)
+     *     angle between angles a and b.
+     */
+    public static double smallestAngleRadiansBetween(double angleA, double angleB) {
+        double normA = UtilityMath.normalizeAngleRadians(angleA);
+        double normB = UtilityMath.normalizeAngleRadians(angleB);
+
+        double diff = (normB - normA + Math.PI) % (2 * Math.PI) - Math.PI;
+        return (diff < -Math.PI) ? diff + (2 * Math.PI) : diff;
+    }
+
+    /**
+     * Returns the angle in degrees between two other angles with the smallest absolute value.
+     *
+     * <p>A negative number indicates a clockwise rotation from angle a to angle b.
+     *
+     * @param angleA The first angle, in degrees.
+     * @param angleB The second angle, in degrees.
+     * @return A signed angle in degrees representing the smallest (positive is counterclockwise)
+     *     angle between angles a and b.
+     */
+    public static double smallestAngleDegreesBetween(double angleA, double angleB) {
+        double normA = UtilityMath.normalizeAngleDegrees(angleA);
+        double normB = UtilityMath.normalizeAngleDegrees(angleB);
+
+        double diff = (normB - normA + 180) % 360 - 180;
+        return (diff < -180) ? diff + 360 : diff;
+    }
+
+    /**
      * Interpolates a value between two points.
      *
      * <p>For more complex, multi-point interpolation, use the {@link MultiPointInterpolator} class.
@@ -63,19 +97,44 @@ public class UtilityMath {
     }
 
     /**
+     * Scales a set of doubles symmetrically such that they sum to a desired number, while
+     * maintaining the same ratio.
+     *
+     * @param inputs An array of doubles. If empty, this will return an empty array.
+     * @param desiredSum The desired sum, positive or negative, of the outputs. If equal to zero,
+     *     this will return an array of zeros of length equal to the input's length.
+     * @return An array of doubles with the same ratios between each other as the inputs.
+     */
+    public static double[] scaleToSum(double[] inputs, double desiredSum) {
+        if (inputs.length == 0) return inputs;
+        if (desiredSum == 0) return new double[inputs.length];
+
+        double sum = 0;
+        for (double value : inputs) {
+            sum += value;
+        }
+
+        double[] outputs = new double[inputs.length];
+
+        double scalingFactor = desiredSum / sum;
+
+        for (int i = 0; i < inputs.length; i++) {
+            outputs[i] = inputs[i] * (scalingFactor);
+        }
+
+        return outputs;
+    }
+
+    /**
      * Scales a set of doubles symmetrically to ensure that none of them exceed a maximum absolute
      * value, while still maintaining the same ratio.
      *
-     * @param inputs An array of the input values.
+     * @param inputs An array of the input values. If empty, this will return an empty array.
      * @param maxAbsoluteValue The maximum absolute value allowed for an output.
      * @return An array of the scaled values, in the same order as they were input.
-     * @throws InvalidParameterException If the array is empty.
      */
-    public static double[] normalizeSet(double[] inputs, double maxAbsoluteValue)
-            throws InvalidParameterException {
-        if (inputs.length == 0) {
-            throw new InvalidParameterException("Values must contain an element!");
-        }
+    public static double[] normalizeSet(double[] inputs, double maxAbsoluteValue) {
+        if (inputs.length == 0) return inputs;
         int highestIndex = 0; // find the largest absolute value element in the list
         for (int i = 0; i < inputs.length; i++) {
             if (Math.abs(inputs[highestIndex]) < Math.abs(inputs[i])) {

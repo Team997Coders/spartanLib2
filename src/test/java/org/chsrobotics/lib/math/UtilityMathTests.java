@@ -18,9 +18,7 @@ package org.chsrobotics.lib.math;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 
-import java.security.InvalidParameterException;
 import org.junit.Test;
 
 /** Tests for the various small math functions in the UtilityMath class. */
@@ -70,6 +68,41 @@ public class UtilityMathTests {
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // smallestAngleRadiansBetween
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    @Test
+    public void UtilityMathSmallestAngleRadiansBetweenWorksProperly() {
+        assertEquals(0, UtilityMath.smallestAngleRadiansBetween(2 * Math.PI, 0), epsilon);
+        assertEquals(
+                -0.5 * Math.PI,
+                UtilityMath.smallestAngleRadiansBetween(1.5 * Math.PI, Math.PI),
+                epsilon);
+        assertEquals(
+                0.25 * Math.PI,
+                UtilityMath.smallestAngleRadiansBetween(1.75 * Math.PI, 2 * Math.PI),
+                epsilon);
+        assertEquals(-Math.PI, UtilityMath.smallestAngleRadiansBetween(Math.PI, 0), epsilon);
+        assertEquals(-Math.PI, UtilityMath.smallestAngleRadiansBetween(-3 * Math.PI, 0), epsilon);
+        assertEquals(
+                0.25 * Math.PI,
+                UtilityMath.smallestAngleRadiansBetween(-0.125 * Math.PI, 0.125 * Math.PI),
+                epsilon);
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // smallestAngleDegreesBetween
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    @Test
+    public void UtilityMathSmallestAngleDegreesBetweenWorksProperly() {
+        assertEquals(0, UtilityMath.smallestAngleDegreesBetween(360, 0), epsilon);
+        assertEquals(-90, UtilityMath.smallestAngleDegreesBetween(270, 180), epsilon);
+        assertEquals(45, UtilityMath.smallestAngleDegreesBetween(315, 360), epsilon);
+        assertEquals(-180, UtilityMath.smallestAngleDegreesBetween(180, 0), epsilon);
+        assertEquals(-180, UtilityMath.smallestAngleDegreesBetween(-540, 0), epsilon);
+        assertEquals(45, UtilityMath.smallestAngleDegreesBetween(-22.5, 22.5), epsilon);
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // simpleLinearInterpolation
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @Test
@@ -83,18 +116,35 @@ public class UtilityMathTests {
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // scaleToSum
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    @Test
+    public void UtilityMathScaleToSetWorksProperly() {
+        assertArrayEquals(new double[] {1}, UtilityMath.scaleToSum(new double[] {5}, 1), epsilon);
+
+        assertArrayEquals(
+                new double[] {5, 5, 5, 5, 5},
+                UtilityMath.scaleToSum(new double[] {17, 17, 17, 17, 17}, 25),
+                epsilon);
+
+        assertArrayEquals(new double[2], UtilityMath.scaleToSum(new double[] {2, 4}, 0), epsilon);
+
+        assertArrayEquals(new double[0], UtilityMath.scaleToSum(new double[0], 17), epsilon);
+
+        assertArrayEquals(
+                new double[] {0.2, 0.8, 1},
+                UtilityMath.scaleToSum(new double[] {4, 16, 20}, 2),
+                epsilon);
+
+        assertArrayEquals(
+                new double[] {-0.5, 5},
+                UtilityMath.scaleToSum(new double[] {1, -10}, 4.5),
+                epsilon);
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // normalizeSet
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    @Test
-    public void UtilityMathNormalizeSetHandlesEmptyListProperly() {
-        double[] emptyArray = {};
-        assertThrows(
-                InvalidParameterException.class,
-                () -> {
-                    UtilityMath.normalizeSet(emptyArray, 0);
-                });
-    }
 
     @Test
     public void UtilityMathNormalizeSetReturnsZeroCorrectly() throws Exception {

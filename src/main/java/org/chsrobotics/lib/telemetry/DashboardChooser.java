@@ -14,7 +14,7 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.util;
+package org.chsrobotics.lib.telemetry;
 
 import edu.wpi.first.networktables.NTSendable;
 import edu.wpi.first.networktables.NTSendableBuilder;
@@ -24,8 +24,6 @@ import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-import org.chsrobotics.lib.telemetry.HighLevelLogger;
-import org.chsrobotics.lib.telemetry.Logger;
 
 /**
  * A NTSendable which replaces the SendableChooser in favor of a listener-based api. Used for
@@ -53,7 +51,9 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
      * choosers.
      */
     public interface Option {
-        String getDisplayName();
+        default String getDisplayName() {
+            return toString();
+        }
     }
 
     /** Interface which defines a lambda for receiving DashboardChooser updates. */
