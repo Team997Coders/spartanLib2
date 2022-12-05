@@ -59,18 +59,6 @@ public class JoystickAxis {
     }
 
     /**
-     * Returns the approximated rate of change of the value of the axis.
-     *
-     * <p>Assumes that 20 milliseconds (default robot loop period) have passed between the last call
-     * of {@code getValue} and this.
-     *
-     * @return The current approximate derivative of the axis' values with respect to time.
-     */
-    public double getRateOfChange() {
-        return (valueLambda.get() - lastValue) / 0.02;
-    }
-
-    /**
      * Returns whether the value of the axis has increased since the last call of {@code getValue}.
      *
      * @return True if the axis is increasing in value.
