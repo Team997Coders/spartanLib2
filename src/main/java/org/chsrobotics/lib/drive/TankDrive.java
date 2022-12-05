@@ -16,14 +16,15 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.drive;
 
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import org.chsrobotics.lib.input.JoystickAxis;
+import org.chsrobotics.lib.math.filters.RateLimiter;
 
 public class TankDrive implements DifferentialDriveMode {
     private final JoystickAxis leftAxis;
     private final JoystickAxis rightAxis;
     private final double driveModifier;
-    private final SlewRateLimiter driveLimiter;
+    private RateLimiter leftDriveLimiter;
+    private RateLimiter rightDriveLimiter;
 
     /**
      * Moves the robot in teleoperated mode using one input directly mapped to each wheel.
@@ -41,14 +42,31 @@ public class TankDrive implements DifferentialDriveMode {
         this.leftAxis = leftAxis;
         this.rightAxis = rightAxis;
         this.driveModifier = driveModifier;
-        this.driveLimiter = new SlewRateLimiter(driveLimiter);
+        this.leftDriveLimiter = new RateLimiter(driveLimiter);
+        this.rightDriveLimiter = new RateLimiter(driveLimiter);
+    }
+
+    /**
+     * Moves the robot in teleoperated mode using one input directly mapped to each wheel.
+     *
+     * @param leftAxis The {@link JoystickAxis} to be used for the left wheel.
+     * @param rightAxis The {@link JoystickAxis} to be used for the right wheel.
+     */
+    public TankDrive(JoystickAxis leftAxis, JoystickAxis rightAxis) {
+        this.leftAxis = leftAxis;
+        this.rightAxis = rightAxis;
+        driveModifier = 1;
     }
 
     /** {@inheritDoc} */
     @Override
     public DifferentialMove execute() {
-        double left = driveLimiter.calculate(leftAxis.getValue() * driveModifier);
-        double right = driveLimiter.calculate(rightAxis.getValue() * driveModifier);
+        double left = leftAxis.getValue() * driveModifier;
+        double right = rightAxis.getValue() * driveModifier;
+        if (leftDriveLimiter != null && rightDriveLimiter != null) {
+            left = leftDriveLimiter.calculate(left);
+            right = rightDriveLimiter.calculate(right);
+        }
         return new DifferentialMove(left, right);
     }
 }

@@ -16,27 +16,29 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.drive;
 
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import org.chsrobotics.lib.input.JoystickAxis;
+import org.chsrobotics.lib.math.filters.RateLimiter;
 
 public class CurvatureDrive implements DifferentialDriveMode {
     private final JoystickAxis linearAxis;
     private final JoystickAxis rotationalAxis;
     private final double turnModifier;
     private final double driveModifier;
-    private final SlewRateLimiter turnLimiter;
-    private final SlewRateLimiter driveLimiter;
+    private final RateLimiter driveLimiter;
+    private final RateLimiter turnLimiter;
+    private final boolean invertReverseTurning;
 
     /**
      * Moves the robot in teleoperated mode similarly to {@link ArcadeDrive}, but with turning
      * speeds dependent on linear speeds.
      *
-     * @param linearAxis The {@link JoystickAxis} to be used for linear movement
-     * @param rotationalAxis The {@link JoystickAxis} to be used for rotational movement
-     * @param driveModifier Adjusts the linear sensitivity
-     * @param turnModifier Adjusts the turn sensitivity
-     * @param driveLimiter The linear rate limit
-     * @param turnLimiter The rotational rate limit
+     * @param linearAxis The {@link JoystickAxis} to be used for linear movement.
+     * @param rotationalAxis The {@link JoystickAxis} to be used for rotational movement.
+     * @param driveModifier Adjusts the linear sensitivity.
+     * @param turnModifier Adjusts the turn sensitivity.
+     * @param driveLimiter The linear rate limit.
+     * @param turnLimiter The rotational rate limit.
+     * @param invertReverseTurning Whether turning in reverse should be inverted
      */
     public CurvatureDrive(
             JoystickAxis linearAxis,
@@ -44,32 +46,30 @@ public class CurvatureDrive implements DifferentialDriveMode {
             double driveModifier,
             double turnModifier,
             double driveLimiter,
-            double turnLimiter) {
+            double turnLimiter,
+            boolean invertReverseTurning) {
         this.linearAxis = linearAxis;
         this.rotationalAxis = rotationalAxis;
         this.driveModifier = driveModifier;
         this.turnModifier = turnModifier;
-        this.driveLimiter = new SlewRateLimiter(driveLimiter);
-        this.turnLimiter = new SlewRateLimiter(turnLimiter);
+        this.driveLimiter = new RateLimiter(driveLimiter);
+        this.turnLimiter = new RateLimiter(turnLimiter);
+        this.invertReverseTurning = invertReverseTurning;
     }
 
     /** {@inheritDoc} */
     @Override
     public DifferentialMove execute() {
-        // left = linear - (|linear| * rotational)
-        double left =
-                driveLimiter.calculate(linearAxis.getValue()) * driveModifier
-                        + turnModifier
-                                * turnLimiter.calculate(
-                                        (Math.abs(linearAxis.getValue())
-                                                * rotationalAxis.getValue()));
-        // right = linear + (|linear| * rotational)
-        double right =
-                driveLimiter.calculate(linearAxis.getValue()) * driveModifier
-                        - turnModifier
-                                * turnLimiter.calculate(
-                                        (Math.abs(linearAxis.getValue())
-                                                * rotationalAxis.getValue()));
+        double rotationMultiplier =
+                invertReverseTurning ? Math.abs(linearAxis.getValue()) : linearAxis.getValue();
+        // rotation = (linear * rotational input)
+        double rotation =
+                turnLimiter.calculate((rotationalAxis.getValue() * rotationMultiplier))
+                        * turnModifier;
+        double linear = driveLimiter.calculate(linearAxis.getValue()) * driveModifier;
+
+        double left = linear + rotation;
+        double right = linear - rotation;
 
         return new DifferentialMove(left, right);
     }

@@ -16,16 +16,16 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.drive;
 
-import edu.wpi.first.math.filter.SlewRateLimiter;
 import org.chsrobotics.lib.input.JoystickAxis;
+import org.chsrobotics.lib.math.filters.RateLimiter;
 
 public class ArcadeDrive implements DifferentialDriveMode {
     private final JoystickAxis linearAxis;
     private final JoystickAxis rotationalAxis;
     private final double driveModifier;
     private final double turnModifier;
-    private final SlewRateLimiter driveLimiter;
-    private final SlewRateLimiter turnLimiter;
+    private final RateLimiter driveLimiter;
+    private final RateLimiter turnLimiter;
 
     /**
      * Moves the robot in teleoperated mode using separate inputs for linear and rotational
@@ -49,21 +49,19 @@ public class ArcadeDrive implements DifferentialDriveMode {
         this.rotationalAxis = rotationalAxis;
         this.driveModifier = driveModifier;
         this.turnModifier = turnModifier;
-        this.driveLimiter = new SlewRateLimiter(driveLimiter);
-        this.turnLimiter = new SlewRateLimiter(turnLimiter);
+        this.driveLimiter = new RateLimiter(driveLimiter);
+        this.turnLimiter = new RateLimiter(turnLimiter);
     }
 
     /** {@inheritDoc} */
     @Override
     public DifferentialMove execute() {
-        // left = linear - rotational
-        double left =
-                driveLimiter.calculate(linearAxis.getValue()) * driveModifier
-                        + turnLimiter.calculate(rotationalAxis.getValue()) * turnModifier;
-        // right = linear + rotational
-        double right =
-                driveLimiter.calculate(linearAxis.getValue()) * driveModifier
-                        - turnLimiter.calculate(rotationalAxis.getValue()) * turnModifier;
+        double linear = driveLimiter.calculate(linearAxis.getValue()) * driveModifier;
+        double rotation = turnLimiter.calculate(rotationalAxis.getValue()) * turnModifier;
+
+        double left = linear + rotation;
+        double right = linear - rotation;
+
         return new DifferentialMove(left, right);
     }
 }
