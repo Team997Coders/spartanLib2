@@ -80,7 +80,7 @@ public class ConditionalEndConsumerCommand<T> extends CommandBase {
     /**
      * Constructs a ConditionalConsumerCommand for a method with two parameters.
      *
-     * @param consumer A method which takes two parameters, each of type T.
+     * @param biConsumer A method which takes two parameters, each of type T.
      * @param init A Tuple2 of Ts to feed to the consumer upon command initalization, in the order
      *     that they are in the actual method.
      * @param end A Tuple2 of Ts to feed to the consumer upon command end, in the order that they

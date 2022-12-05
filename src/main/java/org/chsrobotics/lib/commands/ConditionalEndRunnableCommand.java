@@ -40,7 +40,7 @@ public class ConditionalEndRunnableCommand extends CommandBase {
      * @param end Method (with no parameters) to be called when this command ends. Will not be
      *     called if {@code null}.
      * @param endConditional Lambda of a boolean dictating whether this command should end.
-     * @param toReqiure Any subsystems required to be free for the methods.
+     * @param toRequire Any subsystems required to be free for the methods.
      */
     public ConditionalEndRunnableCommand(
             Runnable init, Runnable end, Supplier<Boolean> endConditional, Subsystem... toRequire) {

@@ -113,7 +113,7 @@ public class ConditionalConsumerCommand<T> extends CommandBase {
     /**
      * Constructs a ConditionalConsumerCommand for a method with two parameter.
      *
-     * @param consumer A method which takes one parameters of type T.
+     * @param biConsumer A method which takes two parameters of type T.
      * @param onTrue A Tuple2 of Ts to feed to the consumer upon conditional change from false to
      *     true. Should be in the same order as in the actual method.
      * @param onFalse A Tuple2 of Ts to feed to the consumer upon conditional change from true to
