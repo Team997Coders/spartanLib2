@@ -1,4 +1,4 @@
-name: Dev Documentation
+name: Development Javadocs
 
 on:
   push:
