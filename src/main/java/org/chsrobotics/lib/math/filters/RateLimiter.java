@@ -23,7 +23,7 @@ import edu.wpi.first.math.MathUtil;
  * open-loop-controlled mechanism doesn't accelerate uncontrollably, or that measurements can't
  * change unreasonably fast.
  */
-public class RateLimiter implements Filter {
+public class RateLimiter extends Filter {
     private final double rateLimit;
     private final double dtSeconds;
 

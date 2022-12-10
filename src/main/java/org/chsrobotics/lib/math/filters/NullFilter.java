@@ -17,35 +17,19 @@ If not, see <https://www.gnu.org/licenses/>.
 package org.chsrobotics.lib.math.filters;
 
 /**
- * A filter that completely attentuates any value (infinite impulse) below or above a defined
- * threshold.
+ * Filter which performs a nonop on a signal (returns it unchanged).
+ *
+ * <p>This can be useful in composing a controller out of filters, and when multiplied by a gain is
+ * identical to a PID's P term.
  */
-public class ThresholdFilter extends Filter {
-    private final double threshold;
-    private final boolean invert;
-    private double currentValue;
-
-    /**
-     * Constructs a ThresholdFilter. By default, filters out values above the threshold, but can be
-     * interved to filter out values below the threshold.
-     *
-     * @param threshold The filter will attentuate values above this threshold.
-     * @param invert Whether to attentuate values *below* this threshold instead.
-     */
-    public ThresholdFilter(double threshold, boolean invert) {
-        this.threshold = threshold;
-        this.invert = invert;
-    }
+public class NullFilter extends Filter {
+    private double currentValue = 0;
 
     @Override
     /** {@inheritDoc} */
     public double calculate(double value) {
-        if (!invert) {
-            currentValue = (value <= threshold) ? value : 0;
-        } else {
-            currentValue = (value >= threshold) ? value : 0;
-        }
-        return currentValue;
+        currentValue = value;
+        return value;
     }
 
     @Override

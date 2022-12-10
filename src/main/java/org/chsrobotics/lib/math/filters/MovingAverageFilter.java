@@ -16,47 +16,40 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math.filters;
 
-/**
- * A filter that completely attentuates any value (infinite impulse) below or above a defined
- * threshold.
- */
-public class ThresholdFilter extends Filter {
-    private final double threshold;
-    private final boolean invert;
-    private double currentValue;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
+/** Filter which computes the arithmetic mean of a stream of data. */
+public class MovingAverageFilter extends Filter {
+    private final DescriptiveStatistics series;
 
     /**
-     * Constructs a ThresholdFilter. By default, filters out values above the threshold, but can be
-     * interved to filter out values below the threshold.
+     * Constructs a MovingAverageFilter.
      *
-     * @param threshold The filter will attentuate values above this threshold.
-     * @param invert Whether to attentuate values *below* this threshold instead.
+     * @param window Number of values to look back when calculating the average. If zero or
+     *     negative, will be an indefinite window.
      */
-    public ThresholdFilter(double threshold, boolean invert) {
-        this.threshold = threshold;
-        this.invert = invert;
+    public MovingAverageFilter(int window) {
+        if (window > 0) series = new DescriptiveStatistics(window);
+        else series = new DescriptiveStatistics();
     }
 
     @Override
     /** {@inheritDoc} */
     public double calculate(double value) {
-        if (!invert) {
-            currentValue = (value <= threshold) ? value : 0;
-        } else {
-            currentValue = (value >= threshold) ? value : 0;
-        }
-        return currentValue;
+        series.addValue(value);
+        return series.getGeometricMean();
     }
 
     @Override
     /** {@inheritDoc} */
     public void reset() {
-        currentValue = 0;
+        series.clear();
     }
 
     @Override
     /** {@inheritDoc} */
     public double getCurrentOutput() {
-        return currentValue;
+        if (Double.isNaN(series.getMean())) return 0;
+        else return series.getMean();
     }
 }

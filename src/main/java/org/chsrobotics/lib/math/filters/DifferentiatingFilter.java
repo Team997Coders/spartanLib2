@@ -21,7 +21,7 @@ package org.chsrobotics.lib.math.filters;
  *
  * <p>Approximated with finite timesteps.
  */
-public class DifferentiatingFilter implements Filter {
+public class DifferentiatingFilter extends Filter {
     private final double defaultRobotPeriodSeconds = 0.02;
     private double lastValue = 0;
     private double currentDeriv = 0;

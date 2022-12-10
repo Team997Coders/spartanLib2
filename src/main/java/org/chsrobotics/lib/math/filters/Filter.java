@@ -16,18 +16,18 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math.filters;
 
-/** Common interface for this library's filters. */
-public interface Filter {
+/** Common superclass for this library's filters. */
+public abstract class Filter {
     /**
      * Adds the value to the window and calculates the current output of the filter
      *
      * @param value The value to input to the filter.
      * @return The current output of the filter.
      */
-    double calculate(double value);
+    public abstract double calculate(double value);
 
     /** Resets the history of the filter. */
-    void reset();
+    public abstract void reset();
 
     /**
      * Returns the current output of the filter without updating with a new value.
@@ -35,5 +35,60 @@ public interface Filter {
      * @return The current output of the filter (0 if no values have been given to {@code
      *     calculate()}).
      */
-    double getCurrentOutput();
+    public abstract double getCurrentOutput();
+
+    /**
+     * Returns a filter of a sum of the outputs of two other filters.
+     *
+     * @param other The other filter to sum.
+     * @return A new, composed filter.
+     */
+    public final Filter add(Filter other) {
+        class AddedFilter extends Filter {
+            @Override
+            public double calculate(double value) {
+                return this.calculate(value) + other.calculate(value);
+            }
+
+            @Override
+            public void reset() {
+                this.reset();
+                other.reset();
+            }
+
+            @Override
+            public double getCurrentOutput() {
+                return this.getCurrentOutput() + other.getCurrentOutput();
+            }
+        }
+
+        return new AddedFilter();
+    }
+
+    /**
+     * Returns a new filter of the outputs of this filter multiplied by a scalar.
+     *
+     * @param scalar The scalar value to multiply by.
+     * @return A new filter.
+     */
+    public final Filter scalarMultiply(double scalar) {
+        class MultipliedFilter extends Filter {
+
+            @Override
+            public double calculate(double value) {
+                return this.calculate(value) * scalar;
+            }
+
+            @Override
+            public void reset() {
+                this.reset();
+            }
+
+            @Override
+            public double getCurrentOutput() {
+                return this.getCurrentOutput() * scalar;
+            }
+        }
+        return new MultipliedFilter();
+    }
 }

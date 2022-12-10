@@ -17,46 +17,49 @@ If not, see <https://www.gnu.org/licenses/>.
 package org.chsrobotics.lib.math.filters;
 
 /**
- * A filter that completely attentuates any value (infinite impulse) below or above a defined
- * threshold.
+ * A filter composed of multiple filters, such that the output of a filter is the input of another,
+ * etc.
  */
-public class ThresholdFilter extends Filter {
-    private final double threshold;
-    private final boolean invert;
-    private double currentValue;
+public class ComposedFilter extends Filter {
+    private final Filter[] filters;
+
+    private double currentOuput = 0;
 
     /**
-     * Constructs a ThresholdFilter. By default, filters out values above the threshold, but can be
-     * interved to filter out values below the threshold.
+     * Constructs a ComposedFilter.
      *
-     * @param threshold The filter will attentuate values above this threshold.
-     * @param invert Whether to attentuate values *below* this threshold instead.
+     * @param filters Filters to compose into this filter. Filters at the start of the list are the
+     *     innermost (first) in evaluation, and filters at the end are the outermost (last) in
+     *     evaluation.
      */
-    public ThresholdFilter(double threshold, boolean invert) {
-        this.threshold = threshold;
-        this.invert = invert;
+    public ComposedFilter(Filter... filters) {
+        this.filters = filters;
     }
 
     @Override
     /** {@inheritDoc} */
     public double calculate(double value) {
-        if (!invert) {
-            currentValue = (value <= threshold) ? value : 0;
-        } else {
-            currentValue = (value >= threshold) ? value : 0;
+        double lastValue = value;
+
+        for (Filter filter : filters) {
+            lastValue = filter.calculate(lastValue);
         }
-        return currentValue;
+
+        currentOuput = lastValue;
+        return currentOuput;
     }
 
     @Override
     /** {@inheritDoc} */
     public void reset() {
-        currentValue = 0;
+        for (Filter filter : filters) {
+            filter.reset();
+        }
     }
 
     @Override
     /** {@inheritDoc} */
     public double getCurrentOutput() {
-        return currentValue;
+        return currentOuput;
     }
 }

@@ -26,7 +26,7 @@ public class PIDTests {
 
     @Test
     public void PIDProportionalControllerWorks() {
-        PID controller = new PID(1, 0, 0, 0);
+        PID controller = new PID(1, 0, 0, 0, 0);
         controller.setSetpoint(5);
         assertEquals(5, controller.calculate(0), epsilon);
         assertEquals(2.5, controller.calculate(2.5), epsilon);
@@ -36,7 +36,7 @@ public class PIDTests {
 
     @Test
     public void PIDIntegralControllerWorks() {
-        PID controller = new PID(0, 0.1, 0, 10);
+        PID controller = new PID(0, 0.1, 0, 0, 10);
         assertEquals(1, controller.calculate(0, 1), epsilon);
         assertEquals(1.9, controller.calculate(1, 1), epsilon);
         assertEquals(2.5, controller.calculate(4, 1), epsilon);
@@ -52,7 +52,7 @@ public class PIDTests {
 
     @Test
     public void PIDDerivativeControllerWorks() {
-        PID controller = new PID(0, 0, 0.1, 10);
+        PID controller = new PID(0, 0, 0.1, 0, 10);
         assertEquals(0, controller.calculate(0, 1), epsilon);
         assertEquals(-0.5, controller.calculate(5, 1), epsilon);
         assertEquals(0.1, controller.calculate(4, 1), epsilon);
@@ -66,16 +66,16 @@ public class PIDTests {
 
     @Test
     public void PIDAtSetpointWorks() {
-        PID controller = new PID(0, 0, 0, 100);
+        PID controller = new PID(0, 0, 0, 0, 100);
 
         controller.calculate(98);
-        assertEquals(false, controller.isAtSetpoint());
+        assertEquals(false, controller.atSetpoint());
         controller.calculate(99, 1);
-        assertEquals(true, controller.isAtSetpoint());
+        assertEquals(true, controller.atSetpoint());
 
         controller.setSetpointTolerance(0.01, 0.01);
-        assertEquals(false, controller.isAtSetpoint());
+        assertEquals(false, controller.atSetpoint());
         controller.calculate(99.5, 1);
-        assertEquals(true, controller.isAtSetpoint());
+        assertEquals(true, controller.atSetpoint());
     }
 }
