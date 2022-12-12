@@ -19,12 +19,26 @@ package org.chsrobotics.lib.math.filters;
 /** Common superclass for this library's filters. */
 public abstract class Filter {
     /**
-     * Adds the value to the window and calculates the current output of the filter
+     * Adds the value to the window and calculates the current output of the filter. If dt would be
+     * a required parameter for the filter, uses 20 milliseconds (the robot loop period).
      *
      * @param value The value to input to the filter.
      * @return The current output of the filter.
      */
     public abstract double calculate(double value);
+
+    /**
+     * Adds the value to the window and calculates the current output of the filter, with a change
+     * in time since the last call of this.
+     *
+     * <p>Some filters do not use time in their calculations, and this method is identical to {@code
+     * calculate()} for them.
+     *
+     * @param value the value to input to the filter.
+     * @param dtSeconds The change in time since the last call of the filter.
+     * @return The current output of the filter.
+     */
+    public abstract double calculate(double value, double dtSeconds);
 
     /** Resets the history of the filter. */
     public abstract void reset();
@@ -48,6 +62,11 @@ public abstract class Filter {
             @Override
             public double calculate(double value) {
                 return this.calculate(value) + other.calculate(value);
+            }
+
+            @Override
+            public double calculate(double value, double dtSeconds) {
+                return this.calculate(value, dtSeconds) + other.calculate(value, dtSeconds);
             }
 
             @Override
@@ -77,6 +96,11 @@ public abstract class Filter {
             @Override
             public double calculate(double value) {
                 return this.calculate(value) * scalar;
+            }
+
+            @Override
+            public double calculate(double value, double dtSeconds) {
+                return this.calculate(value, dtSeconds) * scalar;
             }
 
             @Override

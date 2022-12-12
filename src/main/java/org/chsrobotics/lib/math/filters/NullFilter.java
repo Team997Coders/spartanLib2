@@ -34,6 +34,12 @@ public class NullFilter extends Filter {
 
     @Override
     /** {@inheritDoc} */
+    public double calculate(double value, double dt) {
+        return calculate(value);
+    }
+
+    @Override
+    /** {@inheritDoc} */
     public void reset() {
         currentValue = 0;
     }

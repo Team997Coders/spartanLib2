@@ -159,6 +159,12 @@ public class PeakDetectionFilter extends Filter {
         return returnValue;
     }
 
+    @Override
+    /** {@inheritDoc} */
+    public double calculate(double value, double dtSeconds) {
+        return calculate(value);
+    }
+
     /** {@inheritDoc} */
     @Override
     public void reset() {

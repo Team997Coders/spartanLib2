@@ -48,6 +48,12 @@ public class ExponentialMovingAverage extends Filter {
 
     @Override
     /** {@inheritDoc} */
+    public double calculate(double value, double dtSeconds) {
+        return calculate(value);
+    }
+
+    @Override
+    /** {@inheritDoc} */
     public void reset() {
         lastOutput = 0;
     }

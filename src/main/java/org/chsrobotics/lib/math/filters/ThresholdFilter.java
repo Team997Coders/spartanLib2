@@ -50,6 +50,12 @@ public class ThresholdFilter extends Filter {
 
     @Override
     /** {@inheritDoc} */
+    public double calculate(double value, double dtSeconds) {
+        return calculate(value);
+    }
+
+    @Override
+    /** {@inheritDoc} */
     public void reset() {
         currentValue = 0;
     }

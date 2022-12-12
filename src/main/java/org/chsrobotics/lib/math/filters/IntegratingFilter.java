@@ -49,6 +49,7 @@ public class IntegratingFilter extends Filter {
         return calculate(value, 0.02);
     }
 
+    @Override
     /**
      * Adds the value to the filter and calculates the integral, using a provided dt.
      *

@@ -20,7 +20,8 @@ import java.util.Map;
 import org.chsrobotics.lib.math.filters.Filter;
 
 /**
- * A controller made of a sum of filters, each multiplied by a constant gain.
+ * A controller made of a sum of filters, each multiplied by a constant gain. Instead of the input
+ * value, the error between the setpoint and input is what is given to the filters.
  *
  * <p>For example, this can easily be turned into a simple PID controller by constructing as
  * follows:
@@ -92,7 +93,7 @@ public class ComposedFeedbackController implements FeedbackController {
         }
 
         for (Filter filter : terms.keySet()) {
-            currentValue += terms.get(filter) * filter.calculate(error);
+            currentValue += terms.get(filter) * filter.calculate(error, dtSeconds);
         }
 
         lastMeasurement = measurement;

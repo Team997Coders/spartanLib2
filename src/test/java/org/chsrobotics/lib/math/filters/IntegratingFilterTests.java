@@ -20,16 +20,27 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class RateLimiterTests {
+public class IntegratingFilterTests {
     private final double epsilon = 0.0001;
 
     @Test
-    public void RateLimiterFunctional() {
-        RateLimiter limiter = new RateLimiter(5);
+    public void IntegratingFilterWorksInfiniteWindow() {
+        IntegratingFilter filter = new IntegratingFilter(0);
 
-        assertEquals(2, limiter.calculate(2, 1), epsilon);
-        assertEquals(7, limiter.calculate(10, 1), epsilon);
-        assertEquals(2, limiter.calculate(-5, 1), epsilon);
-        assertEquals(0, limiter.calculate(0, 1), epsilon);
+        assertEquals(0, filter.calculate(0, 1), epsilon);
+        assertEquals(5, filter.calculate(10, 0.5), epsilon);
+        assertEquals(-5, filter.calculate(-5, 2), epsilon);
+    }
+
+    @Test
+    public void IntegratingFilterWorksFiniteWindow() {
+        IntegratingFilter filter = new IntegratingFilter(3);
+
+        assertEquals(4, filter.calculate(2, 2), epsilon);
+        assertEquals(2, filter.calculate(-4, 0.5), epsilon);
+        assertEquals(3, filter.calculate(1, 1), epsilon);
+
+        assertEquals(-1, filter.calculate(0, 1), epsilon);
+        assertEquals(2, filter.calculate(1, 1), epsilon);
     }
 }

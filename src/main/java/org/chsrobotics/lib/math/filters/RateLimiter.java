@@ -25,7 +25,6 @@ import edu.wpi.first.math.MathUtil;
  */
 public class RateLimiter extends Filter {
     private final double rateLimit;
-    private final double dtSeconds;
 
     private double lastValue = 0;
 
@@ -34,25 +33,20 @@ public class RateLimiter extends Filter {
      *
      * @param rateLimit Maximum rate-of-change of the reference, in units per second. If equal to
      *     zero, this will not apply any kind of rate limiting.
-     * @param dtSeconds Time, in seconds, expected between calls of this method.
-     */
-    public RateLimiter(double rateLimit, double dtSeconds) {
-        this.rateLimit = rateLimit;
-        this.dtSeconds = dtSeconds;
-    }
-
-    /**
-     * Constructs a RateLimiter with the default robot loop cycle time.
-     *
-     * @param rateLimit Maximum rate-of-change of the reference, in units per second.
      */
     public RateLimiter(double rateLimit) {
-        this(rateLimit, 0.02);
+        this.rateLimit = rateLimit;
     }
 
     @Override
     /** {@inheritDoc} */
     public double calculate(double value) {
+        return calculate(value, 0.02);
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public double calculate(double value, double dtSeconds) {
         double delta = value - lastValue;
 
         if (rateLimit != 0)

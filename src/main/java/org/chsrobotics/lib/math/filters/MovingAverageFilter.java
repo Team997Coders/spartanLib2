@@ -37,7 +37,13 @@ public class MovingAverageFilter extends Filter {
     /** {@inheritDoc} */
     public double calculate(double value) {
         series.addValue(value);
-        return series.getGeometricMean();
+        return series.getMean();
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public double calculate(double value, double dtSeconds) {
+        return calculate(value);
     }
 
     @Override

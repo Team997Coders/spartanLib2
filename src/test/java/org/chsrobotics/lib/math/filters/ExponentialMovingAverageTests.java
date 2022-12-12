@@ -20,16 +20,16 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class RateLimiterTests {
+public class ExponentialMovingAverageTests {
     private final double epsilon = 0.0001;
 
     @Test
-    public void RateLimiterFunctional() {
-        RateLimiter limiter = new RateLimiter(5);
+    public void ExponentialMovingAverageWorks() {
+        ExponentialMovingAverage movingAverage = new ExponentialMovingAverage(0.5);
 
-        assertEquals(2, limiter.calculate(2, 1), epsilon);
-        assertEquals(7, limiter.calculate(10, 1), epsilon);
-        assertEquals(2, limiter.calculate(-5, 1), epsilon);
-        assertEquals(0, limiter.calculate(0, 1), epsilon);
+        assertEquals(0.5, movingAverage.calculate(1), epsilon);
+        assertEquals(0.75, movingAverage.calculate(1), epsilon);
+        assertEquals(2.875, movingAverage.calculate(5), epsilon);
+        assertEquals(1.4375, movingAverage.calculate(0), epsilon);
     }
 }

@@ -51,6 +51,18 @@ public class ComposedFilter extends Filter {
 
     @Override
     /** {@inheritDoc} */
+    public double calculate(double value, double dtSeconds) {
+        double lastValue = value;
+
+        for (Filter filter : filters) {
+            lastValue = filter.calculate(lastValue, dtSeconds);
+        }
+        currentOuput = lastValue;
+        return currentOuput;
+    }
+
+    @Override
+    /** {@inheritDoc} */
     public void reset() {
         for (Filter filter : filters) {
             filter.reset();
