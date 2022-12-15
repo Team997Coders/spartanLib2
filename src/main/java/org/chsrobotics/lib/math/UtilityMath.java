@@ -18,6 +18,8 @@ package org.chsrobotics.lib.math;
 
 /** Various useful small math functions. */
 public class UtilityMath {
+    private static final double defaultProportionEpsilon = 1E-3;
+    private static final double defaultAbsoluteEpsilon = 1E-5;
 
     /**
      * Normalizes an angle in radians between 0 and 2 pi.
@@ -153,5 +155,102 @@ public class UtilityMath {
             }
             return outputs;
         }
+    }
+
+    /**
+     * Takes in a series of numbers and returns their arithmetic mean.
+     *
+     * @param inputs The values to average. If empty, this will return {@code 0}.
+     * @return The arithmetic mean of the values.
+     */
+    public static double arithmeticMean(double... inputs) {
+        if (inputs.length == 0) return 0;
+
+        double sum = 0;
+
+        for (double value : inputs) sum += value;
+
+        return sum / inputs.length;
+    }
+
+    /**
+     * Takes in a series of numbers and returns their geometric mean.
+     *
+     * @param inputs The values to average. If empty, this will return {@code 0}.
+     * @return The geometric mean of the values.
+     */
+    public static double geometricMean(double... inputs) {
+        if (inputs.length == 0) return 0;
+
+        double product = 1;
+
+        for (double value : inputs) product = product * value;
+
+        return Math.pow(product, 1 / (inputs.length));
+    }
+
+    /**
+     * Returns whether two values are equal to within an epsilon (calculated by their difference and
+     * expected from floating-point arithmetic). Essentially just "close enough".
+     *
+     * @param valueA The first number to compare.
+     * @param valueB The second number to compare.
+     * @param absoluteEpsilon The maximum allowed difference between the two to return true.
+     * @return Whether two values are "close enough" to each other.
+     */
+    public static boolean epsilonEqualsAbsolute(
+            double valueA, double valueB, double absoluteEpsilon) {
+        return (Math.abs(valueA - valueB) <= absoluteEpsilon);
+    }
+
+    /**
+     * Returns whether two values are equal to within an epsilon (calculated by their difference and
+     * expected from floating-point arithmetic). Essentially just "close enough".
+     *
+     * <p>Uses a default epsilon value of 1E-5 (0.00001).
+     *
+     * @param valueA The first number to compare.
+     * @param valueB The second number to compare.
+     * @return Whether two values are "close enough" to each other.
+     */
+    public static boolean epsilonEqualsAbsolute(double valueA, double valueB) {
+        return epsilonEqualsAbsolute(valueA, valueB, defaultAbsoluteEpsilon);
+    }
+
+    /**
+     * Returns whether two values are equal to within an epsilon (calculated multiplicatively and
+     * expected from floating-point arithmetic). Essentially just "close enough".
+     *
+     * <p>To avoid division by zero, if only one of the two terms is exactly equal to zero, this
+     * will return false. If *both* are exactly equal to zero, this returns true.
+     *
+     * @param valueA The first number to compare.
+     * @param valueB The second number to compare.
+     * @param proportionEpsilon If one value is bigger than another by a factor of at least {@code 1
+     *     + proportionEpsilon}, this will return false.
+     * @return Whether two values are "close enough" to each other.
+     */
+    public static boolean epsilonEqualsProportion(
+            double valueA, double valueB, double proportionEpsilon) {
+        if (valueA == 0 && valueB == 0) return true;
+        if (valueA == 0 || valueB == 0) return false;
+        return (Math.abs((valueA / valueB) - 1) <= proportionEpsilon);
+    }
+
+    /**
+     * Returns whether two values are equal to within an epsilon (calculated multiplicatively and
+     * expected from floating-point arithmetic). Essentially just "close enough".
+     *
+     * <p>Uses a default epsilon value of 1E-3 (0.001).
+     *
+     * <p>To avoid division by zero, if only one of the two terms is exactly equal to zero, this
+     * will return false. If *both* are exactly equal to zero, this returns true.
+     *
+     * @param valueA The first number to compare.
+     * @param valueB The second number to compare.
+     * @return Whether two values are "close enough" to each other.
+     */
+    public static boolean epsilonEqualsProportion(double valueA, double valueB) {
+        return epsilonEqualsProportion(valueA, valueB, defaultProportionEpsilon);
     }
 }
