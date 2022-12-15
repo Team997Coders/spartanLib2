@@ -33,10 +33,10 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Convenience wrapper class for telemetry/ logging with built-in logging for robot-agnostic data
@@ -77,6 +77,8 @@ public class HighLevelLogger {
 
     private static final NetworkTable sendables =
             NetworkTableInstance.getDefault().getTable("sendables");
+
+    private static final Map<String, Sendable> tablesToData = new HashMap<>();
 
     /**
      * Starts the HighLevelLogger.
@@ -135,10 +137,10 @@ public class HighLevelLogger {
      * class.
      */
     public static void logPeriodic() {
-        ArrayList<Command> commands = new ArrayList<>();
+        ArrayList<String> commands = new ArrayList<>();
 
         for (Command command : commandTimeMap.keySet()) {
-            commands.add(command);
+            commands.add(command.getName());
         }
 
         scheduledCommandsLogger.update(commands.toArray(new String[] {}));
@@ -212,20 +214,18 @@ public class HighLevelLogger {
      *
      * @param key String key to associate with the object.
      * @param data Sendable object.
-     * @throws InvalidParameterException If the Sendable data is null.
      */
-    public static synchronized void publishSendable(String key, Sendable data)
-            throws InvalidParameterException {
-        if (data == null) throw new InvalidParameterException("Data was null!");
-        NetworkTable dataTable = sendables.getSubTable(key);
-
-        SendableBuilderImpl builder = new SendableBuilderImpl();
-
-        builder.setTable(dataTable);
-        builder.startListeners();
-        SendableRegistry.publish(data, builder);
-
-        dataTable.getEntry("name").setString(key);
+    public static synchronized void publishSendable(String key, Sendable data) {
+        Sendable sddata = tablesToData.get(key);
+        if (sddata == null || sddata != data) {
+            tablesToData.put(key, data);
+            NetworkTable dataTable = sendables.getSubTable(key);
+            SendableBuilderImpl builder = new SendableBuilderImpl();
+            builder.setTable(dataTable);
+            SendableRegistry.publish(data, builder);
+            builder.startListeners();
+            dataTable.getEntry(".name").setString(key);
+        }
     }
 
     private static void logCommandInit(Command command) {
