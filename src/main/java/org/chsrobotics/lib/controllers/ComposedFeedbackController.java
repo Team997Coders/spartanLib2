@@ -16,6 +16,8 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.controllers;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.chsrobotics.lib.math.filters.Filter;
 
@@ -30,7 +32,7 @@ import org.chsrobotics.lib.math.filters.Filter;
  * new DifferentiatingFilter(), kD))}
  */
 public class ComposedFeedbackController implements FeedbackController {
-    private final Map<Filter, Double> terms;
+    private final List<Filter> filters;
 
     private double setpoint = 0;
 
@@ -47,16 +49,31 @@ public class ComposedFeedbackController implements FeedbackController {
     /**
      * Constructs a ComposedController.
      *
-     * @param terms A map of filters to their tuneable gains in the controller.
+     * @param terms A list of filters to combine into the controller.
      */
-    public ComposedFeedbackController(Map<Filter, Double> terms) {
-        this.terms = terms;
+    public ComposedFeedbackController(List<Filter> filters) {
+        this.filters = filters;
+    }
+
+    /**
+     * Constructs a ComposedController.
+     *
+     * @param values A map of filters to their gains.
+     */
+    public ComposedFeedbackController(Map<Filter, Double> values) {
+        ArrayList<Filter> filters = new ArrayList<>();
+
+        for (Filter filter : values.keySet()) {
+            filters.add(Filter.scalarMultiply(filter, values.get(filter)));
+        }
+
+        this.filters = filters;
     }
 
     @Override
     /** {@inheritDoc} */
     public void reset() {
-        for (Filter filter : terms.keySet()) {
+        for (Filter filter : filters) {
             filter.reset();
         }
     }
@@ -92,8 +109,8 @@ public class ComposedFeedbackController implements FeedbackController {
             velocity = ((setpoint - measurement) - (lastSetpoint - lastMeasurement)) / dtSeconds;
         }
 
-        for (Filter filter : terms.keySet()) {
-            currentValue += terms.get(filter) * filter.calculate(error, dtSeconds);
+        for (Filter filter : filters) {
+            currentValue += filter.calculate(error, dtSeconds);
         }
 
         lastMeasurement = measurement;

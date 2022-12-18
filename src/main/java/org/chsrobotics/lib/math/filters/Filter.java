@@ -54,30 +54,31 @@ public abstract class Filter {
     /**
      * Returns a filter of a sum of the outputs of two other filters.
      *
-     * @param other The other filter to sum.
+     * @param filterA The first filter to sum.
+     * @param filterB The other filter to sum.
      * @return A new, composed filter.
      */
-    public final Filter add(Filter other) {
+    public static final Filter add(Filter filterA, Filter filterB) {
         class AddedFilter extends Filter {
             @Override
             public double calculate(double value) {
-                return this.calculate(value) + other.calculate(value);
+                return filterA.calculate(value) + filterB.calculate(value);
             }
 
             @Override
             public double calculate(double value, double dtSeconds) {
-                return this.calculate(value, dtSeconds) + other.calculate(value, dtSeconds);
+                return filterA.calculate(value, dtSeconds) + filterB.calculate(value, dtSeconds);
             }
 
             @Override
             public void reset() {
-                this.reset();
-                other.reset();
+                filterA.reset();
+                filterB.reset();
             }
 
             @Override
             public double getCurrentOutput() {
-                return this.getCurrentOutput() + other.getCurrentOutput();
+                return filterA.getCurrentOutput() + filterB.getCurrentOutput();
             }
         }
 
@@ -85,32 +86,33 @@ public abstract class Filter {
     }
 
     /**
-     * Returns a new filter of the outputs of this filter multiplied by a scalar.
+     * Returns a new filter of the outputs of a filter multiplied by a scalar.
      *
+     * @param filter The filter to multiply.
      * @param scalar The scalar value to multiply by.
      * @return A new filter.
      */
-    public final Filter scalarMultiply(double scalar) {
+    public static Filter scalarMultiply(Filter filter, double scalar) {
         class MultipliedFilter extends Filter {
 
             @Override
             public double calculate(double value) {
-                return this.calculate(value) * scalar;
+                return filter.calculate(value) * scalar;
             }
 
             @Override
             public double calculate(double value, double dtSeconds) {
-                return this.calculate(value, dtSeconds) * scalar;
+                return filter.calculate(value, dtSeconds) * scalar;
             }
 
             @Override
             public void reset() {
-                this.reset();
+                filter.reset();
             }
 
             @Override
             public double getCurrentOutput() {
-                return this.getCurrentOutput() * scalar;
+                return filter.getCurrentOutput() * scalar;
             }
         }
         return new MultipliedFilter();
