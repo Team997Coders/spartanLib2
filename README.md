@@ -11,7 +11,7 @@
 
 Reusable robot code for FIRST Robotics Competition Team 997.
 
-<img src="https://scontent.fhio2-2.fna.fbcdn.net/v/t1.18169-9/17952471_1343549849025086_7905389874919796012_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=cukHnJHO-icAX89KacE&_nc_ht=scontent.fhio2-2.fna&oh=00_AfBSIvr6fqBbK5NVnG7MnDfyw8yNqmzuazWEnHRFbrOrJw&oe=638FFDEE" width="350" height="350" />
+<img src="https://github.com/Team997Coders/spartanLib2/raw/main/logo.jpeg" width="350" height="350" />
 
 <a href=https://www.chsrobotics.org>chsrobotics.org</a>
 </div>
