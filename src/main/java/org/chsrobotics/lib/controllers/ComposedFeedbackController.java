@@ -49,7 +49,7 @@ public class ComposedFeedbackController implements FeedbackController {
     /**
      * Constructs a ComposedController.
      *
-     * @param terms A list of filters to combine into the controller.
+     * @param filters A list of filters to combine into the controller.
      */
     public ComposedFeedbackController(List<Filter> filters) {
         this.filters = filters;
