@@ -16,57 +16,62 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math.filters;
 
-import edu.wpi.first.math.MathUtil;
-
 /**
- * Filter which constrains the maximum rate of change of a reference. Useful for ensuring that an
- * open-loop-controlled mechanism doesn't accelerate uncontrollably, or that measurements can't
- * change unreasonably fast.
+ * A filter composed of multiple filters, such that the output of a filter is the input of another,
+ * etc.
  */
-public class RateLimiter extends Filter {
-    private final double rateLimit;
+public class ComposedFilter extends Filter {
+    private final Filter[] filters;
 
-    private double lastValue = 0;
+    private double currentOuput = 0;
 
     /**
-     * Constructs a RateLimiter.
+     * Constructs a ComposedFilter.
      *
-     * @param rateLimit Maximum rate-of-change of the reference, in units per second. If equal to
-     *     zero, this will not apply any kind of rate limiting.
+     * @param filters Filters to compose into this filter. Filters at the start of the list are the
+     *     innermost (first) in evaluation, and filters at the end are the outermost (last) in
+     *     evaluation.
      */
-    public RateLimiter(double rateLimit) {
-        this.rateLimit = rateLimit;
+    public ComposedFilter(Filter... filters) {
+        this.filters = filters;
     }
 
     @Override
     /** {@inheritDoc} */
     public double calculate(double value) {
-        return calculate(value, 0.02);
+        double lastValue = value;
+
+        for (Filter filter : filters) {
+            lastValue = filter.calculate(lastValue);
+        }
+
+        currentOuput = lastValue;
+        return currentOuput;
     }
 
     @Override
     /** {@inheritDoc} */
     public double calculate(double value, double dtSeconds) {
-        double delta = value - lastValue;
+        double lastValue = value;
 
-        if (rateLimit != 0)
-            lastValue =
-                    lastValue
-                            + MathUtil.clamp(delta, -rateLimit * dtSeconds, rateLimit * dtSeconds);
-        else lastValue = value;
-
-        return lastValue;
+        for (Filter filter : filters) {
+            lastValue = filter.calculate(lastValue, dtSeconds);
+        }
+        currentOuput = lastValue;
+        return currentOuput;
     }
 
     @Override
     /** {@inheritDoc} */
     public void reset() {
-        lastValue = 0;
+        for (Filter filter : filters) {
+            filter.reset();
+        }
     }
 
     @Override
     /** {@inheritDoc} */
     public double getCurrentOutput() {
-        return lastValue;
+        return currentOuput;
     }
 }
