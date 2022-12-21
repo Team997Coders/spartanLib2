@@ -16,57 +16,46 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math.filters;
 
-import edu.wpi.first.math.MathUtil;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-/**
- * Filter which constrains the maximum rate of change of a reference. Useful for ensuring that an
- * open-loop-controlled mechanism doesn't accelerate uncontrollably, or that measurements can't
- * change unreasonably fast.
- */
-public class RateLimiter extends Filter {
-    private final double rateLimit;
-
-    private double lastValue = 0;
+/** Filter which computes the arithmetic mean of a stream of data. */
+public class MovingAverageFilter extends Filter {
+    private final DescriptiveStatistics series;
 
     /**
-     * Constructs a RateLimiter.
+     * Constructs a MovingAverageFilter.
      *
-     * @param rateLimit Maximum rate-of-change of the reference, in units per second. If equal to
-     *     zero, this will not apply any kind of rate limiting.
+     * @param window Number of values to look back when calculating the average. If zero or
+     *     negative, will be an indefinite window.
      */
-    public RateLimiter(double rateLimit) {
-        this.rateLimit = rateLimit;
+    public MovingAverageFilter(int window) {
+        if (window > 0) series = new DescriptiveStatistics(window);
+        else series = new DescriptiveStatistics();
     }
 
     @Override
     /** {@inheritDoc} */
     public double calculate(double value) {
-        return calculate(value, 0.02);
+        series.addValue(value);
+        return series.getMean();
     }
 
     @Override
     /** {@inheritDoc} */
     public double calculate(double value, double dtSeconds) {
-        double delta = value - lastValue;
-
-        if (rateLimit != 0)
-            lastValue =
-                    lastValue
-                            + MathUtil.clamp(delta, -rateLimit * dtSeconds, rateLimit * dtSeconds);
-        else lastValue = value;
-
-        return lastValue;
+        return calculate(value);
     }
 
     @Override
     /** {@inheritDoc} */
     public void reset() {
-        lastValue = 0;
+        series.clear();
     }
 
     @Override
     /** {@inheritDoc} */
     public double getCurrentOutput() {
-        return lastValue;
+        if (Double.isNaN(series.getMean())) return 0;
+        else return series.getMean();
     }
 }

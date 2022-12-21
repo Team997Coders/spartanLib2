@@ -16,57 +16,51 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math.filters;
 
-import edu.wpi.first.math.MathUtil;
-
 /**
- * Filter which constrains the maximum rate of change of a reference. Useful for ensuring that an
- * open-loop-controlled mechanism doesn't accelerate uncontrollably, or that measurements can't
- * change unreasonably fast.
+ * An IIR variation upon the moving average. Instead of moving outside of the window, a past value's
+ * influence over the filter's current value approaches but never reaches zero.
  */
-public class RateLimiter extends Filter {
-    private final double rateLimit;
+public class ExponentialMovingAverage extends Filter {
 
-    private double lastValue = 0;
+    private final double responseConstant;
+
+    private double lastOutput = 0;
 
     /**
-     * Constructs a RateLimiter.
+     * Constructs an ExponentialMovingAverage.
      *
-     * @param rateLimit Maximum rate-of-change of the reference, in units per second. If equal to
-     *     zero, this will not apply any kind of rate limiting.
+     * @param responseConstant Parameter dictating how quickly the filter should react to a new
+     *     value. Must be in [0,1] (inclusive). A {@code responseConstant} of 1 produces a filter
+     *     that instantly takes on the value of the input each cycle. A {@code responseConstant} of
+     *     0 gives a filter that never changes from its initial value (0 in this implementation).
      */
-    public RateLimiter(double rateLimit) {
-        this.rateLimit = rateLimit;
+    public ExponentialMovingAverage(double responseConstant) {
+        this.responseConstant = responseConstant;
     }
 
     @Override
     /** {@inheritDoc} */
     public double calculate(double value) {
-        return calculate(value, 0.02);
+        lastOutput = (value * responseConstant) + ((1 - responseConstant) * lastOutput);
+
+        return lastOutput;
     }
 
     @Override
     /** {@inheritDoc} */
     public double calculate(double value, double dtSeconds) {
-        double delta = value - lastValue;
-
-        if (rateLimit != 0)
-            lastValue =
-                    lastValue
-                            + MathUtil.clamp(delta, -rateLimit * dtSeconds, rateLimit * dtSeconds);
-        else lastValue = value;
-
-        return lastValue;
+        return calculate(value);
     }
 
     @Override
     /** {@inheritDoc} */
     public void reset() {
-        lastValue = 0;
+        lastOutput = 0;
     }
 
     @Override
     /** {@inheritDoc} */
     public double getCurrentOutput() {
-        return lastValue;
+        return lastOutput;
     }
 }

@@ -45,7 +45,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  * https://stackoverflow.com/questions/22583391/peak-signal-detection-in-realtime-timeseries-data/22640362#22640362
  * (version: 2020-11-08).
  */
-public class PeakDetectionFilter implements Filter {
+public class PeakDetectionFilter extends Filter {
     private final double threshold;
     private final double standardDeviationInfluence;
     private final double meanInfluence;
@@ -157,6 +157,12 @@ public class PeakDetectionFilter implements Filter {
         series.addValue(value);
 
         return returnValue;
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public double calculate(double value, double dtSeconds) {
+        return calculate(value);
     }
 
     /** {@inheritDoc} */
