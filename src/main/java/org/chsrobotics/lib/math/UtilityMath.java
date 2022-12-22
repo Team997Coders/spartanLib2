@@ -16,6 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math;
 
+import org.chsrobotics.lib.math.geometry.Vector3D;
 import org.chsrobotics.lib.util.Tuple2;
 
 /** Various useful small math functions. */
@@ -82,29 +83,27 @@ public class UtilityMath {
     }
 
     /**
-     * Interpolates a value between two points.
+     * Finds a midpoint between two other points in up to three-dimensional space.
      *
-     * <p>For more complex, multi-point interpolation, use the {@link MultiPointInterpolator} class.
-     *
-     * @param y0 The initial value of the dependent variable.
-     * @param x0 The initial value of the independent variable.
-     * @param y1 The final value of the dependent variable.
-     * @param x1 The final value of the independent variable.
-     * @param x The place at which to sample for the returned value.
-     * @return The linearly interpolated value.
+     * @param startpoint A vector with endpoint representing the starting point.
+     * @param endpoint A vector with endpoint representing the ending point.
+     * @param reference The place, in [0,1] (inclusive), to sample to find the midpoint.
+     * @return A new vector with endpoint representing the interpolated midpoint.
      */
-    public static double simpleLinearInterpolation(
-            double y0, double x0, double y1, double x1, double x) {
-        return y0 + ((x - x0) * (y1 - y0) / (x1 - x0));
-        // starting value, plus the distance of the sample from the start multiplied by
-        // the slope
+    public static Vector3D linearInterpolation(
+            Vector3D startpoint, Vector3D endpoint, double reference) {
+        return new Vector3D(
+                startpoint.getX() + ((endpoint.getX() - startpoint.getX()) * reference),
+                startpoint.getY() + ((endpoint.getY() - startpoint.getY()) * reference),
+                startpoint.getZ() + ((endpoint.getZ() - startpoint.getZ()) * reference));
     }
 
     /**
      * Scales a set of doubles symmetrically such that they sum to a desired number, while
      * maintaining the same ratio.
      *
-     * @param inputs An array of doubles. If empty, this will return an empty array.
+     * @param inputs An array of doubles. If empty, this will return an empty array. If this sums to
+     *     zero, this will return this.
      * @param desiredSum The desired sum, positive or negative, of the outputs. If equal to zero,
      *     this will return an array of zeros of length equal to the input's length.
      * @return An array of doubles with the same ratios between each other as the inputs.
@@ -117,6 +116,8 @@ public class UtilityMath {
         for (double value : inputs) {
             sum += value;
         }
+
+        if (sum == 0) return inputs;
 
         double[] outputs = new double[inputs.length];
 
@@ -185,8 +186,8 @@ public class UtilityMath {
     }
 
     /**
-     * Finds the zeros (x-intercepts) of a quadratic (parabolic or lower-order polynomial) function
-     * of the form y(x) = ax^2 + bx + c.
+     * Finds the zeros (x-intercepts) of a quadratic (second- or lower-order polynomial) function of
+     * the form y(x) = ax^2 + bx + c.
      *
      * <p>If there are no real-valued solutions, this will return {@code NaN} represented twice in
      * the Tuple.
@@ -239,7 +240,7 @@ public class UtilityMath {
 
         for (double value : inputs) product = product * value;
 
-        return Math.pow(product, 1 / (inputs.length));
+        return root(product, inputs.length);
     }
 
     /**
@@ -305,5 +306,141 @@ public class UtilityMath {
      */
     public static boolean epsilonEqualsProportion(double valueA, double valueB) {
         return epsilonEqualsProportion(valueA, valueB, defaultProportionEpsilon);
+    }
+
+    /**
+     * Returns the solution of the Pythagorean formula for the hypotenuse of a right triangle, with
+     * the leg lengths given.
+     *
+     * @param legLengthA The length of one of the legs.
+     * @param legLengthB The length of the other leg.
+     * @return The length of the hypotenuse.
+     */
+    public static double hypotenuse(double legLengthA, double legLengthB) {
+        return Math.pow((legLengthA * legLengthA) + (legLengthB * legLengthB), 0.5);
+    }
+
+    /**
+     * Returns the solution of the Pythagorean formula for a leg of a right triangle, with the other
+     * leg length and the hypotenuse length given.
+     *
+     * @param hypotenuse The length of the hypotenuse.
+     * @param legLengthA The length of one of the legs.
+     * @return The length of the hypotenuse.
+     */
+    public static double leg(double hypotenuse, double legLengthA) {
+        return Math.pow((hypotenuse * hypotenuse) - (legLengthA * legLengthA), 0.5);
+    }
+
+    /**
+     * Calculates a higher order root of a number.
+     *
+     * @param value The value to take the root of.
+     * @param order The order of the root (2 is a square root, 3 is a cubic root, etc).
+     * @return The positive root. If {@code order} is equal to 0, will return {@code NaN}.
+     */
+    public static double root(double value, int order) {
+        if (order == 0) return Double.NaN;
+        return Math.pow(value, 1 / ((double) order));
+    }
+
+    /**
+     * Takes the trigonometric cosecant of an angle.
+     *
+     * @param thetaRadians The angle. If coterminal to 0 or pi, this will return {@code NaN}.
+     * @return The cosecant of the angle.
+     */
+    public static double csc(double thetaRadians) {
+        if (Math.sin(thetaRadians) == 0) return Double.NaN;
+
+        return 1 / Math.sin(thetaRadians);
+    }
+
+    /**
+     * Takes the trigonometric secant of an angle.
+     *
+     * @param thetaRadians The angle. If coterminal to pi/2 or -pi/2, this will return {@code NaN}.
+     * @return The secant of the angle.
+     */
+    public static double sec(double thetaRadians) {
+        if (Math.cos(thetaRadians) == 0) return Double.NaN;
+
+        return 1 / Math.cos(thetaRadians);
+    }
+
+    /**
+     * Takes the trigonometric cotangent of an angle.
+     *
+     * @param thetaRadians The angle. If coterminal to 0 or pi, this will return {@code NaN}.
+     * @return
+     */
+    public static double cot(double thetaRadians) {
+        if (Math.sin(thetaRadians) == 0) return Double.NaN;
+
+        return Math.cos(thetaRadians) / Math.sin(thetaRadians);
+    }
+
+    /**
+     * Returns the trigonometric arccosecant (inverse cosecant) of a ratio of right triangle sides.
+     *
+     * @param ratio The ratio. If equal to 0, this will return {@code NaN}.
+     * @return The arccosecant of the ratio.
+     */
+    public static double acsc(double ratio) {
+        if (ratio == 0) return Double.NaN;
+
+        return Math.asin(1 / ratio);
+    }
+
+    /**
+     * Returns the trigonometric arcsecant (inverse secant) of a ratio of right triangle sides.
+     *
+     * @param ratio The ratio. If equal to 0, this will return {@code NaN}.
+     * @return The arcsecant of the ratio.
+     */
+    public static double asec(double ratio) {
+        if (ratio == 0) return Double.NaN;
+
+        return Math.acos(1 / ratio);
+    }
+
+    /**
+     * Returns the trigonometric arccotangent (inverse cotangent) of a ratio of right triangle
+     * sides.
+     *
+     * @param ratio The ratio. If equal to 0, this will return {@code NaN}.
+     * @return The arccotangent of the ratio.
+     */
+    public static double acot(double ratio) {
+        if (ratio == 0) return Double.NaN;
+
+        return Math.atan(1 / ratio);
+    }
+
+    /**
+     * Two-argument arccotangent (inverse cotangent). This is useful over the single argument
+     * arccotangent to avoid sign erasure (allowing returned angles in quadrange III instead of just
+     * I).
+     *
+     * @param x A side length.
+     * @param y A side length.
+     * @return The angle associated with the sides.
+     */
+    public static double acot2(double x, double y) {
+        return Math.atan2(y, x);
+    }
+
+    /**
+     * Returns if a number is between (inclusive) the boundary numbers. The boundaries do not have
+     * to be ordered.
+     *
+     * @param boundaryA The first boundary value.
+     * @param boundaryB The second boundary value.
+     * @param toCheck The value to check.
+     * @return Whether the value is between (inclusive) the boundary numbers in either ordering.
+     */
+    public static boolean inRange(double boundaryA, double boundaryB, double toCheck) {
+        return (((boundaryA <= toCheck) && (toCheck <= boundaryB))
+                || ((boundaryA >= toCheck) && (toCheck >= boundaryB)));
     }
 }
