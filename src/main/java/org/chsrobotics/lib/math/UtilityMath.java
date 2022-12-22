@@ -21,8 +21,8 @@ import org.chsrobotics.lib.util.Tuple2;
 
 /** Various useful small math functions. */
 public class UtilityMath {
-    private static final double defaultProportionEpsilon = 1E-3;
-    private static final double defaultAbsoluteEpsilon = 1E-5;
+    public static final double defaultProportionEpsilon = 1E-3;
+    public static final double defaultAbsoluteEpsilon = 1E-5;
 
     /**
      * Normalizes an angle in radians between 0 and 2 pi.
