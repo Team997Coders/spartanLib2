@@ -14,7 +14,7 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.math;
+package org.chsrobotics.lib.math.filters;
 
 import java.security.InvalidParameterException;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
@@ -45,7 +45,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  * https://stackoverflow.com/questions/22583391/peak-signal-detection-in-realtime-timeseries-data/22640362#22640362
  * (version: 2020-11-08).
  */
-public class PeakDetectionFilter implements Filter {
+public class PeakDetectionFilter extends Filter {
     private final double threshold;
     private final double standardDeviationInfluence;
     private final double meanInfluence;
@@ -77,7 +77,7 @@ public class PeakDetectionFilter implements Filter {
             double standardDeviationInfluence,
             double meanInfluence,
             double minimumDelta) {
-        if (window < 1) {
+        if (window < 2) {
             throw new InvalidParameterException(
                     "Window of PeakDetectionFilter must be greater than 1 for meaningful answers!");
         }
@@ -157,6 +157,12 @@ public class PeakDetectionFilter implements Filter {
         series.addValue(value);
 
         return returnValue;
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public double calculate(double value, double dtSeconds) {
+        return calculate(value);
     }
 
     /** {@inheritDoc} */

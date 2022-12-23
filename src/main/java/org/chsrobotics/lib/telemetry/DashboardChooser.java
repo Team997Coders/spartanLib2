@@ -51,7 +51,9 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
      * choosers.
      */
     public interface Option {
-        String getDisplayName();
+        default String getDisplayName() {
+            return toString();
+        }
     }
 
     /** Interface which defines a lambda for receiving DashboardChooser updates. */

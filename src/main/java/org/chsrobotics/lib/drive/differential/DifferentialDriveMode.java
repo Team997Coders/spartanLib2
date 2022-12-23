@@ -14,26 +14,14 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.math;
+package org.chsrobotics.lib.drive.differential;
 
-/** Common interface for this library's filters. */
-public interface Filter {
+/** Represents a mapping of joystick inputs to left and right drivetrain motor inputs. */
+public interface DifferentialDriveMode {
     /**
-     * Adds the value to the window and calculates the current output of the filter
+     * Calculate the drive output using the current joystick inputs.
      *
-     * @param value The value to input to the filter.
-     * @return The current output of the filter.
+     * @return The input, mapped to left and right side inputs.
      */
-    double calculate(double value);
-
-    /** Resets the history of the filter. */
-    void reset();
-
-    /**
-     * Returns the current output of the filter without updating with a new value.
-     *
-     * @return The current output of the filter (0 if no values have been given to {@code
-     *     calculate()}).
-     */
-    double getCurrentOutput();
+    DifferentialDrivetrainInput execute();
 }

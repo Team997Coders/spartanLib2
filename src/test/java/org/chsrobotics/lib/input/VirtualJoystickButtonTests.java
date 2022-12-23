@@ -31,31 +31,31 @@ public class VirtualJoystickButtonTests {
         VirtualJoystickButton buttonB = new VirtualJoystickButton(axis, -0.5, 0.5, true);
 
         value = 0.5;
-        assertEquals(true, buttonA.isPressed());
-        assertEquals(false, buttonB.isPressed());
+        assertEquals(true, buttonA.get());
+        assertEquals(false, buttonB.get());
 
         value = 0.5001;
-        assertEquals(false, buttonA.isPressed());
-        assertEquals(true, buttonB.isPressed());
+        assertEquals(false, buttonA.get());
+        assertEquals(true, buttonB.get());
 
         value = -0.5;
-        assertEquals(true, buttonA.isPressed());
-        assertEquals(false, buttonB.isPressed());
+        assertEquals(true, buttonA.get());
+        assertEquals(false, buttonB.get());
 
         value = -0.5001;
-        assertEquals(false, buttonA.isPressed());
-        assertEquals(true, buttonB.isPressed());
+        assertEquals(false, buttonA.get());
+        assertEquals(true, buttonB.get());
 
         value = -0.5;
-        assertEquals(true, buttonA.isPressed());
-        assertEquals(false, buttonB.isPressed());
+        assertEquals(true, buttonA.get());
+        assertEquals(false, buttonB.get());
 
         value = 0;
-        assertEquals(true, buttonA.isPressed());
-        assertEquals(false, buttonB.isPressed());
+        assertEquals(true, buttonA.get());
+        assertEquals(false, buttonB.get());
 
         value = 1;
-        assertEquals(false, buttonA.isPressed());
-        assertEquals(true, buttonB.isPressed());
+        assertEquals(false, buttonA.get());
+        assertEquals(true, buttonB.get());
     }
 }

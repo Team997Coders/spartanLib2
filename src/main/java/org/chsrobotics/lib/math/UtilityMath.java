@@ -16,7 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math;
 
-import java.security.InvalidParameterException;
+import org.chsrobotics.lib.util.Tuple2;
 
 /** Various useful small math functions. */
 public class UtilityMath {
@@ -99,19 +99,44 @@ public class UtilityMath {
     }
 
     /**
+     * Scales a set of doubles symmetrically such that they sum to a desired number, while
+     * maintaining the same ratio.
+     *
+     * @param inputs An array of doubles. If empty, this will return an empty array.
+     * @param desiredSum The desired sum, positive or negative, of the outputs. If equal to zero,
+     *     this will return an array of zeros of length equal to the input's length.
+     * @return An array of doubles with the same ratios between each other as the inputs.
+     */
+    public static double[] scaleToSum(double[] inputs, double desiredSum) {
+        if (inputs.length == 0) return inputs;
+        if (desiredSum == 0) return new double[inputs.length];
+
+        double sum = 0;
+        for (double value : inputs) {
+            sum += value;
+        }
+
+        double[] outputs = new double[inputs.length];
+
+        double scalingFactor = desiredSum / sum;
+
+        for (int i = 0; i < inputs.length; i++) {
+            outputs[i] = inputs[i] * (scalingFactor);
+        }
+
+        return outputs;
+    }
+
+    /**
      * Scales a set of doubles symmetrically to ensure that none of them exceed a maximum absolute
      * value, while still maintaining the same ratio.
      *
-     * @param inputs An array of the input values.
+     * @param inputs An array of the input values. If empty, this will return an empty array.
      * @param maxAbsoluteValue The maximum absolute value allowed for an output.
      * @return An array of the scaled values, in the same order as they were input.
-     * @throws InvalidParameterException If the array is empty.
      */
-    public static double[] normalizeSet(double[] inputs, double maxAbsoluteValue)
-            throws InvalidParameterException {
-        if (inputs.length == 0) {
-            throw new InvalidParameterException("Values must contain an element!");
-        }
+    public static double[] normalizeSet(double[] inputs, double maxAbsoluteValue) {
+        if (inputs.length == 0) return inputs;
         int highestIndex = 0; // find the largest absolute value element in the list
         for (int i = 0; i < inputs.length; i++) {
             if (Math.abs(inputs[highestIndex]) < Math.abs(inputs[i])) {
@@ -130,5 +155,56 @@ public class UtilityMath {
             }
             return outputs;
         }
+    }
+
+    /**
+     * Constrains a value between two other numbers.
+     *
+     * @param ceiling The maximum allowed value of the output.
+     * @param floor The minimum allowed value of the output.
+     * @param value The value to constrain.
+     * @return The constrained value.
+     */
+    public static double clamp(double ceiling, double floor, double value) {
+        if (value > ceiling) return ceiling;
+        else if (value < floor) return floor;
+        else return value;
+    }
+
+    /**
+     * Constrains a value under a maximum absolute value.
+     *
+     * @param maxValueAbs The maximum allowed absolute value of the output.
+     * @param value The value to constrain.
+     * @return The constrained value.
+     */
+    public static double clamp(double maxValueAbs, double value) {
+        return clamp(Math.abs(maxValueAbs), -Math.abs(maxValueAbs), value);
+    }
+
+    /**
+     * Finds the zeros (x-intercepts) of a quadratic (parabolic or lower-order polynomial) function
+     * of the form y(x) = ax^2 + bx + c.
+     *
+     * <p>If there are no real-valued solutions, this will return {@code NaN} represented twice in
+     * the Tuple.
+     *
+     * <p>If there is one real-valued solution, this will return that solution represented twice in
+     * the Tuple.
+     *
+     * @param coeffA The coefficient of the ax^2 term of the quadratic polynomial.
+     * @param coeffB The coefficient of the bx term of the quadratic polynomial.
+     * @param coeffC The coefficient of the c (constant) term of the quadratic polynomial.
+     * @return A Tuple2 holding up to 2 unique real solutions (if they exist).
+     */
+    public static Tuple2<Double> quadraticZeros(double coeffA, double coeffB, double coeffC) {
+        double sqrtSafety = (coeffB * coeffB) - (4 * coeffA * coeffC);
+
+        if (sqrtSafety < 0) return Tuple2.of(Double.NaN, Double.NaN);
+
+        double pos = (-coeffB + Math.pow(sqrtSafety, 0.5)) / (2 * coeffA);
+        double neg = (-coeffB - Math.pow(sqrtSafety, 0.5)) / (2 * coeffA);
+
+        return Tuple2.of(pos, neg);
     }
 }

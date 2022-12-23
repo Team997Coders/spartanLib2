@@ -14,29 +14,27 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.input;
+package org.chsrobotics.lib.drive.differential;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for the JoystickButton. */
-public class JoystickButtonTests {
-    private boolean value;
-    private final JoystickButton button = new JoystickButton(() -> value, "test", false);
-
-    @Before
-    public void reset() {
-        value = false;
-        button.get();
+public class DifferentialDriveInputTests {
+    @Test
+    public void differentialMoveAdd() {
+        DifferentialDrivetrainInput actual =
+                new DifferentialDrivetrainInput(0.5, 0.5)
+                        .add(new DifferentialDrivetrainInput(0.5, -0.2));
+        DifferentialDrivetrainInput expected = new DifferentialDrivetrainInput(1.0, 0.3);
+        assertEquals(actual, expected);
     }
 
     @Test
-    public void JoystickButtonIsPressedWorks() {
-        assertEquals(false, button.get());
-
-        value = true;
-        assertEquals(true, button.get());
+    public void differentialMoveMultiply() {
+        DifferentialDrivetrainInput actual =
+                new DifferentialDrivetrainInput(1.0, 0.0).multiply(-0.5);
+        DifferentialDrivetrainInput expected = new DifferentialDrivetrainInput(-0.5, 0.0);
+        assertEquals(actual, expected);
     }
 }

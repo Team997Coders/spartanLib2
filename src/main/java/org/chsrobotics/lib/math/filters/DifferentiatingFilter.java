@@ -14,18 +14,19 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.math;
+package org.chsrobotics.lib.math.filters;
 
 /**
  * A filter that returns the rate of change (derivative) of a stream of data.
  *
  * <p>Approximated with finite timesteps.
  */
-public class DifferentiatingFilter implements Filter {
+public class DifferentiatingFilter extends Filter {
     private final double defaultRobotPeriodSeconds = 0.02;
     private double lastValue = 0;
     private double currentDeriv = 0;
 
+    @Override
     /**
      * Calculates the rate of change (derivative) of a value relative to the filter's previous
      * input, using a given change in time.
@@ -41,9 +42,9 @@ public class DifferentiatingFilter implements Filter {
      * @return The rate of change, in units/second, between the current {@code value} and the
      *     previous {@code value}.
      */
-    public double calculate(double value, double dt) {
-        if (dt == 0) return 0;
-        currentDeriv = (value - lastValue) / dt;
+    public double calculate(double value, double dtSeconds) {
+        if (dtSeconds == 0) return 0;
+        currentDeriv = (value - lastValue) / dtSeconds;
         lastValue = value;
         return currentDeriv;
     }

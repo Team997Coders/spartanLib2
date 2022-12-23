@@ -14,29 +14,22 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.input;
+package org.chsrobotics.lib.math.filters;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for the JoystickButton. */
-public class JoystickButtonTests {
-    private boolean value;
-    private final JoystickButton button = new JoystickButton(() -> value, "test", false);
-
-    @Before
-    public void reset() {
-        value = false;
-        button.get();
-    }
+public class RateLimiterTests {
+    private final double epsilon = 0.0001;
 
     @Test
-    public void JoystickButtonIsPressedWorks() {
-        assertEquals(false, button.get());
+    public void RateLimiterFunctional() {
+        RateLimiter limiter = new RateLimiter(5);
 
-        value = true;
-        assertEquals(true, button.get());
+        assertEquals(2, limiter.calculate(2, 1), epsilon);
+        assertEquals(7, limiter.calculate(10, 1), epsilon);
+        assertEquals(2, limiter.calculate(-5, 1), epsilon);
+        assertEquals(0, limiter.calculate(0, 1), epsilon);
     }
 }
