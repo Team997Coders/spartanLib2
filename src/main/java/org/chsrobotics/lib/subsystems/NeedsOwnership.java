@@ -17,7 +17,7 @@ If not, see <https://www.gnu.org/licenses/>.
 package org.chsrobotics.lib.subsystems;
 
 /**
- * Annotation to indicate that a particular (subsystem) method may be unsafe to call if there is a
- * command requiring this subsystem (except from within that command).
+ * Annotation to indicate that a particular (subsystem) method may be unsafe to call outside of a
+ * command requiring this subsystem.
  */
 public @interface NeedsOwnership {}
