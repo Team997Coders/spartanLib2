@@ -52,6 +52,14 @@ public class LEDStrip {
         this.animation = animation;
     }
 
+    /**
+     * @param frame
+     */
+    public void setFrame(LEDAnimationFrame frame) {
+        animationIndex = 0;
+        this.animation = new LEDAnimation(frame);
+    }
+
     /** */
     public void update() {
         if (animation.numberOfFrames() != 0) {

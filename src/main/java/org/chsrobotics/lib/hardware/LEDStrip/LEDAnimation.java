@@ -58,8 +58,7 @@ public class LEDAnimation {
     }
 
     /**
-     * @param length
-     * @param step
+     * @param size
      * @param colorA
      * @param colorB
      * @return
@@ -129,5 +128,22 @@ public class LEDAnimation {
         }
 
         return new LEDAnimation(lFrames);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof LEDAnimation) {
+            LEDAnimation rhs = (LEDAnimation) other;
+            if (this.numberOfFrames() == rhs.numberOfFrames()) {
+                boolean sameSoFar = true;
+
+                for (int i = 0; i < this.numberOfFrames(); i++) {
+                    if (sameSoFar) sameSoFar = this.getFrame(i).equals(rhs.getFrame(i));
+                }
+
+                return sameSoFar;
+            } else return false;
+
+        } else return false;
     }
 }

@@ -16,8 +16,6 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.LEDStrip;
 
-import java.security.InvalidParameterException;
-
 /** */
 public class RGBColor {
     public final int r;
@@ -75,27 +73,6 @@ public class RGBColor {
      */
     public RGBColor transformMinus(RGBColor other) {
         return new RGBColor(this.r - other.r, this.g - other.g, this.b - other.b);
-    }
-
-    /**
-     * @param hex
-     * @return
-     * @throws InvalidParameterException
-     */
-    public static RGBColor fromHex(String hex) throws InvalidParameterException {
-        if (hex.length() < 6) {
-            throw new InvalidParameterException(
-                    "Hexadecimal value must contain six or more characters!");
-        }
-
-        String stringR = new String(new char[] {hex.charAt(0), hex.charAt(1)});
-        String stringG = new String(new char[] {hex.charAt(2), hex.charAt(3)});
-        String stringB = new String(new char[] {hex.charAt(4), hex.charAt(5)});
-
-        return new RGBColor(
-                Integer.valueOf(stringR, 16),
-                Integer.valueOf(stringG, 16),
-                Integer.valueOf(stringB, 16));
     }
 
     @Override

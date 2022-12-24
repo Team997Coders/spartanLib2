@@ -88,15 +88,15 @@ public class LEDAnimationFrame {
      * @return
      */
     public LEDAnimationFrame offset(int step) {
-        if (step >= pixels.length) return this;
+        int modStep = step % pixels.length;
 
         RGBColor[] output = new RGBColor[pixels.length];
 
         for (int i = 0; i < pixels.length; i++) {
-            int newIndex = i + step;
+            int newIndex = i + modStep;
 
-            if (newIndex > pixels.length) newIndex = i - pixels.length;
-            if (newIndex < 0) newIndex = pixels.length - i;
+            if (newIndex >= pixels.length) newIndex = newIndex - pixels.length;
+            else if (newIndex < 0) newIndex = newIndex + pixels.length;
 
             output[newIndex] = pixels[i];
         }
@@ -104,6 +104,10 @@ public class LEDAnimationFrame {
         return new LEDAnimationFrame(output);
     }
 
+    /**
+     * @param other
+     * @return
+     */
     public LEDAnimationFrame add(LEDAnimationFrame other) {
         RGBColor[] colors = new RGBColor[this.pixels.length + other.pixels.length];
 
@@ -140,5 +144,22 @@ public class LEDAnimationFrame {
         }
 
         return new LEDAnimationFrame(colors);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof LEDAnimationFrame) {
+            LEDAnimationFrame rhs = (LEDAnimationFrame) other;
+            if (this.numberOfPixels() == rhs.numberOfPixels()) {
+                boolean sameSoFar = true;
+
+                for (int i = 0; i < this.numberOfPixels(); i++) {
+                    if (sameSoFar) sameSoFar = this.getPixel(i).equals(rhs.getPixel(i));
+                }
+
+                return sameSoFar;
+            } else return false;
+
+        } else return false;
     }
 }
