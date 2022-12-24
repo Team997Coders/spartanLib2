@@ -17,8 +17,8 @@ If not, see <https://www.gnu.org/licenses/>.
 package org.chsrobotics.lib.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.function.Supplier;
+import org.chsrobotics.lib.subsystems.SpartanSubsystem;
 
 /**
  * Class for the command-based structure which allows for method execution at beginning and end of
@@ -43,7 +43,10 @@ public class ConditionalEndRunnableCommand extends CommandBase {
      * @param toRequire Any subsystems required to be free for the methods.
      */
     public ConditionalEndRunnableCommand(
-            Runnable init, Runnable end, Supplier<Boolean> endConditional, Subsystem... toRequire) {
+            Runnable init,
+            Runnable end,
+            Supplier<Boolean> endConditional,
+            SpartanSubsystem... toRequire) {
         this.endConditional = endConditional;
 
         this.init = init;

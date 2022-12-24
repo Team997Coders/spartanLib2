@@ -18,10 +18,10 @@ package org.chsrobotics.lib.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import org.chsrobotics.lib.subsystems.SpartanSubsystem;
 import org.chsrobotics.lib.util.Tuple2;
 
 /**
@@ -69,7 +69,7 @@ public class ConditionalConsumerCommand<T> extends CommandBase {
             T onFalse,
             Supplier<Boolean> conditional,
             double durationSeconds,
-            Subsystem... toRequire) {
+            SpartanSubsystem... toRequire) {
         isBiConsumer = false;
 
         this.consumer = consumer;
@@ -106,7 +106,7 @@ public class ConditionalConsumerCommand<T> extends CommandBase {
             T onTrue,
             T onFalse,
             Supplier<Boolean> conditional,
-            Subsystem... toRequire) {
+            SpartanSubsystem... toRequire) {
         this(consumer, onTrue, onFalse, conditional, -1, toRequire);
     }
 
@@ -128,7 +128,7 @@ public class ConditionalConsumerCommand<T> extends CommandBase {
             Tuple2<T> onFalse,
             double durationSeconds,
             Supplier<Boolean> conditional,
-            Subsystem... toRequire) {
+            SpartanSubsystem... toRequire) {
         isBiConsumer = true;
 
         this.biConsumer = biConsumer;
@@ -163,7 +163,7 @@ public class ConditionalConsumerCommand<T> extends CommandBase {
             Tuple2<T> onTrue,
             Tuple2<T> onFalse,
             Supplier<Boolean> conditional,
-            Subsystem... toRequire) {
+            SpartanSubsystem... toRequire) {
         this(consumer, onTrue, onFalse, -1, conditional, toRequire);
     }
 

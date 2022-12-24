@@ -18,8 +18,8 @@ package org.chsrobotics.lib.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.function.Supplier;
+import org.chsrobotics.lib.subsystems.SpartanSubsystem;
 
 /**
  * Class to allow execution of methods (with no parameters) upon boolean state change, in the
@@ -58,7 +58,7 @@ public class ConditionalRunnableCommand extends CommandBase {
             Runnable onFalse,
             Supplier<Boolean> conditional,
             double durationSeconds,
-            Subsystem... toRequire) {
+            SpartanSubsystem... toRequire) {
         this.conditional = conditional;
 
         this.onTrue = onTrue;
@@ -85,7 +85,7 @@ public class ConditionalRunnableCommand extends CommandBase {
             Runnable onTrue,
             Runnable onFalse,
             Supplier<Boolean> conditional,
-            Subsystem... toRequire) {
+            SpartanSubsystem... toRequire) {
         this(onTrue, onFalse, conditional, -1, toRequire);
     }
 

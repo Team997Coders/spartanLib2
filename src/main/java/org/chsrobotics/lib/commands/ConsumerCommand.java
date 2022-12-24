@@ -18,9 +18,9 @@ package org.chsrobotics.lib.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import org.chsrobotics.lib.subsystems.SpartanSubsystem;
 import org.chsrobotics.lib.util.Tuple2;
 
 /**
@@ -59,7 +59,11 @@ public class ConsumerCommand<T> extends CommandBase {
      * @param toRequire Any subsystems that need to be freed for the method.
      */
     public ConsumerCommand(
-            Consumer<T> consumer, T init, T end, double durationSeconds, Subsystem... toRequire) {
+            Consumer<T> consumer,
+            T init,
+            T end,
+            double durationSeconds,
+            SpartanSubsystem... toRequire) {
         isBiConsumer = false;
 
         this.consumer = consumer;
@@ -84,7 +88,7 @@ public class ConsumerCommand<T> extends CommandBase {
      *     initialized. If {@code null}, will not be fed.
      * @param toRequire Any subsystems that need to be freed for the method.
      */
-    public ConsumerCommand(Consumer<T> consumer, T init, Subsystem... toRequire) {
+    public ConsumerCommand(Consumer<T> consumer, T init, SpartanSubsystem... toRequire) {
         this(consumer, init, null, 0, toRequire);
     }
 
@@ -106,7 +110,7 @@ public class ConsumerCommand<T> extends CommandBase {
             Tuple2<T> init,
             Tuple2<T> end,
             double durationSeconds,
-            Subsystem... toRequire) {
+            SpartanSubsystem... toRequire) {
 
         isBiConsumer = true;
 
@@ -133,7 +137,8 @@ public class ConsumerCommand<T> extends CommandBase {
      *     should match the order of parameters in the actual method.
      * @param toRequire Any subsystems required to be freed for the method.
      */
-    public ConsumerCommand(BiConsumer<T, T> biConsumer, Tuple2<T> init, Subsystem... toRequire) {
+    public ConsumerCommand(
+            BiConsumer<T, T> biConsumer, Tuple2<T> init, SpartanSubsystem... toRequire) {
         this(biConsumer, init, null, 0, toRequire);
     }
 

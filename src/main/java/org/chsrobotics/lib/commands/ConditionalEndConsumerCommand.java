@@ -17,10 +17,10 @@ If not, see <https://www.gnu.org/licenses/>.
 package org.chsrobotics.lib.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import org.chsrobotics.lib.subsystems.SpartanSubsystem;
 import org.chsrobotics.lib.util.Tuple2;
 
 /**
@@ -60,7 +60,7 @@ public class ConditionalEndConsumerCommand<T> extends CommandBase {
             T init,
             T end,
             Supplier<Boolean> endConditional,
-            Subsystem... toRequire) {
+            SpartanSubsystem... toRequire) {
         isBiConsumer = false;
 
         this.consumer = consumer;
@@ -93,7 +93,7 @@ public class ConditionalEndConsumerCommand<T> extends CommandBase {
             Tuple2<T> init,
             Tuple2<T> end,
             Supplier<Boolean> endConditional,
-            Subsystem... toRequire) {
+            SpartanSubsystem... toRequire) {
         isBiConsumer = true;
 
         this.biConsumer = biConsumer;
