@@ -1,13 +1,15 @@
 plugins {
 	id "java"
-	id "edu.wpi.first.GradleRIO" version "2022.4.1"
+	id "edu.wpi.first.GradleRIO" version "2023.1.1-beta-7"
 	id 'com.diffplug.spotless' version '6.11.0'
 	id 'maven-publish'
 	id 'signing'
 }
 
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+//def includeDesktopSupport = false
 
 dependencies {
 	implementation wpi.java.deps.wpilib()

@@ -31,31 +31,31 @@ public class VirtualJoystickButtonTests {
         VirtualJoystickButton buttonB = new VirtualJoystickButton(axis, -0.5, 0.5, true);
 
         value = 0.5;
-        assertEquals(true, buttonA.get());
-        assertEquals(false, buttonB.get());
+        assertEquals(true, buttonA.getAsBoolean());
+        assertEquals(false, buttonB.getAsBoolean());
 
         value = 0.5001;
-        assertEquals(false, buttonA.get());
-        assertEquals(true, buttonB.get());
+        assertEquals(false, buttonA.getAsBoolean());
+        assertEquals(true, buttonB.getAsBoolean());
 
         value = -0.5;
-        assertEquals(true, buttonA.get());
-        assertEquals(false, buttonB.get());
+        assertEquals(true, buttonA.getAsBoolean());
+        assertEquals(false, buttonB.getAsBoolean());
 
         value = -0.5001;
-        assertEquals(false, buttonA.get());
-        assertEquals(true, buttonB.get());
+        assertEquals(false, buttonA.getAsBoolean());
+        assertEquals(true, buttonB.getAsBoolean());
 
         value = -0.5;
-        assertEquals(true, buttonA.get());
-        assertEquals(false, buttonB.get());
+        assertEquals(true, buttonA.getAsBoolean());
+        assertEquals(false, buttonB.getAsBoolean());
 
         value = 0;
-        assertEquals(true, buttonA.get());
-        assertEquals(false, buttonB.get());
+        assertEquals(true, buttonA.getAsBoolean());
+        assertEquals(false, buttonB.getAsBoolean());
 
         value = 1;
-        assertEquals(false, buttonA.get());
-        assertEquals(true, buttonB.get());
+        assertEquals(false, buttonA.getAsBoolean());
+        assertEquals(true, buttonB.getAsBoolean());
     }
 }
