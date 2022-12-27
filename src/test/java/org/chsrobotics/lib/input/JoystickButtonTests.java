@@ -18,13 +18,15 @@ package org.chsrobotics.lib.input;
 
 import static org.junit.Assert.assertEquals;
 
+import edu.wpi.first.wpilibj.event.EventLoop;
 import org.junit.Before;
 import org.junit.Test;
 
 /** Tests for the JoystickButton. */
 public class JoystickButtonTests {
     private boolean value;
-    private final JoystickButton button = new JoystickButton(() -> value, "test", false);
+    private final JoystickButton button =
+            new JoystickButton(new EventLoop(), () -> value, "test", false);
 
     @Before
     public void reset() {

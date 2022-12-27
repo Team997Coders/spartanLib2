@@ -18,6 +18,7 @@ package org.chsrobotics.lib.input;
 
 import static org.junit.Assert.assertEquals;
 
+import edu.wpi.first.wpilibj.event.EventLoop;
 import org.junit.Test;
 
 public class VirtualJoystickButtonTests {
@@ -27,8 +28,11 @@ public class VirtualJoystickButtonTests {
     /** Tests for the VirtualJoystickButton. */
     public void VirtualJoystickButtonWorksAsExpected() {
         JoystickAxis axis = new JoystickAxis(() -> value, "test", false);
-        VirtualJoystickButton buttonA = new VirtualJoystickButton(axis, -0.5, 0.5, false);
-        VirtualJoystickButton buttonB = new VirtualJoystickButton(axis, -0.5, 0.5, true);
+
+        VirtualJoystickButton buttonA =
+                new VirtualJoystickButton(new EventLoop(), axis, -0.5, 0.5, false);
+        VirtualJoystickButton buttonB =
+                new VirtualJoystickButton(new EventLoop(), axis, -0.5, 0.5, true);
 
         value = 0.5;
         assertEquals(true, buttonA.getAsBoolean());
