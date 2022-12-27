@@ -18,6 +18,7 @@ concurrency:
 jobs:
   build-docs:
     runs-on: ubuntu-latest
+    container: wpilib/roborio-cross-ubuntu:2023-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
