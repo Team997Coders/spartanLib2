@@ -175,7 +175,7 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
     public void initSendable(NTSendableBuilder builder) {
         builder.setSmartDashboardType("String Chooser");
         // sets the channel
-        builder.getEntry(".instance").setDouble(channel);
+        builder.getTable().getEntry(".instance").setDouble(channel);
         // set the default option
         builder.addStringProperty("default", () -> defaultOption, null);
         // populate the options
@@ -195,7 +195,7 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
                 null);
         mutex.lock();
         try {
-            activeEntries.add(builder.getEntry("active"));
+            activeEntries.add(builder.getTable().getEntry("active"));
         } finally {
             mutex.unlock();
         }

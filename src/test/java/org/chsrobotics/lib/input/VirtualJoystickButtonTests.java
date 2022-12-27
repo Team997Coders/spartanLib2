@@ -18,6 +18,7 @@ package org.chsrobotics.lib.input;
 
 import static org.junit.Assert.assertEquals;
 
+import edu.wpi.first.wpilibj.event.EventLoop;
 import org.junit.Test;
 
 public class VirtualJoystickButtonTests {
@@ -27,35 +28,38 @@ public class VirtualJoystickButtonTests {
     /** Tests for the VirtualJoystickButton. */
     public void VirtualJoystickButtonWorksAsExpected() {
         JoystickAxis axis = new JoystickAxis(() -> value, "test", false);
-        VirtualJoystickButton buttonA = new VirtualJoystickButton(axis, -0.5, 0.5, false);
-        VirtualJoystickButton buttonB = new VirtualJoystickButton(axis, -0.5, 0.5, true);
+
+        VirtualJoystickButton buttonA =
+                new VirtualJoystickButton(new EventLoop(), axis, -0.5, 0.5, false);
+        VirtualJoystickButton buttonB =
+                new VirtualJoystickButton(new EventLoop(), axis, -0.5, 0.5, true);
 
         value = 0.5;
-        assertEquals(true, buttonA.get());
-        assertEquals(false, buttonB.get());
+        assertEquals(true, buttonA.getAsBoolean());
+        assertEquals(false, buttonB.getAsBoolean());
 
         value = 0.5001;
-        assertEquals(false, buttonA.get());
-        assertEquals(true, buttonB.get());
+        assertEquals(false, buttonA.getAsBoolean());
+        assertEquals(true, buttonB.getAsBoolean());
 
         value = -0.5;
-        assertEquals(true, buttonA.get());
-        assertEquals(false, buttonB.get());
+        assertEquals(true, buttonA.getAsBoolean());
+        assertEquals(false, buttonB.getAsBoolean());
 
         value = -0.5001;
-        assertEquals(false, buttonA.get());
-        assertEquals(true, buttonB.get());
+        assertEquals(false, buttonA.getAsBoolean());
+        assertEquals(true, buttonB.getAsBoolean());
 
         value = -0.5;
-        assertEquals(true, buttonA.get());
-        assertEquals(false, buttonB.get());
+        assertEquals(true, buttonA.getAsBoolean());
+        assertEquals(false, buttonB.getAsBoolean());
 
         value = 0;
-        assertEquals(true, buttonA.get());
-        assertEquals(false, buttonB.get());
+        assertEquals(true, buttonA.getAsBoolean());
+        assertEquals(false, buttonB.getAsBoolean());
 
         value = 1;
-        assertEquals(false, buttonA.get());
-        assertEquals(true, buttonB.get());
+        assertEquals(false, buttonA.getAsBoolean());
+        assertEquals(true, buttonB.getAsBoolean());
     }
 }
