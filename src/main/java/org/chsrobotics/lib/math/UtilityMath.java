@@ -16,6 +16,8 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import org.chsrobotics.lib.math.geometry.Vector3D;
 import org.chsrobotics.lib.util.Tuple2;
 
@@ -442,5 +444,15 @@ public class UtilityMath {
     public static boolean inRange(double boundaryA, double boundaryB, double toCheck) {
         return (((boundaryA <= toCheck) && (toCheck <= boundaryB))
                 || ((boundaryA >= toCheck) && (toCheck >= boundaryB)));
+    }
+
+    /**
+     * Converts a Rotation2d into a Rotation3d.
+     *
+     * @param original The Rotation2d to convert.
+     * @return A Rotation3d with a pitch and roll of 0, and a yaw of the Rotation2d's value.
+     */
+    public static Rotation3d fromRotation2d(Rotation2d original) {
+        return new Rotation3d(0, 0, original.getRadians());
     }
 }
