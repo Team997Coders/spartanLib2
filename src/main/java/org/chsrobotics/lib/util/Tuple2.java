@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * Very simple utility class which can hold any two objects of the same type in order.
  *
- * @param T The data type of objects to store.
+ * @param <T> The data type of objects to store.
  */
 public class Tuple2<T> {
     private final T valueA;
