@@ -28,7 +28,7 @@ import org.chsrobotics.lib.util.Tuple2;
  * of generic T) at beginning and end of the command, with a boolean lambda of when the command
  * should end.
  *
- * @param T The data type of the method parameter(s).
+ * @param <T> The data type of the method parameter(s).
  */
 public class ConditionalEndConsumerCommand<T> extends CommandBase {
     private final boolean isBiConsumer;

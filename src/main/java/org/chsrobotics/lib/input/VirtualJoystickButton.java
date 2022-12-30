@@ -16,10 +16,46 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.input;
 
+import edu.wpi.first.wpilibj.event.EventLoop;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+
 /** Class to mock a joystick button from a hardware joystick axis. */
 public class VirtualJoystickButton extends JoystickButton {
     /**
      * Constructs a VirtualJoystickButton.
+     *
+     * @param pollingLoop An EventLoop to poll for the resulting button's {@code Trigger}
+     *     functionality.
+     * @param axis The JoystickAxis to use as an input.
+     * @param minimumValue The minimum value in [-1,1] (inclusive) the JoystickAxis can have for
+     *     this to be considered pressed.
+     * @param maximumValue The maximum value in [-1,1] (inclusive) the JoystickAxis can have for
+     *     this to be considered pressed.
+     * @param inverse If true, the button will be pressed *except* if it is between the minimum and
+     *     maximum values.
+     */
+    public VirtualJoystickButton(
+            EventLoop pollingLoop,
+            JoystickAxis axis,
+            double minimumValue,
+            double maximumValue,
+            boolean inverse) {
+        super(
+                pollingLoop,
+                () -> {
+                    if (!inverse) {
+                        return (axis.getValue() >= minimumValue && axis.getValue() <= maximumValue);
+                    } else {
+                        return !(axis.getValue() >= minimumValue
+                                && axis.getValue() <= maximumValue);
+                    }
+                },
+                ("virtual: " + axis.toString()),
+                false);
+    }
+
+    /**
+     * Constructs a VirtualJoystickButton, using the default CommandScheduler polling.
      *
      * @param axis The JoystickAxis to use as an input.
      * @param minimumValue The minimum value in [-1,1] (inclusive) the JoystickAxis can have for
@@ -31,16 +67,11 @@ public class VirtualJoystickButton extends JoystickButton {
      */
     public VirtualJoystickButton(
             JoystickAxis axis, double minimumValue, double maximumValue, boolean inverse) {
-        super(
-                () -> {
-                    if (!inverse) {
-                        return (axis.getValue() >= minimumValue && axis.getValue() <= maximumValue);
-                    } else {
-                        return !(axis.getValue() >= minimumValue
-                                && axis.getValue() <= maximumValue);
-                    }
-                },
-                ("virtual: " + axis.toString()),
-                false);
+        this(
+                CommandScheduler.getInstance().getDefaultButtonLoop(),
+                axis,
+                minimumValue,
+                maximumValue,
+                inverse);
     }
 }

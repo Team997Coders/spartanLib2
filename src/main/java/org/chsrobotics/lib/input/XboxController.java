@@ -18,8 +18,9 @@ package org.chsrobotics.lib.input;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import java.util.ArrayList;
-import java.util.List;
+import edu.wpi.first.wpilibj.event.EventLoop;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import java.util.Map;
 import org.chsrobotics.lib.telemetry.HighLevelLogger;
 
 /** Wrapper class for the Xbox controller used by FRC 997. */
@@ -29,19 +30,42 @@ public class XboxController {
     private double rightRumble = 0;
     private double leftRumble = 0;
 
-    private final ArrayList<Boolean> axisAllocations =
-            new ArrayList<>(List.of(false, false, false, false, false, false));
-    private final ArrayList<Boolean> buttonAllocations =
-            new ArrayList<>(
-                    List.of(false, false, false, false, false, false, false, false, false, false));
+    private final Map<Integer, Boolean> axisAllocations =
+            Map.ofEntries(
+                    Map.entry(0, false),
+                    Map.entry(1, false),
+                    Map.entry(2, false),
+                    Map.entry(3, false),
+                    Map.entry(4, false),
+                    Map.entry(5, false));
+
+    private final Map<Integer, Boolean> buttonAllocations =
+            Map.ofEntries(
+                    Map.entry(1, false),
+                    Map.entry(2, false),
+                    Map.entry(3, false),
+                    Map.entry(4, false),
+                    Map.entry(5, false),
+                    Map.entry(6, false),
+                    Map.entry(7, false),
+                    Map.entry(8, false),
+                    Map.entry(9, false),
+                    Map.entry(10, false));
+
+    private final EventLoop pollingLoop;
 
     /**
      * Constructs an XboxController connected to a specific port in the driver station application.
      *
      * @param port The port reported by the driver station for this controller.
      */
-    public XboxController(int port) {
+    public XboxController(EventLoop pollingLoop, int port) {
         controller = new GenericHID(port);
+        this.pollingLoop = pollingLoop;
+    }
+
+    public XboxController(int port) {
+        this(CommandScheduler.getInstance().getDefaultButtonLoop(), port);
     }
 
     /**
@@ -89,12 +113,7 @@ public class XboxController {
      * @return The JoystickAxis at index 1.
      */
     public JoystickAxis leftStickVerticalAxis() {
-        if (axisAllocations.get(1)) {
-            HighLevelLogger.logWarning("JoystickAxis already allocated!");
-        } else {
-            axisAllocations.set(1, true);
-        }
-        return new JoystickAxis(() -> controller.getRawAxis(1), "1", true);
+        return getJoystickAxis(1);
     }
 
     /**
@@ -104,12 +123,7 @@ public class XboxController {
      * @return The JoystickAxis at index 0.
      */
     public JoystickAxis leftStickHorizontalAxis() {
-        if (axisAllocations.get(0)) {
-            HighLevelLogger.logWarning("JoystickAxis already allocated!");
-        } else {
-            axisAllocations.set(0, true);
-        }
-        return new JoystickAxis(() -> controller.getRawAxis(0), "0", true);
+        return getJoystickAxis(0);
     }
 
     /**
@@ -119,12 +133,7 @@ public class XboxController {
      * @return The JoystickAxis at index 5.
      */
     public JoystickAxis rightStickVerticalAxis() {
-        if (axisAllocations.get(5)) {
-            HighLevelLogger.logWarning("JoystickAxis already allocated!");
-        } else {
-            axisAllocations.set(5, true);
-        }
-        return new JoystickAxis(() -> controller.getRawAxis(5), "5", true);
+        return getJoystickAxis(5);
     }
 
     /**
@@ -134,12 +143,7 @@ public class XboxController {
      * @return The JoystickAxis at index 4.
      */
     public JoystickAxis rightStickHorizontalAxis() {
-        if (axisAllocations.get(4)) {
-            HighLevelLogger.logWarning("JoystickAxis already allocated!");
-        } else {
-            axisAllocations.set(4, true);
-        }
-        return new JoystickAxis(() -> controller.getRawAxis(4), "4", true);
+        return getJoystickAxis(4);
     }
 
     /**
@@ -152,12 +156,7 @@ public class XboxController {
      * @return The JoystickAxis at index 2.
      */
     public JoystickAxis leftTriggerAxis() {
-        if (axisAllocations.get(2)) {
-            HighLevelLogger.logWarning("JoystickAxis already allocated!");
-        } else {
-            axisAllocations.set(2, true);
-        }
-        return new JoystickAxis(() -> controller.getRawAxis(2), "2", true);
+        return getJoystickAxis(2);
     }
 
     /**
@@ -170,12 +169,7 @@ public class XboxController {
      * @return The JoystickAxis at index 3.
      */
     public JoystickAxis rightTriggerAxis() {
-        if (axisAllocations.get(3)) {
-            HighLevelLogger.logWarning("JoystickAxis already allocated!");
-        } else {
-            axisAllocations.set(3, true);
-        }
-        return new JoystickAxis(() -> controller.getRawAxis(3), "3", true);
+        return getJoystickAxis(3);
     }
 
     /**
@@ -185,12 +179,7 @@ public class XboxController {
      * @return The JoystickButton at index 1.
      */
     public JoystickButton AButton() {
-        if (buttonAllocations.get(0)) {
-            HighLevelLogger.logWarning("JoystickButton already allocated!");
-        } else {
-            buttonAllocations.set(0, true);
-        }
-        return new JoystickButton(() -> controller.getRawButton(1), "1", true);
+        return getJoystickButton(1);
     }
 
     /**
@@ -200,12 +189,7 @@ public class XboxController {
      * @return The JoystickButton at index 2.
      */
     public JoystickButton BButton() {
-        if (buttonAllocations.get(1)) {
-            HighLevelLogger.logWarning("JoystickButton already allocated!");
-        } else {
-            buttonAllocations.set(1, true);
-        }
-        return new JoystickButton(() -> controller.getRawButton(2), "2", true);
+        return getJoystickButton(2);
     }
 
     /**
@@ -215,12 +199,7 @@ public class XboxController {
      * @return The JoystickButton at index 3.
      */
     public JoystickButton XButton() {
-        if (buttonAllocations.get(2)) {
-            HighLevelLogger.logWarning("JoystickButton already allocated!");
-        } else {
-            buttonAllocations.set(2, true);
-        }
-        return new JoystickButton(() -> controller.getRawButton(3), "3", true);
+        return getJoystickButton(3);
     }
 
     /**
@@ -230,12 +209,7 @@ public class XboxController {
      * @return The JoystickButton at index 4.
      */
     public JoystickButton YButton() {
-        if (buttonAllocations.get(3)) {
-            HighLevelLogger.logWarning("JoystickButton already allocated!");
-        } else {
-            buttonAllocations.set(3, true);
-        }
-        return new JoystickButton(() -> controller.getRawButton(4), "4", true);
+        return getJoystickButton(4);
     }
 
     /**
@@ -245,12 +219,7 @@ public class XboxController {
      * @return The JoystickButton at index 5.
      */
     public JoystickButton leftBumperButton() {
-        if (buttonAllocations.get(4)) {
-            HighLevelLogger.logWarning("JoystickButton already allocated!");
-        } else {
-            buttonAllocations.set(4, true);
-        }
-        return new JoystickButton(() -> controller.getRawButton(5), "5", true);
+        return getJoystickButton(5);
     }
 
     /**
@@ -260,12 +229,7 @@ public class XboxController {
      * @return The JoystickButton at index 6.
      */
     public JoystickButton rightBumperButton() {
-        if (buttonAllocations.get(5)) {
-            HighLevelLogger.logWarning("JoystickButton already allocated!");
-        } else {
-            buttonAllocations.set(5, true);
-        }
-        return new JoystickButton(() -> controller.getRawButton(6), "6", true);
+        return getJoystickButton(6);
     }
 
     /**
@@ -275,12 +239,7 @@ public class XboxController {
      * @return The JoystickButton at index 9.
      */
     public JoystickButton leftStickButton() {
-        if (buttonAllocations.get(8)) {
-            HighLevelLogger.logWarning("JoystickButton already allocated!");
-        } else {
-            buttonAllocations.set(8, true);
-        }
-        return new JoystickButton(() -> controller.getRawButton(9), "9", true);
+        return getJoystickButton(9);
     }
 
     /**
@@ -290,12 +249,7 @@ public class XboxController {
      * @return The JoystickButton at index 10.
      */
     public JoystickButton rightStickButton() {
-        if (buttonAllocations.get(9)) {
-            HighLevelLogger.logWarning("JoystickButton already allocated!");
-        } else {
-            buttonAllocations.set(9, true);
-        }
-        return new JoystickButton(() -> controller.getRawButton(10), "10", true);
+        return getJoystickButton(10);
     }
 
     /**
@@ -305,12 +259,7 @@ public class XboxController {
      * @return The JoystickButton at index 7.
      */
     public JoystickButton backButton() {
-        if (buttonAllocations.get(6)) {
-            HighLevelLogger.logWarning("JoystickButton already allocated!");
-        } else {
-            buttonAllocations.set(6, true);
-        }
-        return new JoystickButton(() -> controller.getRawButton(7), "7", true);
+        return getJoystickButton(7);
     }
 
     /**
@@ -320,11 +269,24 @@ public class XboxController {
      * @return The JoystickButton at index 8.
      */
     public JoystickButton startButton() {
-        if (buttonAllocations.get(7)) {
-            HighLevelLogger.logWarning("JoystickButton already allocated!");
+        return getJoystickButton(8);
+    }
+
+    private JoystickButton getJoystickButton(int index) {
+        if (buttonAllocations.get(index)) {
+            HighLevelLogger.logWarning("Joystick button at port " + index + " already allocated!");
+        } else buttonAllocations.replace(index, true);
+
+        return new JoystickButton(
+                pollingLoop, () -> controller.getRawButton(index), Integer.toString(index), true);
+    }
+
+    private JoystickAxis getJoystickAxis(int index) {
+        if (axisAllocations.get(index)) {
+            HighLevelLogger.logWarning("Joystick axis at port " + index + " already allocated!");
         } else {
-            buttonAllocations.set(7, true);
+            axisAllocations.replace(index, true);
         }
-        return new JoystickButton(() -> controller.getRawButton(8), "8", true);
+        return new JoystickAxis(() -> controller.getRawAxis(index), Integer.toString(index), true);
     }
 }

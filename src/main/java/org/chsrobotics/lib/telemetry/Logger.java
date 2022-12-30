@@ -149,7 +149,7 @@ public class Logger<T> {
             if (recordInLog && !value.equals(previousValue))
                 doubleLogEntry.append(((Number) value).doubleValue());
             if (publishToNT && !value.equals(previousValue))
-                ntEntry.forceSetDouble(((Number) value).doubleValue());
+                ntEntry.setDouble(((Number) value).doubleValue());
 
         } else if (value instanceof Number[]) {
 
@@ -162,7 +162,7 @@ public class Logger<T> {
                 logEntryExists = true;
             }
             if (recordInLog && !value.equals(previousValue)) doubleArrayLogEntry.append(castArray);
-            if (publishToNT && !value.equals(previousValue)) ntEntry.forceSetDoubleArray(castArray);
+            if (publishToNT && !value.equals(previousValue)) ntEntry.setDoubleArray(castArray);
 
         } else if (value instanceof Boolean) {
 
@@ -171,8 +171,7 @@ public class Logger<T> {
                 logEntryExists = true;
             }
             if (recordInLog && !value.equals(previousValue)) boolLogEntry.append((boolean) value);
-            if (publishToNT && !value.equals(previousValue))
-                ntEntry.forceSetBoolean((boolean) value);
+            if (publishToNT && !value.equals(previousValue)) ntEntry.setBoolean((boolean) value);
 
         } else if (value instanceof Boolean[]) {
 
@@ -183,7 +182,7 @@ public class Logger<T> {
             if (recordInLog && !value.equals(previousValue))
                 boolArrayLogEntry.append((boolean[]) value);
             if (publishToNT && !value.equals(previousValue))
-                ntEntry.forceSetBooleanArray((boolean[]) value);
+                ntEntry.setBooleanArray((boolean[]) value);
 
         } else if (value instanceof String) {
 
@@ -192,7 +191,7 @@ public class Logger<T> {
                 logEntryExists = true;
             }
             if (recordInLog && !value.equals(previousValue)) stringLogEntry.append((String) value);
-            if (publishToNT && !value.equals(previousValue)) ntEntry.forceSetString((String) value);
+            if (publishToNT && !value.equals(previousValue)) ntEntry.setString((String) value);
 
         } else if (value instanceof String[]) {
 
@@ -203,7 +202,7 @@ public class Logger<T> {
             if (recordInLog && !value.equals(previousValue))
                 stringArrayLogEntry.append((String[]) value);
             if (publishToNT && !value.equals(previousValue))
-                ntEntry.forceSetStringArray((String[]) value);
+                ntEntry.setStringArray((String[]) value);
 
         } else {
 
@@ -214,7 +213,7 @@ public class Logger<T> {
             if (recordInLog && !value.equals(previousValue))
                 stringLogEntry.append(value.toString());
             if (publishToNT && !value.equals(previousValue)) {
-                ntEntry.forceSetString(value.toString());
+                ntEntry.setString(value.toString());
             }
         }
         previousValue = value;

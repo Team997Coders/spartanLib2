@@ -27,7 +27,7 @@ import org.chsrobotics.lib.util.Tuple2;
  * Simple class to allow calling methods with one or two parameters (of the same type) in the
  * command-based structure.
  *
- * @param T Data type of the method parameter or parameters.
+ * @param <T> Data type of the method parameter or parameters.
  */
 public class ConsumerCommand<T> extends CommandBase {
     private final boolean isBiConsumer;
