@@ -17,8 +17,8 @@ If not, see <https://www.gnu.org/licenses/>.
 package org.chsrobotics.lib.controllers;
 
 import java.util.Objects;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.chsrobotics.lib.math.UtilityMath;
+import org.chsrobotics.lib.util.SizedStack;
 
 /**
  * Implementation of a simple Proportional-Integral-Derivative feedback controller.
@@ -155,7 +155,7 @@ public class PID implements FeedbackController {
 
     private double currentValue = 0;
 
-    private final DescriptiveStatistics integrationValues;
+    private final SizedStack<Double> integrationStack;
 
     /**
      * Constructs a PID with given gains and a finite integration window.
@@ -172,10 +172,7 @@ public class PID implements FeedbackController {
         this.kI = kI;
         this.kD = kD;
 
-        integrationValues =
-                (integrationWindow < 1)
-                        ? new DescriptiveStatistics()
-                        : new DescriptiveStatistics(integrationWindow);
+        integrationStack = new SizedStack<>(integrationWindow);
 
         setpoint = initialSetpoint;
         lastSetpoint = initialSetpoint;
@@ -326,12 +323,18 @@ public class PID implements FeedbackController {
      * @return The integral of error with respect to time from the last reset to now.
      */
     public double getIntegralAccumulation() {
-        return integrationValues.getSum();
+        double integrationSum = 0;
+
+        for (double entry : integrationStack) {
+            integrationSum += entry;
+        }
+
+        return integrationSum;
     }
 
     /** Resets accumulation of past error in the integral term. */
     public void resetIntegralAccumulation() {
-        integrationValues.clear();
+        integrationStack.clear();
     }
 
     /** Resets the previous measurement used for velocity approximation for the derivative term. */
@@ -383,7 +386,7 @@ public class PID implements FeedbackController {
     /** {@inheritDoc} */
     public double calculate(double measurement, double dt) {
 
-        integrationValues.addValue(dt * (setpoint - measurement));
+        integrationStack.push(dt * (setpoint - measurement));
 
         if (dt == 0) { // sensible way to handle dt of zero
             velocity = 0;
@@ -391,8 +394,14 @@ public class PID implements FeedbackController {
             velocity = (((setpoint - measurement) - (lastSetpoint - lastMeasurement)) / dt);
         }
 
+        double integrationSum = 0;
+
+        for (double entry : integrationStack) {
+            integrationSum += entry;
+        }
+
         double rawP = kP * (setpoint - measurement);
-        double rawI = kI * integrationValues.getSum();
+        double rawI = kI * integrationSum;
         double rawD = kD * velocity;
 
         if (Math.abs(maxAbsPContribution) == 0) lastPContribution = rawP;

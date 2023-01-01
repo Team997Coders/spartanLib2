@@ -57,6 +57,7 @@ public class XboxController {
     /**
      * Constructs an XboxController connected to a specific port in the driver station application.
      *
+     * @param pollingLoop The EventLoop used to poll button press actions.
      * @param port The port reported by the driver station for this controller.
      */
     public XboxController(EventLoop pollingLoop, int port) {
@@ -64,6 +65,12 @@ public class XboxController {
         this.pollingLoop = pollingLoop;
     }
 
+    /**
+     * Constructs an XboxController connected to a specific port in the driver station application,
+     * using the default CommandScheduler event loop.
+     *
+     * @param port The port reported by the driver station for this controller.
+     */
     public XboxController(int port) {
         this(CommandScheduler.getInstance().getDefaultButtonLoop(), port);
     }
