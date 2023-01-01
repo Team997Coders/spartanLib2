@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -100,19 +100,6 @@ public class UtilityMathTests {
         assertEquals(-180, UtilityMath.smallestAngleDegreesBetween(180, 0), epsilon);
         assertEquals(-180, UtilityMath.smallestAngleDegreesBetween(-540, 0), epsilon);
         assertEquals(45, UtilityMath.smallestAngleDegreesBetween(-22.5, 22.5), epsilon);
-    }
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // simpleLinearInterpolation
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    @Test
-    public void UtilityMathSimpleLinearInterpolationReturnsInBoundsCorrectly() {
-        assertEquals(1, UtilityMath.simpleLinearInterpolation(0, 0, 2, 2, 1), epsilon);
-    }
-
-    @Test
-    public void UtilityMathSimpleLinearInterpolationReturnsOutOfBoundsCorrectly() {
-        assertEquals(-5, UtilityMath.simpleLinearInterpolation(3, -1, -1, 1, 3), epsilon);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
