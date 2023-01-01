@@ -14,13 +14,11 @@ Reusable robot code for FIRST Robotics Competition Team 997.
 <img src="https://github.com/Team997Coders/spartanLib2/raw/main/logo.jpeg" width="350" height="350" />
 
 <a href=https://www.chsrobotics.org>chsrobotics.org</a>
+
+<p><p>
+<a href=https://github.com/Team997Coders/spartanLib2/wiki> Wiki</a>
+
 </div>
-
-## Note to Future Programmers:
-In order to keep this library from going the way of the dinosaurs (and spartanLib1...), it can't stay static, not useful to anyone. If there's some bit of code you just *need* to make your life in FRC programming easier, put it in. If there's something in here not being useful, consider removing it.
-
-### Future Leads:
-Ask for admin rights from your software mentor so that you can play a large role in future development. If you have issues getting this role, please reach out to the original author(s).
 
 ## Contents:
 Currently, the library contains 8 sub-packages:
@@ -34,7 +32,7 @@ Currently, the library contains 8 sub-packages:
 - `trajectory`: Trajectory Generation, Motion Profiles
 - `util`: Utility
 
-Future expansion will likely create a `hardware` package, containing abstractions for various hardware APIs for FRC, and a `subsystem` packages for the WPILib Command-Based paradigm.
+Future expansion will likely create a `hardware` package, containing abstractions for various hardware APIs for FRC, and a `subsystem` package for WPILib subsystems.
 
 
 ## Contributing:
@@ -48,10 +46,11 @@ There aren't stringent criteria for merging, but your code should, at the minimu
 - Well-documented (javadoc, variable/method names, source comments explaining complex logic)
 - Robustly-tested (not much hardware can be tested without the NI/WPILib HAL, but those should be benchtop tested, and everything else should have tests for many cases written)
 
+## Note to Future Programmers:
+In order to keep this library from going the way of the dinosaurs (and spartanLib1...), it can't stay static, not useful to anyone. If there's some bit of code you just *need* to make your life in FRC programming easier, put it in. If there's something in here not being useful, consider removing it.
+
+### Future Leads:
+Ask for admin rights from your software mentor so that you can play a large role in future development. If you have issues getting this role, please reach out to the original author(s).
+
 ## License:
 Licensed under the GNU GPLv3.
-
-## Dependencies:
-Will self-install with gradle build.
-- WPILib 2022.4.1
-- Apache Commons Math >= 3.0.0

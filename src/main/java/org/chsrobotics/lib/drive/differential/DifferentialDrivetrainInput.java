@@ -18,7 +18,6 @@ package org.chsrobotics.lib.drive.differential;
 
 import edu.wpi.first.math.MathUtil;
 import java.util.Objects;
-import org.apache.commons.math3.util.Precision;
 
 /**
  * A data class that holds differential drivetrain inputs, split into drivetrain's left and right
@@ -86,10 +85,8 @@ public class DifferentialDrivetrainInput {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        double epsilon = 0.000001;
         DifferentialDrivetrainInput that = (DifferentialDrivetrainInput) o;
-        return Precision.equals(that.left, left, epsilon)
-                && Precision.equals(that.right, right, epsilon);
+        return (that.left == this.left && that.right == this.right);
     }
 
     @Override

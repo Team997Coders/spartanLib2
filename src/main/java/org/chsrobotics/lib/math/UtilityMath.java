@@ -207,4 +207,65 @@ public class UtilityMath {
 
         return Tuple2.of(pos, neg);
     }
+
+    /**
+     * Computes the arithmetic mean, often called the average, of a set of numbers.
+     *
+     * @param values The numbers to find the arithmetic mean of. If empty, this will return {@code
+     *     0}.
+     * @return The arithmetic mean.
+     */
+    public static double arithmeticMean(double[] values) {
+        if (values.length == 0) return 0;
+
+        double sum = 0;
+
+        for (double entry : values) {
+            sum += entry;
+        }
+
+        return (sum / values.length);
+    }
+
+    /**
+     * Computes the geometric mean of a series of numbers.
+     *
+     * @param values The numbers to find the geometric mean of. If empty, this will return {@code
+     *     0}.
+     * @return The geometric mean.
+     */
+    public static double geometricMean(double[] values) {
+        if (values.length == 0) return 0;
+
+        double product = 1;
+
+        for (double entry : values) {
+            product = product * entry;
+        }
+
+        return Math.pow(product, 1 / values.length);
+    }
+
+    /**
+     * Computes the harmonic mean of a series of numbers.
+     *
+     * <p>If a number input to this is 0, its reciprocal will be defined as 0, and if the arithmetic
+     * mean before reciprocation is 0, this will return 0.
+     *
+     * @param values The numbers to find the harmonic mean of. If empty, this will return {@code 0}.
+     * @return The geometric mean.
+     */
+    public static double harmonicMean(double[] values) {
+        double[] reciprocals = new double[values.length];
+
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] == 0) reciprocals[i] = 0;
+            else reciprocals[i] = (1 / values[i]);
+        }
+
+        double aMean = arithmeticMean(reciprocals);
+
+        if (aMean == 0) return 0;
+        else return (1 / aMean);
+    }
 }
