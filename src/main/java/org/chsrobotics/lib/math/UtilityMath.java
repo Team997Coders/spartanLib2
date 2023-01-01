@@ -443,4 +443,27 @@ public class UtilityMath {
         return (((boundaryA <= toCheck) && (toCheck <= boundaryB))
                 || ((boundaryA >= toCheck) && (toCheck >= boundaryB)));
     }
+
+    /**
+     * Converts a point in polar coordinates into a point in Cartesian coordinates.
+     *
+     * @param angle The angle, in radians counterclockwise from the positive x-axis, of the point
+     *     vector.
+     * @param magnitude The magnitude of the point vector.
+     * @return A Tuple2 of the Cartesian coordinates, as (x, y).
+     */
+    public static Tuple2<Double> fromPolarToCartesian(double angle, double magnitude) {
+        return Tuple2.of(magnitude * Math.cos(angle), magnitude * Math.sin(angle));
+    }
+
+    /**
+     * Converts a point in Cartesian coordinates into a point in polar coordinates.
+     *
+     * @param x The x-value of the point.
+     * @param y The y-value of the point.
+     * @return A Tuple2 of the polar coordinates, as (angle, magnitude).
+     */
+    public static Tuple2<Double> fromCartesianToPolar(double x, double y) {
+        return Tuple2.of(Math.atan2(y, x), hypotenuse(x, y));
+    }
 }

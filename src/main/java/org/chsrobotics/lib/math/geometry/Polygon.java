@@ -20,7 +20,7 @@ import java.util.ArrayList;
 
 /** Represents a closed shape with a definite number of sides in 2-dimensional space. */
 public class Polygon {
-    private final Vector2D[] vertices;
+    private final ArrayList<Line2D> sides = new ArrayList<>();
 
     /**
      * Constructs a Polygon.
@@ -30,7 +30,28 @@ public class Polygon {
      *     them in this constructor. The last edge is connected automatically.
      */
     public Polygon(Vector2D... vertices) {
-        this.vertices = vertices;
+        // create sides between vertices
+        for (int i = 0; i < vertices.length - 1; i++) {
+            sides.add(new Line2D(vertices[i], vertices[i + 1]));
+        }
+
+        sides.add(new Line2D(vertices[vertices.length - 1], vertices[0]));
+    }
+
+    /**
+     * Returns whether the provided line intersects any of the edges of the polygon.
+     *
+     * @param line The Line2D to check for intersection.
+     * @return Whether the lines intersect (including colinearity over the same space).
+     */
+    public boolean lineIntersectsAnyEdge(Line2D line) {
+        boolean retVal = false;
+
+        for (Line2D edge : sides) {
+            if (!retVal) retVal = edge.intersects(line);
+        }
+
+        return retVal;
     }
 
     /**
@@ -40,18 +61,6 @@ public class Polygon {
      * @return Whether the point lies within the bounds of the polygon.
      */
     public boolean pointLiesWithin(Vector2D point) {
-        if (vertices.length == 0) return false;
-
-        // create sides between vertices
-
-        ArrayList<Line2D> sides = new ArrayList<>();
-
-        for (int i = 0; i < vertices.length - 1; i++) {
-            sides.add(new Line2D(vertices[i], vertices[i + 1]));
-        }
-
-        sides.add(new Line2D(vertices[vertices.length - 1], vertices[0]));
-
         for (Line2D side : sides) {
             if (side.pointOn(point)) return true;
         }

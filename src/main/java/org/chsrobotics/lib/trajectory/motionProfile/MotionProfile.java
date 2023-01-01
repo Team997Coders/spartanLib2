@@ -14,7 +14,7 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.trajectory;
+package org.chsrobotics.lib.trajectory.motionProfile;
 
 import java.util.ArrayList;
 import java.util.List;

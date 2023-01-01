@@ -14,11 +14,11 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.trajectory;
+package org.chsrobotics.lib.trajectory.motionProfile;
 
 import static org.junit.Assert.assertEquals;
 
-import org.chsrobotics.lib.trajectory.MotionProfile.State;
+import org.chsrobotics.lib.trajectory.motionProfile.MotionProfile.State;
 import org.junit.Test;
 
 /** Tests for the MotionProfile. */
