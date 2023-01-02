@@ -22,7 +22,7 @@ jobs:
         run: ./gradlew build -x test -x spotlessApply -x spotlessCheck
 
       - name: Test
-        run: ./gradlew test
+        run: ./gradlew test -x spotlessApply -x spotlessCheck
 
       - name: Build Javadocs
         run: ./gradlew javadoc
