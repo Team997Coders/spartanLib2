@@ -19,7 +19,7 @@ jobs:
         run: chmod +x gradlew
       
       - name: Compile
-        run: ./gradlew build -x test spotlessApply
+        run: ./gradlew build -x test -x spotlessApply
 
       - name: Test
         run: ./gradlew test
