@@ -48,22 +48,22 @@ public class TrapezoidProfileTests {
                         new State(0, 5),
                         new State(40, 2));
 
-        assertEquals(symmetrical.totalTime(), asymmetrical.totalTime(), epsilon);
+        assertEquals(symmetrical.getMaxReference(), asymmetrical.getMaxReference(), epsilon);
 
-        for (int i = 0; i < symmetrical.totalTime(); i++) {
-            assertEquals(true, symmetrical.calculate(i).equals(asymmetrical.calculate(i)));
+        for (int i = 0; i < symmetrical.getMaxReference(); i++) {
+            assertEquals(true, symmetrical.sample(i).equals(asymmetrical.sample(i)));
         }
 
         assertEquals(
                 true,
                 symmetrical
-                        .calculate(symmetrical.totalTime())
-                        .equals(asymmetrical.calculate(symmetrical.totalTime())));
+                        .sample(symmetrical.getMaxReference())
+                        .equals(asymmetrical.sample(symmetrical.getMaxReference())));
 
         assertEquals(
                 true,
                 symmetrical
-                        .calculate(symmetrical.totalTime() + 1)
-                        .equals(asymmetrical.calculate(symmetrical.totalTime() + 1)));
+                        .sample(symmetrical.getMaxReference() + 1)
+                        .equals(asymmetrical.sample(symmetrical.getMaxReference() + 1)));
     }
 }

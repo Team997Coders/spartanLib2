@@ -19,6 +19,7 @@ package org.chsrobotics.lib.trajectory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.chsrobotics.lib.util.Sampleable;
 
 /**
  * A group of ProfilePhases that represents an arbitrary trajectory of compound accelerations,
@@ -34,7 +35,7 @@ import java.util.Objects;
  * {@link AsymmetricTrapezoidProfile} and {@link TrapezoidProfile} extend this to create profiles
  * out of constraints and desired states.
  */
-public class MotionProfile {
+public class MotionProfile implements Sampleable<MotionProfile.State> {
     protected List<ProfilePhase> phases = new ArrayList<>();
     protected State initialState;
 
@@ -122,29 +123,25 @@ public class MotionProfile {
         return List.copyOf(phases);
     }
 
-    /**
-     * Returns the total timespan of the profile.
-     *
-     * @return The duration of the profile, in seconds.
-     */
-    public double totalTime() {
-        double time = 0;
-        for (ProfilePhase phase : phases) {
-            time += phase.time;
+    @Override
+    /** {@inheritDoc} */
+    public double getMinReference() {
+        return 0;
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public double getMaxReference() {
+        double timeSum = 0;
+
+        for (ProfilePhase phase : getPhases()) {
+            timeSum += phase.time;
         }
-        return time;
+
+        return timeSum;
     }
 
-    /**
-     * Returns true if the provided time is greater than the length of the profile.
-     *
-     * @param time The time since the beginning of the profile, in seconds.
-     * @return True if the profile has finished all its phases.
-     */
-    public boolean isFinished(double time) {
-        return time >= totalTime();
-    }
-
+    @Override
     /**
      * Calculates the current State of the profile at a given time.
      *
@@ -155,7 +152,7 @@ public class MotionProfile {
      * @param time The time since the beginning of the profile.
      * @return The position and velocity of the profile at that time.
      */
-    public State calculate(double time) {
+    public State sample(double time) {
         if (time <= 0) {
             return initialState;
         }
