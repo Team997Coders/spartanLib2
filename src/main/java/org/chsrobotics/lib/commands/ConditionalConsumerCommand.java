@@ -28,7 +28,7 @@ import org.chsrobotics.lib.util.Tuple2;
  * Class to allow calling methods with one or two parameters (of the same type), in the
  * command-based structure, upon state change of a boolean conditional.
  *
- * @param T Data type of the method parameter or parameters.
+ * @param <T> Data type of the method parameter or parameters.
  */
 public class ConditionalConsumerCommand<T> extends CommandBase {
     private final boolean isBiConsumer;
