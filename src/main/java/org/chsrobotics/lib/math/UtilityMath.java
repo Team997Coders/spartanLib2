@@ -484,4 +484,22 @@ public class UtilityMath {
     public static Rotation3d fromRotation2d(Rotation2d original) {
         return new Rotation3d(0, 0, original.getRadians());
     }
+
+    /**
+     * Calculates the standard deviation of a set of doubles.
+     *
+     * @param population The population of doubles to find the standard deviation of.
+     * @return The standard deviation, or, the square root of the average distance from the mean.
+     */
+    public static double standardDeviation(double... population) {
+        double aMean = arithmeticMean(population);
+
+        double[] variances = new double[population.length];
+
+        for (int i = 0; i < population.length; i++) {
+            variances[i] = Math.pow((population[i] - aMean), 2);
+        }
+
+        return Math.pow(arithmeticMean(variances), 0.5);
+    }
 }
