@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -16,16 +16,21 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.LEDStrip;
 
-/** */
+/** Represents a color in Red-Green-Blue space, with methods for manipulating said color. */
 public class RGBColor {
     public final int r;
     public final int g;
     public final int b;
 
     /**
-     * @param r
-     * @param g
-     * @param b
+     * Constructs an RGBColor.
+     *
+     * @param r Red value of the color, in the interval [0,255] (inclusive). If too big or small,
+     *     changed to the closest valid value.
+     * @param g Green value of the color, in the interval [0,255] (inclusive). If too big or small,
+     *     changed to the closest valid value.
+     * @param b Blue value of the color, in the interval [0,255] (inclusive). If too big or small,
+     *     changed to the closest value value.
      */
     public RGBColor(int r, int g, int b) {
         if (r > 255) this.r = 255;
@@ -42,9 +47,12 @@ public class RGBColor {
     }
 
     /**
-     * @param reference
-     * @param other
-     * @return
+     * Interpolates a new color somewhere between this color and another.
+     *
+     * @param reference Number in [0,1] (inclusive) indicating where to sample the new color.
+     *     Smaller values indicate a color closest to this color, larger closer to the other color.
+     * @param other Other color to smear towards.
+     * @return A new, interpolated color.
      */
     public RGBColor smear(double reference, RGBColor other) {
         double pReference;
@@ -60,19 +68,16 @@ public class RGBColor {
     }
 
     /**
-     * @param other
-     * @return
+     * Returns a new RGBColor with a modified saturation, or color intensity, from this.
+     *
+     * @param proportion The amount to multiply each color value by.
+     * @return A new RGBColor with modified saturation.
      */
-    public RGBColor transformPlus(RGBColor other) {
-        return new RGBColor(this.r + other.r, this.g + other.g, this.b + other.b);
-    }
-
-    /**
-     * @param other
-     * @return
-     */
-    public RGBColor transformMinus(RGBColor other) {
-        return new RGBColor(this.r - other.r, this.g - other.g, this.b - other.b);
+    public RGBColor changeSaturation(double proportion) {
+        return new RGBColor(
+                (int) (this.r * proportion),
+                (int) (this.g * proportion),
+                (int) (this.b * proportion));
     }
 
     @Override

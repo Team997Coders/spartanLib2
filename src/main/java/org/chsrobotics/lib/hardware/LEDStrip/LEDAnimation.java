@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -16,12 +16,17 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.LEDStrip;
 
-/** */
+/** Wraps around an array of LEDAnimationFrames, intended for playing back in sequence. */
 public class LEDAnimation {
     private final LEDAnimationFrame[] frames;
 
+    private final int expectedLength;
+
     /**
-     * @param frames
+     * Constructs a new LEDAnimation.
+     *
+     * @param frames Frames to add to the animation. If a first frame is present, all other frames
+     *     will be reshaped to match it in length.
      */
     public LEDAnimation(LEDAnimationFrame... frames) {
         this.frames = new LEDAnimationFrame[frames.length];
@@ -32,19 +37,34 @@ public class LEDAnimation {
 
             for (int i = 0; i < frames.length; i++)
                 this.frames[i] = frames[i].toNewSize(expectedLength);
-        }
+
+            this.expectedLength = expectedLength;
+        } else expectedLength = 0;
     }
 
     /**
-     * @return
+     * Returns the number of frames the animation consists of.
+     *
+     * @return The number of frames present.
      */
     public int numberOfFrames() {
         return frames.length;
     }
 
     /**
-     * @param index
-     * @return
+     * Returns the number of pixels per each frame.
+     *
+     * @return The number of pixels contained by every frame.
+     */
+    public int numberOfPixelsPerFrame() {
+        return expectedLength;
+    }
+
+    /**
+     * Returns the LEDAnimationFrame at an index.
+     *
+     * @param index The index to sample.
+     * @return The LEDAnimationFrame at that index.
      */
     public LEDAnimationFrame getFrame(int index) {
         if (frames.length == 0) return new LEDAnimationFrame();
@@ -58,34 +78,34 @@ public class LEDAnimation {
     }
 
     /**
-     * @param size
-     * @param colorA
-     * @param colorB
-     * @return
+     * Statically constructs and returns a new LEDAnimation of a gradient between two colors which
+     * offsets itself by one step each cycle.
+     *
+     * @param size Number of pixels in the LED strip. If 0 or less, returns an empty animation.
+     * @param colorA First color of the gradient.
+     * @param colorB Second color of the gradient.
+     * @return A new LEDAnimation.
      */
     public static LEDAnimation gradientCascade(int size, RGBColor colorA, RGBColor colorB) {
         if (size <= 0) return new LEDAnimation();
 
-        LEDAnimationFrame[] lFrames = new LEDAnimationFrame[size];
-
         RGBColor[] root = new RGBColor[size];
 
-        for (int i = 0; i < size; i++) {
-            root[i] = colorA.smear(((double) i) / size, colorB);
+        for (int i = 0; i < size - 1; i++) {
+            root[i] = colorA.smear(((double) i) / (size - 1), colorB);
         }
 
-        lFrames[0] = new LEDAnimationFrame(root);
+        root[size - 1] = colorB;
 
-        for (int i = 1; i < size; i++) {
-            lFrames[i] = lFrames[i - 1].offset(1);
-        }
-
-        return new LEDAnimation(lFrames);
+        return cascading(new LEDAnimationFrame(root));
     }
 
     /**
-     * @param root
-     * @return
+     * Statically constructs and returns a new LEDAnimation which offsets itself from an initial
+     * frame by one step each cycle.
+     *
+     * @param root The initial frame of the animation.
+     * @return A new LEDAnimation.
      */
     public static LEDAnimation cascading(LEDAnimationFrame root) {
         if (root.numberOfPixels() == 0) return new LEDAnimation();
@@ -101,11 +121,14 @@ public class LEDAnimation {
     }
 
     /**
-     * @param periodCyclesA
-     * @param periodCyclesB
-     * @param frameA
-     * @param frameB
-     * @return
+     * Statically constructs and returns a new LEDAnimation which periodically cycles between two
+     * frames.
+     *
+     * @param periodCyclesA How many consecutive cycles frameA should be shown for.
+     * @param periodCyclesB How many consecutive cycles frameB should be shown for.
+     * @param frameA The first frame to periodically display.
+     * @param frameB The second frame to periodically display.
+     * @return A new LEDAnimation.
      */
     public static LEDAnimation flashing(
             int periodCyclesA,
