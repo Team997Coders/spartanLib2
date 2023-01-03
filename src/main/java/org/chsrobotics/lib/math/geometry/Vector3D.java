@@ -18,7 +18,12 @@ package org.chsrobotics.lib.math.geometry;
 
 import java.util.Objects;
 
-/** Represents a 3-dimensional vector in a right-handed system. */
+/**
+ * Represents a 3-dimensional vector in a right-handed system.
+ *
+ * <p>Also commonly used in this library to represent a single point (the position of the endpoint
+ * if the startpoint is at the origin).
+ */
 public class Vector3D {
     private final double x;
     private final double y;

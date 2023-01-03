@@ -20,13 +20,16 @@ import org.chsrobotics.lib.math.UtilityMath;
 import org.chsrobotics.lib.math.geometry.Vector3D;
 import org.chsrobotics.lib.util.Sampleable;
 
-// TODO docs
+/** TODO */
 public class LinearInterpolation implements Sampleable<Vector3D> {
     private final Vector3D[] points;
 
     private final double minReference;
     private final double maxReference;
 
+    /**
+     * @param points
+     */
     public LinearInterpolation(Vector3D... points) {
         this.points = points;
 
@@ -55,6 +58,7 @@ public class LinearInterpolation implements Sampleable<Vector3D> {
     }
 
     @Override
+    /** */
     public Vector3D sample(double reference) {
         Vector3D floor = null;
         Vector3D ceiling = null;
