@@ -76,7 +76,7 @@ public class LEDStrip {
                 buffer.setRGB(i, pixel.r, pixel.g, pixel.b);
             }
 
-            if (animationIndex == animation.numberOfFrames() - 1) animationIndex = 0;
+            if (animationIndex == animation.numberOfFrames()) animationIndex = 0;
             else animationIndex++;
         }
     }
