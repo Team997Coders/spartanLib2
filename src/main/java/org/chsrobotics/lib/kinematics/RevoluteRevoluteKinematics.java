@@ -27,7 +27,7 @@ import org.chsrobotics.lib.util.Tuple2;
 public class RevoluteRevoluteKinematics {
 
     /** Data class holding information about the state of a double revolute-jointed arm. */
-    public class RRConfiguration {
+    public static class RRConfiguration {
         /**
          * Angle of joint A (the joint connected to the root), in radians, from (counterclockwise)
          * the horizontal (or the positive x-axis in non-vertically oriented setups).

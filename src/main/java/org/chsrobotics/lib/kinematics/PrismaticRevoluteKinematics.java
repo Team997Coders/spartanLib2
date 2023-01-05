@@ -28,7 +28,7 @@ import org.chsrobotics.lib.util.Tuple2;
 public class PrismaticRevoluteKinematics {
 
     /** Data class holding information about the state of a prismatic-revolute arm. */
-    public class PRConfiguration {
+    public static class PRConfiguration {
         /** Signed extension of the prismatic joint vertically (+y) from the root. */
         public final double extension;
 
