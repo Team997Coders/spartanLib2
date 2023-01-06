@@ -16,8 +16,12 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.controllers;
 
+import edu.wpi.first.util.datalog.DataLog;
 import java.util.Objects;
 import org.chsrobotics.lib.math.UtilityMath;
+import org.chsrobotics.lib.telemetry.HighLevelLogger;
+import org.chsrobotics.lib.telemetry.Logger;
+import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
 import org.chsrobotics.lib.util.SizedStack;
 
 /**
@@ -142,6 +146,8 @@ public class PID implements FeedbackController {
     private double lastIContribution = 0;
     private double lastDContribution = 0;
 
+    private double maxAbsControlEffort = 0;
+
     private double maxAbsPContribution = 0;
     private double maxAbsIContribution = 0;
     private double maxAbsDContribution = 0;
@@ -156,6 +162,32 @@ public class PID implements FeedbackController {
     private double currentValue = 0;
 
     private final SizedStack<Double> integrationStack;
+
+    private boolean logsConstructed = false;
+
+    private Logger<Double> pGainLogger;
+    private Logger<Double> iGainLogger;
+    private Logger<Double> dGainLogger;
+
+    private Logger<Double> setpointLogger;
+    private Logger<Double> measurementLogger;
+    private Logger<Double> errorLogger;
+    private Logger<Double> integralAccumulationLogger;
+    private Logger<Double> errorVelocityLogger;
+
+    private Logger<Double> totalControlEffortLogger;
+    private Logger<Double> pControlEffortLogger;
+    private Logger<Double> iControlEffortLogger;
+    private Logger<Double> dControlEffortLogger;
+
+    private Logger<Double> maxAbsControlEffortLogger;
+    private Logger<Double> maxAbsPContributionLogger;
+    private Logger<Double> maxAbsIContributionLogger;
+    private Logger<Double> maxAbsDContributionLogger;
+
+    private Logger<Boolean> atSetpointLogger;
+    private Logger<Double> setpointPositionToleranceLogger;
+    private Logger<Double> setpointVelocityToleranceLogger;
 
     /**
      * Constructs a PID with given gains and a finite integration window.
@@ -215,6 +247,70 @@ public class PID implements FeedbackController {
      */
     public PID(PIDConstants constants, double initialSetpoint) {
         this(constants, 0, initialSetpoint);
+    }
+
+    /**
+     * Auto-generates {@link Logger}s for important controller values.
+     *
+     * <p>The logs will only when {@code calculate()} is called.
+     *
+     * @param log The DataLog to log values inside of, most likely from HighLevelLogger.getLog() or
+     *     whatever log is being used program-wide.
+     * @param name The name of this controller to associate with its data.
+     * @param subdirName The string name of the existing or new NetworkTables sub-table to write to.
+     * @param publishToNT Whether this should push logged values to NetworkTables.
+     * @param recordInLog Whether this should store logged values in an on-robot log file.
+     */
+    public void autoGenerateLogging(
+            DataLog log, String name, String subdirName, boolean publishToNT, boolean recordInLog) {
+        if (!logsConstructed) {
+
+            LoggerFactory<Double> doubleLogFactory =
+                    new LoggerFactory<>(log, subdirName, publishToNT, recordInLog);
+
+            pGainLogger = doubleLogFactory.getLogger(name + "/pGain");
+            iGainLogger = doubleLogFactory.getLogger(name + "/iGain");
+            dGainLogger = doubleLogFactory.getLogger(name + "/dGain");
+
+            setpointLogger = doubleLogFactory.getLogger("/setpoint");
+            measurementLogger = doubleLogFactory.getLogger(name + "/measurement");
+            errorLogger = doubleLogFactory.getLogger(name + "/error");
+            integralAccumulationLogger = doubleLogFactory.getLogger(name + "/integralAccumulation");
+            errorVelocityLogger = doubleLogFactory.getLogger(name + "/errorVelocity");
+
+            totalControlEffortLogger = doubleLogFactory.getLogger(name + "/totalControlEffort");
+            pControlEffortLogger = doubleLogFactory.getLogger(name + "/pControlEffort");
+            iControlEffortLogger = doubleLogFactory.getLogger(name + "/iControlEffort");
+            dControlEffortLogger = doubleLogFactory.getLogger(name + "/dControlEffort");
+
+            maxAbsControlEffortLogger = doubleLogFactory.getLogger(name + "/maxAbsControlEffort");
+            maxAbsPContributionLogger = doubleLogFactory.getLogger(name + "/maxAbsPControlEffort");
+            maxAbsIContributionLogger = doubleLogFactory.getLogger(name + "/maxAbsIControlEffort");
+            maxAbsDContributionLogger = doubleLogFactory.getLogger(name + "/maxAbsDControlEffort");
+
+            atSetpointLogger =
+                    new Logger<>(log, name + "/atSetpoint", subdirName, publishToNT, recordInLog);
+
+            setpointPositionToleranceLogger =
+                    doubleLogFactory.getLogger(name + "/setpointPositionTolerance");
+            setpointVelocityToleranceLogger =
+                    doubleLogFactory.getLogger(name + "/setpointVelocityTolerance");
+
+            logsConstructed = true;
+        }
+    }
+
+    /**
+     * Auto-generates {@link Logger}s for important controller values, using the default DataLog,
+     * and both publishing to NT and logging on-robot.
+     *
+     * <p>The logs will only update when {@code calculate()} is called.
+     *
+     * @param name The name of this controller to associate with its data.
+     * @param subdirName The string name of the existing or new NetworkTables sub-table to write to.
+     */
+    public void autoGenerateLogging(String name, String subdirName) {
+        autoGenerateLogging(HighLevelLogger.getLog(), name, subdirName, true, true);
     }
 
     /**
@@ -416,7 +512,36 @@ public class PID implements FeedbackController {
         lastMeasurement = measurement;
         lastSetpoint = setpoint;
 
-        currentValue = lastPContribution + lastIContribution + lastDContribution;
+        double effortsSum = lastPContribution + lastIContribution + lastDContribution;
+
+        if (Math.abs(maxAbsControlEffort) == 0) currentValue = effortsSum;
+        else currentValue = UtilityMath.clamp(maxAbsControlEffort, effortsSum);
+
+        if (logsConstructed) {
+            pGainLogger.update(getkP());
+            iGainLogger.update(getkI());
+            dGainLogger.update(getkD());
+
+            setpointLogger.update(setpoint);
+            measurementLogger.update(measurement);
+            errorLogger.update(setpoint - measurement);
+            integralAccumulationLogger.update(getIntegralAccumulation());
+            errorVelocityLogger.update(velocity);
+
+            totalControlEffortLogger.update(currentValue);
+            pControlEffortLogger.update(getPContribution());
+            iControlEffortLogger.update(getIContribution());
+            dControlEffortLogger.update(getDContribution());
+
+            maxAbsControlEffortLogger.update(maxAbsControlEffort);
+            maxAbsPContributionLogger.update(maxAbsPContribution);
+            maxAbsIContributionLogger.update(maxAbsIContribution);
+            maxAbsDContributionLogger.update(maxAbsDContribution);
+
+            atSetpointLogger.update(atSetpoint());
+            setpointPositionToleranceLogger.update(positionTolerance);
+            setpointVelocityToleranceLogger.update(velocityTolerance);
+        }
 
         return currentValue;
     }
@@ -455,6 +580,15 @@ public class PID implements FeedbackController {
     }
 
     /**
+     * Sets a new value to use to constrain the maximum absolute control effort from the controller.
+     *
+     * @param newValue The maximum absolute control effort. If zero, no limits are applied.
+     */
+    public void setMaxAbsControlEffort(double newValue) {
+        maxAbsControlEffort = newValue;
+    }
+
+    /**
      * Sets a new value to use to constrain the maximum absolute contribution from the Proportional
      * term of the controller.
      *
@@ -485,6 +619,15 @@ public class PID implements FeedbackController {
      */
     public void setMaxDContribution(double newValue) {
         maxAbsDContribution = Math.abs(newValue);
+    }
+
+    /**
+     * Returns the maximum absolute control effort allowed from the controller.
+     *
+     * @return The maximum absolute P contribution. If zero, no limits are being applied.
+     */
+    public double getMaxAbsControlEffort() {
+        return maxAbsControlEffort;
     }
 
     /**
