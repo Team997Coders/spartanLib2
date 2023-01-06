@@ -19,7 +19,7 @@ package org.chsrobotics.lib.controllers;
 import edu.wpi.first.util.datalog.DataLog;
 import java.util.Objects;
 import org.chsrobotics.lib.math.UtilityMath;
-import org.chsrobotics.lib.telemetry.HighLevelLogger;
+import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
 import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
 import org.chsrobotics.lib.util.SizedStack;
@@ -63,7 +63,7 @@ import org.chsrobotics.lib.util.SizedStack;
  * to make a velocity PID controller, or something else with a controlled quantity other than
  * position.
  */
-public class PID implements FeedbackController {
+public class PID implements FeedbackController, IntrinsicLoggable {
 
     /** Data class for holding the gains to a PID controller. */
     public static class PIDConstants {
@@ -249,19 +249,9 @@ public class PID implements FeedbackController {
         this(constants, 0, initialSetpoint);
     }
 
-    /**
-     * Auto-generates {@link Logger}s for important controller values.
-     *
-     * <p>The logs will only when {@code calculate()} is called.
-     *
-     * @param log The DataLog to log values inside of, most likely from HighLevelLogger.getLog() or
-     *     whatever log is being used program-wide.
-     * @param name The name of this controller to associate with its data.
-     * @param subdirName The string name of the existing or new NetworkTables sub-table to write to.
-     * @param publishToNT Whether this should push logged values to NetworkTables.
-     * @param recordInLog Whether this should store logged values in an on-robot log file.
-     */
-    public void autoGenerateLogging(
+    @Override
+    /** {@inheritDoc} */
+    public void autoGenerateLogs(
             DataLog log, String name, String subdirName, boolean publishToNT, boolean recordInLog) {
         if (!logsConstructed) {
 
@@ -298,19 +288,6 @@ public class PID implements FeedbackController {
 
             logsConstructed = true;
         }
-    }
-
-    /**
-     * Auto-generates {@link Logger}s for important controller values, using the default DataLog,
-     * and both publishing to NT and logging on-robot.
-     *
-     * <p>The logs will only update when {@code calculate()} is called.
-     *
-     * @param name The name of this controller to associate with its data.
-     * @param subdirName The string name of the existing or new NetworkTables sub-table to write to.
-     */
-    public void autoGenerateLogging(String name, String subdirName) {
-        autoGenerateLogging(HighLevelLogger.getLog(), name, subdirName, true, true);
     }
 
     /**
@@ -517,14 +494,20 @@ public class PID implements FeedbackController {
         if (Math.abs(maxAbsControlEffort) == 0) currentValue = effortsSum;
         else currentValue = UtilityMath.clamp(maxAbsControlEffort, effortsSum);
 
+        return currentValue;
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public void updateLogs() {
         if (logsConstructed) {
             pGainLogger.update(getkP());
             iGainLogger.update(getkI());
             dGainLogger.update(getkD());
 
-            setpointLogger.update(setpoint);
-            measurementLogger.update(measurement);
-            errorLogger.update(setpoint - measurement);
+            setpointLogger.update(lastSetpoint);
+            measurementLogger.update(lastMeasurement);
+            errorLogger.update(lastSetpoint - lastMeasurement);
             integralAccumulationLogger.update(getIntegralAccumulation());
             errorVelocityLogger.update(velocity);
 
@@ -542,8 +525,6 @@ public class PID implements FeedbackController {
             setpointPositionToleranceLogger.update(positionTolerance);
             setpointVelocityToleranceLogger.update(velocityTolerance);
         }
-
-        return currentValue;
     }
 
     @Override
