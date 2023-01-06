@@ -262,7 +262,7 @@ public class PID implements FeedbackController, IntrinsicLoggable {
             iGainLogger = doubleLogFactory.getLogger(name + "/iGain");
             dGainLogger = doubleLogFactory.getLogger(name + "/dGain");
 
-            setpointLogger = doubleLogFactory.getLogger("/setpoint");
+            setpointLogger = doubleLogFactory.getLogger(name + "/setpoint");
             measurementLogger = doubleLogFactory.getLogger(name + "/measurement");
             errorLogger = doubleLogFactory.getLogger(name + "/error");
             integralAccumulationLogger = doubleLogFactory.getLogger(name + "/integralAccumulation");

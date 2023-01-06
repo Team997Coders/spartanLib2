@@ -78,7 +78,7 @@ public class Logger<T> {
          *     to.
          */
         public LoggerFactory(String subdirName) {
-            this(HighLevelLogger.getLog(), subdirName, true, true);
+            this(HighLevelLogger.getInstance().getLog(), subdirName, true, true);
         }
 
         /**
@@ -144,7 +144,7 @@ public class Logger<T> {
      * @param subdirName The string name of the existing or new NetworkTables sub-table to write to.
      */
     public Logger(String key, String subdirName) {
-        this(HighLevelLogger.getLog(), key, subdirName, true, true);
+        this(HighLevelLogger.getInstance().getLog(), key, subdirName, true, true);
     }
 
     /**

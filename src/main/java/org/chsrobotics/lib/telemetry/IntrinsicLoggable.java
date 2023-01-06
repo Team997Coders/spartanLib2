@@ -41,7 +41,7 @@ public interface IntrinsicLoggable {
      * @param subdirName The string name of the existing or new NetworkTables sub-table to write to.
      */
     default void autoGenerateLogs(String name, String subdirName) {
-        autoGenerateLogs(HighLevelLogger.getLog(), name, subdirName, true, true);
+        autoGenerateLogs(HighLevelLogger.getInstance().getLog(), name, subdirName, true, true);
     }
 
     /** Updates the internally generated Loggers. */

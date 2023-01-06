@@ -281,7 +281,8 @@ public class XboxController {
 
     private JoystickButton getJoystickButton(int index) {
         if (buttonAllocations.get(index)) {
-            HighLevelLogger.logWarning("Joystick button at port " + index + " already allocated!");
+            HighLevelLogger.getInstance()
+                    .logWarning("Joystick button at port " + index + " already allocated!");
         } else buttonAllocations.replace(index, true);
 
         return new JoystickButton(
@@ -290,7 +291,8 @@ public class XboxController {
 
     private JoystickAxis getJoystickAxis(int index) {
         if (axisAllocations.get(index)) {
-            HighLevelLogger.logWarning("Joystick axis at port " + index + " already allocated!");
+            HighLevelLogger.getInstance()
+                    .logWarning("Joystick axis at port " + index + " already allocated!");
         } else {
             axisAllocations.replace(index, true);
         }
