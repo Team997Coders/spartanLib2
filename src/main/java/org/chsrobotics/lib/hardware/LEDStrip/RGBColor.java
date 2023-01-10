@@ -99,6 +99,11 @@ public class RGBColor {
     public static final RGBColor GREEN = new RGBColor(0, 255, 0);
     public static final RGBColor BLUE = new RGBColor(0, 0, 255);
 
+    public static final RGBColor ORANGE = new RGBColor(204, 136, 0);
+    public static final RGBColor YELLOW = new RGBColor(255, 255, 0);
+    public static final RGBColor INDIGO = new RGBColor(111, 0, 255);
+    public static final RGBColor VIOLET = new RGBColor(217, 25, 255);
+
     public static final RGBColor WHITE = new RGBColor(255, 255, 255);
     public static final RGBColor BLACK = new RGBColor(0, 0, 0);
 }
