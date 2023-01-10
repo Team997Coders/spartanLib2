@@ -20,10 +20,11 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class LEDAnimationTests {
+public class SimpleLEDAnimationTests {
     @Test
-    public void LEDAnimationGradientCascadeWorks() {
-        LEDAnimation gCascade = LEDAnimation.gradientCascade(5, RGBColor.BLACK, RGBColor.WHITE);
+    public void SimpleLEDAnimationGradientCascadeWorks() {
+        SimpleLEDAnimation gCascade =
+                SimpleLEDAnimation.gradientCascade(5, RGBColor.BLACK, RGBColor.WHITE);
 
         RGBColor lightGrey = new RGBColor(63, 63, 63);
         RGBColor midGrey = new RGBColor(127, 127, 127);
@@ -41,9 +42,9 @@ public class LEDAnimationTests {
     }
 
     @Test
-    public void LEDAnimationCascadeWorks() {
-        LEDAnimation cascade =
-                LEDAnimation.cascading(
+    public void SimpleLEDAnimationCascadeWorks() {
+        SimpleLEDAnimation cascade =
+                SimpleLEDAnimation.cascading(
                         new LEDAnimationFrame(RGBColor.WHITE, RGBColor.BLUE, RGBColor.BLACK));
 
         assertEquals(
@@ -52,16 +53,30 @@ public class LEDAnimationTests {
     }
 
     @Test
-    public void LEDAnimationFlashingWorks() {
+    public void SimpleLEDAnimationFlashingWorks() {
         LEDAnimationFrame a = new LEDAnimationFrame(RGBColor.BLUE, RGBColor.WHITE);
         LEDAnimationFrame b = new LEDAnimationFrame(RGBColor.RED, RGBColor.GREEN);
 
-        LEDAnimation flashing = LEDAnimation.flashing(3, 2, a, b);
+        SimpleLEDAnimation flashing = SimpleLEDAnimation.flashing(3, 2, a, b);
 
         assertEquals(a, flashing.getFrame(0));
         assertEquals(a, flashing.getFrame(1));
         assertEquals(a, flashing.getFrame(2));
         assertEquals(b, flashing.getFrame(3));
         assertEquals(b, flashing.getFrame(4));
+    }
+
+    @Test
+    public void SimpleLEDAnimationInternalIterationWorks() {
+        SimpleLEDAnimation anim =
+                new SimpleLEDAnimation(
+                        new LEDAnimationFrame(RGBColor.GREEN),
+                        new LEDAnimationFrame(RGBColor.BLUE),
+                        new LEDAnimationFrame(RGBColor.RED));
+
+        assertEquals(new LEDAnimationFrame(RGBColor.GREEN), anim.getNextFrame());
+        assertEquals(new LEDAnimationFrame(RGBColor.BLUE), anim.getNextFrame());
+        assertEquals(new LEDAnimationFrame(RGBColor.RED), anim.getNextFrame());
+        assertEquals(new LEDAnimationFrame(RGBColor.GREEN), anim.getNextFrame());
     }
 }

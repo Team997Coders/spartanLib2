@@ -27,9 +27,7 @@ public class LEDStrip {
 
     private final int length;
 
-    private int animationIndex = 0;
-
-    private LEDAnimation animation = new LEDAnimation();
+    private LEDAnimation animation = new SimpleLEDAnimation();
 
     /**
      * Constructs a new LEDStrip.
@@ -52,7 +50,6 @@ public class LEDStrip {
      * @param animation The LEDAnimation to play through.
      */
     public void setAnimation(LEDAnimation animation) {
-        animationIndex = 0;
         this.animation = animation;
     }
 
@@ -62,22 +59,18 @@ public class LEDStrip {
      * @param frame The LEDAnimationFrame to display.
      */
     public void setFrame(LEDAnimationFrame frame) {
-        animationIndex = 0;
-        this.animation = new LEDAnimation(frame);
+        this.animation = new SimpleLEDAnimation(frame);
     }
 
     /** Advances to the next step of the animation. */
     public void update() {
-        if (animation.numberOfFrames() != 0) {
-            LEDAnimationFrame frame = animation.getFrame(animationIndex).toNewSize(length);
+        LEDAnimationFrame frame = animation.getNextFrame();
 
-            for (int i = 0; i < frame.numberOfPixels(); i++) {
+        for (int i = 0; i < frame.numberOfPixels(); i++) {
+            if (i < length) {
                 RGBColor pixel = frame.getPixel(i);
                 buffer.setRGB(i, pixel.r, pixel.g, pixel.b);
             }
-
-            if (animationIndex == animation.numberOfFrames()) animationIndex = 0;
-            else animationIndex++;
         }
     }
 }
