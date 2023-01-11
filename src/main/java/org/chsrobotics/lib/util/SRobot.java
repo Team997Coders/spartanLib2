@@ -21,13 +21,20 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.TimedRobot;
 
 /**
- * Wrapper around TimedRobot which replaces {@code xyzInit()} and {@code xyzPeriodic()} methods with
- * single unified state transition and periodic methods, with robot state given as parameters.
+ * "SpartanRobot"
+ *
+ * <p>Wrapper around TimedRobot which replaces {@code ___Init()} and {@code ___Periodic()} methods
+ * with single unified state transition and periodic methods, with robot state given as parameters.
+ *
+ * <p>To use, have your central robot class extend {@code SRobot}. Your main method should contain
+ * exactly one line, as follows (assuming the central robot class is named Robot).
+ *
+ * <p>{@code new Robot.start();}.
  */
 public class SRobot {
 
     /** Enum of possible DriverStation robot control states. */
-    public enum RobotState {
+    public static enum RobotState {
         TELEOPERATED,
         AUTONOMOUS,
         TEST,
@@ -36,7 +43,11 @@ public class SRobot {
         NONE
     }
 
-    private RobotState currentState = RobotState.NONE;
+    private static RobotState currentState = RobotState.NONE;
+
+    // commented out code is an implementation for callback registry
+    // I've decided to cut this, as it just about violates the intention of the robot class at all.
+    // However, I definitely could change my mind in the future, and as such won't remote it yet.
 
     // private final Map<RobotState, List<Runnable>> periodicCallbacks = new HashMap<>();
 
@@ -90,7 +101,7 @@ public class SRobot {
         }
     }
 
-    // private void stateTransitionRelay(RobotState from, RobotState to) {
+    // private static void stateTransitionRelay(RobotState from, RobotState to) {
     //     // have to be careful since null is an expected possible value here
 
     //     for (Entry<Tuple2<RobotState>, List<Runnable>> entry :
@@ -124,7 +135,7 @@ public class SRobot {
     //     stateTransition(from, to);
     // }
 
-    // private void periodicRelay(RobotState state) {
+    // private static void periodicRelay(RobotState state) {
     //     for (Entry<RobotState, List<Runnable>> entry : periodicCallbacks.entrySet()) {
     //         if (entry.getKey() != null) {
     //             if (entry.getKey() == state) {
@@ -144,7 +155,7 @@ public class SRobot {
 
     /** Call this method to start robot code execution. */
     public final void start() {
-        RobotBase.startRobot(WrappedTimedRobot::new);
+        RobotBase.startRobot(() -> new WrappedTimedRobot());
     }
 
     /**
@@ -179,7 +190,7 @@ public class SRobot {
     // any
     //  *     state.
     //  */
-    // public final void registerPeriodicCallback(Runnable toRun, RobotState state) {
+    // public static final void registerPeriodicCallback(Runnable toRun, RobotState state) {
     //     if (toRun != null) {
     //         if (periodicCallbacks.get(state) == null) {
     //             periodicCallbacks.put(state, new ArrayList<>());
@@ -203,7 +214,7 @@ public class SRobot {
     //  * @param to The current robot state to require. If {@code null}, will not be a constraint to
     //  *     running the runnable.
     //  */
-    // public final void registerStateTransitionCallback(
+    // public static final void registerStateTransitionCallback(
     //         Runnable toRun, RobotState from, RobotState to) {
     //     if (toRun != null) {
     //         if (stateTransitionCallbacks.get(Tuple2.of(from, to)) == null) {
@@ -219,7 +230,7 @@ public class SRobot {
      *
      * @return Whether or not the robot physically exists.
      */
-    public final boolean isReal() {
+    public static final boolean isReal() {
         return WrappedTimedRobot.isReal();
     }
 
@@ -228,7 +239,7 @@ public class SRobot {
      *
      * @return The nominal length of each loop cycle.
      */
-    public final double getPeriodSeconds() {
+    public static final double getPeriodSeconds() {
         return WrappedTimedRobot.kDefaultPeriod;
     }
 
@@ -237,7 +248,7 @@ public class SRobot {
      *
      * @return The current Driver Station control mode.
      */
-    public final RobotState getRobotState() {
+    public static final RobotState getRobotState() {
         return currentState;
     }
 }
