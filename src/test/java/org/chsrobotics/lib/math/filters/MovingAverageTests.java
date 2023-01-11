@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -18,6 +18,7 @@ package org.chsrobotics.lib.math.filters;
 
 import static org.junit.Assert.assertEquals;
 
+import org.chsrobotics.lib.math.filters.MovingAverageFilter.MEAN_IMPLEMENTATION;
 import org.junit.Test;
 
 public class MovingAverageTests {
@@ -25,7 +26,7 @@ public class MovingAverageTests {
 
     @Test
     public void MovingAverageFilterWorksInfiniteWindow() {
-        MovingAverageFilter filter = new MovingAverageFilter(0);
+        MovingAverageFilter filter = new MovingAverageFilter(0, MEAN_IMPLEMENTATION.ARITHMETIC);
 
         assertEquals(1, filter.calculate(1), epsilon);
         assertEquals(1, filter.calculate(1), epsilon);
@@ -35,7 +36,7 @@ public class MovingAverageTests {
 
     @Test
     public void MovingAverageFilterWorksFiniteWindow() {
-        MovingAverageFilter filter = new MovingAverageFilter(3);
+        MovingAverageFilter filter = new MovingAverageFilter(3, MEAN_IMPLEMENTATION.ARITHMETIC);
 
         assertEquals(3, filter.calculate(3), epsilon);
         assertEquals(1.5, filter.calculate(0), epsilon);

@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -16,7 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math.filters;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.chsrobotics.lib.util.SizedStack;
 
 /**
  * Filter which returns the time-weighted sum (integral) of a series of values.
@@ -24,7 +24,9 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
  * <p>Approximated with finite timesteps.
  */
 public class IntegratingFilter extends Filter {
-    private final DescriptiveStatistics series;
+    private final SizedStack<Double> stack;
+
+    private double currentOutput = 0;
 
     /**
      * Constructs an IntegratingFilter.
@@ -33,8 +35,7 @@ public class IntegratingFilter extends Filter {
      *     will instead be an indefinite window.
      */
     public IntegratingFilter(int window) {
-        if (window > 0) series = new DescriptiveStatistics(window);
-        else series = new DescriptiveStatistics();
+        stack = new SizedStack<>(window);
     }
 
     @Override
@@ -58,21 +59,26 @@ public class IntegratingFilter extends Filter {
      * @return Value of the (approximated) integral.
      */
     public double calculate(double value, double dt) {
-        series.addValue(value * dt);
+        stack.push(value * dt);
 
-        return series.getSum();
+        double sum = 0;
+
+        for (double entry : stack) sum += entry;
+
+        currentOutput = sum;
+
+        return sum;
     }
 
     @Override
     /** {@inheritDoc} */
     public void reset() {
-        series.clear();
+        stack.clear();
     }
 
     @Override
     /** {@inheritDoc} */
     public double getCurrentOutput() {
-        if (Double.isNaN(series.getSum())) return 0;
-        else return series.getSum();
+        return currentOutput;
     }
 }
