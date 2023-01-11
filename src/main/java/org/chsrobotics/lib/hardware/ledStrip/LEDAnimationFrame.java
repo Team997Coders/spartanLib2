@@ -14,7 +14,7 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.hardware.LEDStrip;
+package org.chsrobotics.lib.hardware.ledStrip;
 
 /**
  * Wraps around an array of RGBColors (or individual pixel color values), intended for combination

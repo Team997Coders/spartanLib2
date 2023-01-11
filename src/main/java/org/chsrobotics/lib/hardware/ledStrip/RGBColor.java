@@ -14,7 +14,7 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.hardware.LEDStrip;
+package org.chsrobotics.lib.hardware.ledStrip;
 
 /** Represents a color in Red-Green-Blue space, with methods for manipulating said color. */
 public class RGBColor {
