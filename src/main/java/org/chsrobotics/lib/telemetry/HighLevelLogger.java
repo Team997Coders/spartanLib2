@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -37,6 +37,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
 
 /**
  * Convenience wrapper class for telemetry/ logging with built-in logging for robot-agnostic data
@@ -45,40 +46,41 @@ import java.util.Map;
  * <p>For the internally included loggers of system status to function, the method {@code
  * logPeriodic()} needs to be called once per robot loop cycle.
  */
-public class HighLevelLogger {
-    private static boolean hasStarted = false;
-    private static final String commitDataFilename = "commit.txt";
-    private static final String branchDataFilename = "branch.txt";
+public class HighLevelLogger implements IntrinsicLoggable {
+    private static HighLevelLogger instance = new HighLevelLogger();
 
-    private static HashMap<Command, Timer> commandTimeMap = new HashMap<>();
+    private boolean hasStarted = false;
+    private final String commitDataFilename = "commit.txt";
+    private final String branchDataFilename = "branch.txt";
 
-    private static final Logger<String[]> scheduledCommandsLogger =
-            new Logger<>("scheduledCommands", "commandScheduler");
+    private final HashMap<Command, Timer> commandTimeMap = new HashMap<>();
+    private int brownoutCounter = 0;
 
-    private static final String subdirString = "System";
+    private Logger<String[]> scheduledCommandsLogger;
 
-    private static final Logger<Boolean> isBrownedOutLogger =
-            new Logger<>("isBrownedOut", subdirString);
+    private Logger<Boolean> isBrownedOutLogger;
 
-    private static final Logger<Double> canUtilizationLogger =
-            new Logger<>("canUtilizationPercent", subdirString);
+    private Logger<Double> canUtilizationLogger;
 
-    private static final Logger<Double> batteryVoltageLogger =
-            new Logger<>("batteryVoltageVolts", subdirString);
+    private Logger<Double> batteryVoltageLogger;
 
-    private static final Logger<Double> logger3p3vCurrent =
-            new Logger<>("3p3vCurrentAmps", subdirString);
-    private static final Logger<Double> logger5vCurrent =
-            new Logger<>("5vCurrentAmps", subdirString);
+    private Logger<Double> logger3_3vCurrent;
 
-    private static final Logger<Integer> brownoutCounterLogger =
-            new Logger<>("brownoutCounter", subdirString);
-    private static int brownoutCounter = 0;
+    private Logger<Double> logger5vCurrent;
 
-    private static final NetworkTable sendables =
-            NetworkTableInstance.getDefault().getTable("sendables");
+    private Logger<Integer> brownoutCountLogger;
 
-    private static final Map<String, Sendable> tablesToData = new HashMap<>();
+    private boolean loggersConstructed = false;
+
+    private final NetworkTable sendables = NetworkTableInstance.getDefault().getTable("sendables");
+
+    private final Map<String, Sendable> tablesToData = new HashMap<>();
+
+    private HighLevelLogger() {}
+
+    public static HighLevelLogger getInstance() {
+        return instance;
+    }
 
     /**
      * Starts the HighLevelLogger.
@@ -92,12 +94,11 @@ public class HighLevelLogger {
      * href="https://docs.wpilib.org/en/stable/docs/software/advanced-gradlerio/deploy-git-data.html">this</a>
      * documentation from WPI.
      */
-    public static void startLogging() {
+    public void startLogging() {
         if (!hasStarted) {
-            CommandScheduler.getInstance().onCommandInitialize(HighLevelLogger::logCommandInit);
-            CommandScheduler.getInstance().onCommandFinish(HighLevelLogger::logCommandFinished);
-            CommandScheduler.getInstance()
-                    .onCommandInterrupt(HighLevelLogger::logCommandInterrupted);
+            CommandScheduler.getInstance().onCommandInitialize(getInstance()::logCommandInit);
+            CommandScheduler.getInstance().onCommandFinish(getInstance()::logCommandFinished);
+            CommandScheduler.getInstance().onCommandInterrupt(getInstance()::logCommandInterrupted);
 
             hasStarted = true;
             DataLogManager.logNetworkTables(false);
@@ -133,41 +134,11 @@ public class HighLevelLogger {
     }
 
     /**
-     * Method to be called once per robot loop cycle, updating the various Loggers wrapped by this
-     * class.
-     */
-    public static void logPeriodic() {
-        ArrayList<String> commands = new ArrayList<>();
-
-        for (Command command : commandTimeMap.keySet()) {
-            commands.add(command.getName());
-        }
-
-        scheduledCommandsLogger.update(commands.toArray(new String[] {}));
-
-        if (RobotController.getBatteryVoltage() < RobotController.getBrownoutVoltage()) {
-            brownoutCounter++;
-            isBrownedOutLogger.update(true);
-        } else {
-            isBrownedOutLogger.update(false);
-        }
-
-        brownoutCounterLogger.update(brownoutCounter);
-
-        canUtilizationLogger.update(RobotController.getCANStatus().percentBusUtilization);
-
-        batteryVoltageLogger.update(RobotController.getBatteryVoltage());
-
-        logger3p3vCurrent.update(RobotController.getCurrent3V3());
-        logger5vCurrent.update(RobotController.getCurrent5V());
-    }
-
-    /**
      * Returns the DataLog populated by this, for use in more-granular and robot-specific logging.
      *
      * @return The DataLog.
      */
-    public static DataLog getLog() {
+    public DataLog getLog() {
         if (!hasStarted) {
             startLogging();
         }
@@ -180,7 +151,7 @@ public class HighLevelLogger {
      *
      * @param message The message to log.
      */
-    public static void logMessage(String message) {
+    public void logMessage(String message) {
         if (!hasStarted) {
             startLogging();
         }
@@ -193,7 +164,7 @@ public class HighLevelLogger {
      *
      * @param message The String message to associate with the warning.
      */
-    public static void logWarning(String message) {
+    public void logWarning(String message) {
         logMessage("WARNING " + message);
         DriverStation.reportWarning(message, false);
     }
@@ -204,7 +175,7 @@ public class HighLevelLogger {
      *
      * @param message The String message to associate with the error.
      */
-    public static void logError(String message) {
+    public void logError(String message) {
         logMessage("ERROR " + message);
         DriverStation.reportError(message, false);
     }
@@ -215,7 +186,7 @@ public class HighLevelLogger {
      * @param key String key to associate with the object.
      * @param data Sendable object.
      */
-    public static synchronized void publishSendable(String key, Sendable data) {
+    public synchronized void publishSendable(String key, Sendable data) {
         Sendable sddata = tablesToData.get(key);
         if (sddata == null || sddata != data) {
             tablesToData.put(key, data);
@@ -228,7 +199,67 @@ public class HighLevelLogger {
         }
     }
 
-    private static void logCommandInit(Command command) {
+    @Override
+    /** {@inheritDoc} */
+    public void autoGenerateLogs(
+            DataLog log, String name, String subdirName, boolean publishToNT, boolean recordInLog) {
+        if (!loggersConstructed) {
+            LoggerFactory<Double> doubleLogFactory =
+                    new LoggerFactory<>(log, "system", publishToNT, recordInLog);
+
+            scheduledCommandsLogger = new Logger<>("scheduledCommands", "commandScheduler");
+
+            isBrownedOutLogger = new Logger<>("isBrownedOut", "system");
+
+            canUtilizationLogger = doubleLogFactory.getLogger("canUtilitzation_percent");
+
+            batteryVoltageLogger = doubleLogFactory.getLogger("batteryVoltage_volts");
+
+            logger3_3vCurrent = doubleLogFactory.getLogger("3.3vCurrent_amps");
+
+            logger5vCurrent = doubleLogFactory.getLogger("5vCurrent_amps");
+
+            brownoutCountLogger = new Logger<>("brownoutCount", "system");
+
+            loggersConstructed = true;
+        }
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public void updateLogs() {
+        if (!loggersConstructed) {
+            if (RobotController.getBatteryVoltage() < RobotController.getBrownoutVoltage()) {
+                brownoutCounter++;
+            }
+        } else {
+            ArrayList<String> commands = new ArrayList<>();
+
+            for (Command command : commandTimeMap.keySet()) {
+                commands.add(command.getName());
+            }
+
+            scheduledCommandsLogger.update(commands.toArray(new String[] {}));
+
+            if (RobotController.getBatteryVoltage() < RobotController.getBrownoutVoltage()) {
+                brownoutCounter++;
+                isBrownedOutLogger.update(true);
+            } else {
+                isBrownedOutLogger.update(false);
+            }
+
+            brownoutCountLogger.update(brownoutCounter);
+
+            canUtilizationLogger.update(RobotController.getCANStatus().percentBusUtilization);
+
+            batteryVoltageLogger.update(RobotController.getBatteryVoltage());
+
+            logger3_3vCurrent.update(RobotController.getCurrent3V3());
+            logger5vCurrent.update(RobotController.getCurrent5V());
+        }
+    }
+
+    private void logCommandInit(Command command) {
         logMessage("Command initialized: " + command.getName());
 
         Timer timer = new Timer();
@@ -238,7 +269,7 @@ public class HighLevelLogger {
         commandTimeMap.put(command, timer);
     }
 
-    private static void logCommandFinished(Command command) {
+    private void logCommandFinished(Command command) {
         logMessage(
                 "Command finished after "
                         + commandTimeMap.get(command).get()
@@ -248,7 +279,7 @@ public class HighLevelLogger {
         commandTimeMap.remove(command);
     }
 
-    private static void logCommandInterrupted(Command command) {
+    private void logCommandInterrupted(Command command) {
         logMessage(
                 "Command interrupted after "
                         + commandTimeMap.get(command).get()
