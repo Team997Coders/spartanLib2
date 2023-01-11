@@ -21,19 +21,17 @@ Reusable robot code for FIRST Robotics Competition Team 997.
 </div>
 
 ## Contents:
-Currently, the library contains 8 sub-packages:
+Currently, the library contains 9 sub-packages:
 
-- `commands`: Command Framework Abstractions
-- `controllers`: Feedback Controllers
-- `drive`: Differential Drive Modes
-- `input`: Joystick Wrappers
-- `math`: Filters, Utility Operations
+- `commands`: Command framework abstractions
+- `controllers`: Feedback controllers
+- `drive`: Differential drive modes
+- `hardware`: Wrappers and abstractions for common FRC hardware
+- `input`: Joystick wrappers
+- `math`: Filters, utility operations
 - `telemetry`: Logging
-- `trajectory`: Trajectory Generation, Motion Profiles
-- `util`: Utility
-
-Future expansion will likely create a `hardware` package, containing abstractions for various hardware APIs for FRC, and a `subsystem` package for WPILib subsystems.
-
+- `trajectory`: Trajectory generation, motion profiles
+- `util`: Utilities
 
 ## Contributing:
 If you're a member of the Team997Coders org, you can simply create a branch inside this repo and make a pull request to `dev` when you're finished. Currently, 1 review is required and checks must pass to merge to `dev`. No direct commits to `main` are allowed.
