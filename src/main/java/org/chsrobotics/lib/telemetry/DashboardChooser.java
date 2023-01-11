@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -121,7 +121,7 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
         if (logChanges) {
             logger =
                     new Logger<T>(
-                            HighLevelLogger.getLog(),
+                            HighLevelLogger.getInstance().getLog(),
                             "DashboardChooser" + channel,
                             "DashboardChooser",
                             false,
@@ -175,7 +175,7 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
     public void initSendable(NTSendableBuilder builder) {
         builder.setSmartDashboardType("String Chooser");
         // sets the channel
-        builder.getEntry(".instance").setDouble(channel);
+        builder.getTable().getEntry(".instance").setDouble(channel);
         // set the default option
         builder.addStringProperty("default", () -> defaultOption, null);
         // populate the options
@@ -195,7 +195,7 @@ public class DashboardChooser<T> implements NTSendable, AutoCloseable {
                 null);
         mutex.lock();
         try {
-            activeEntries.add(builder.getEntry("active"));
+            activeEntries.add(builder.getTable().getEntry("active"));
         } finally {
             mutex.unlock();
         }

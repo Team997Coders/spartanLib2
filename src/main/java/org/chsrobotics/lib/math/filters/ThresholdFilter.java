@@ -20,7 +20,7 @@ package org.chsrobotics.lib.math.filters;
  * A filter that completely attentuates any value (infinite impulse) below or above a defined
  * threshold.
  */
-public class ThresholdFilter implements Filter {
+public class ThresholdFilter extends Filter {
     private final double threshold;
     private final boolean invert;
     private double currentValue;
@@ -49,10 +49,16 @@ public class ThresholdFilter implements Filter {
     }
 
     @Override
-    /**
-     * This method is inherited from the Filter interface, but is not meaningful for this filter.
-     */
-    public void reset() {}
+    /** {@inheritDoc} */
+    public double calculate(double value, double dtSeconds) {
+        return calculate(value);
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public void reset() {
+        currentValue = 0;
+    }
 
     @Override
     /** {@inheritDoc} */

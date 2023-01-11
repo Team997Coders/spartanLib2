@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -16,7 +16,13 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.controllers;
 
+import edu.wpi.first.util.datalog.DataLog;
 import java.util.Objects;
+import org.chsrobotics.lib.math.UtilityMath;
+import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
+import org.chsrobotics.lib.telemetry.Logger;
+import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
+import org.chsrobotics.lib.util.SizedStack;
 
 /**
  * Implementation of a simple Proportional-Integral-Derivative feedback controller.
@@ -57,7 +63,7 @@ import java.util.Objects;
  * to make a velocity PID controller, or something else with a controlled quantity other than
  * position.
  */
-public class PID {
+public class PID implements FeedbackController, IntrinsicLoggable {
 
     /** Data class for holding the gains to a PID controller. */
     public static class PIDConstants {
@@ -135,17 +141,94 @@ public class PID {
 
     private double lastMeasurement = 0;
     private double lastSetpoint = 0;
-    private double integralAccumulation = 0;
+
+    private double lastPContribution = 0;
+    private double lastIContribution = 0;
+    private double lastDContribution = 0;
+
+    private double maxAbsControlEffort = 0;
+
+    private double maxAbsPContribution = 0;
+    private double maxAbsIContribution = 0;
+    private double maxAbsDContribution = 0;
 
     private double setpoint;
 
     private double velocity = 0;
 
-    private double positionTolerance = 0.02;
-    private double velocityTolerance = 0.02;
+    private double positionTolerance = FeedbackController.defaultPositionErrorToleranceProportion;
+    private double velocityTolerance = FeedbackController.defaultVelocityErrorToleranceProportion;
+
+    private double currentValue = 0;
+
+    private final SizedStack<Double> integrationStack;
+
+    private boolean logsConstructed = false;
+
+    private Logger<Double> pGainLogger;
+    private Logger<Double> iGainLogger;
+    private Logger<Double> dGainLogger;
+
+    private Logger<Double> setpointLogger;
+    private Logger<Double> measurementLogger;
+    private Logger<Double> errorLogger;
+    private Logger<Double> integralAccumulationLogger;
+    private Logger<Double> errorVelocityLogger;
+
+    private Logger<Double> totalControlEffortLogger;
+    private Logger<Double> pControlEffortLogger;
+    private Logger<Double> iControlEffortLogger;
+    private Logger<Double> dControlEffortLogger;
+
+    private Logger<Double> maxAbsControlEffortLogger;
+    private Logger<Double> maxAbsPContributionLogger;
+    private Logger<Double> maxAbsIContributionLogger;
+    private Logger<Double> maxAbsDContributionLogger;
+
+    private Logger<Boolean> atSetpointLogger;
+    private Logger<Double> setpointPositionToleranceLogger;
+    private Logger<Double> setpointVelocityToleranceLogger;
 
     /**
-     * Constructs a PID with given gains.
+     * Constructs a PID with given gains and a finite integration window.
+     *
+     * @param kP The initial proportional gain of the controller.
+     * @param kI The initial integral gain of the controller.
+     * @param kD The initial derivative gain of the controller.
+     * @param integrationWindow The number of past values to consider for integral accumulation. If
+     *     less than or equal to 0, will be an infinite window.
+     * @param initialSetpoint The initial setpoint (or target) of the controller.
+     */
+    public PID(double kP, double kI, double kD, int integrationWindow, double initialSetpoint) {
+        this.kP = kP;
+        this.kI = kI;
+        this.kD = kD;
+
+        integrationStack = new SizedStack<>(integrationWindow);
+
+        setpoint = initialSetpoint;
+        lastSetpoint = initialSetpoint;
+    }
+
+    /**
+     * Constructs a PID with a given PIDConstants and a finite integration window.
+     *
+     * @param constants The PIDConstants containing the gains for this controller.
+     * @param integrationWindow The number of past values to consider for integral accumulation. If
+     *     less than or equal to 0, will be an infinite window.
+     * @param initialSetpoint The initial setpoint (or target) of the controller.
+     */
+    public PID(PIDConstants constants, int integrationWindow, double initialSetpoint) {
+        this(
+                constants.getkP(),
+                constants.getkI(),
+                constants.getkD(),
+                integrationWindow,
+                initialSetpoint);
+    }
+
+    /**
+     * Constructs a PID with given gains and an infinite integration window.
      *
      * @param kP The initial proportional gain of the controller.
      * @param kI The initial integral gain of the controller.
@@ -153,21 +236,58 @@ public class PID {
      * @param initialSetpoint The initial setpoint (or target) of the controller.
      */
     public PID(double kP, double kI, double kD, double initialSetpoint) {
-        this.kP = kP;
-        this.kI = kI;
-        this.kD = kD;
-        setpoint = initialSetpoint;
-        lastSetpoint = initialSetpoint;
+        this(kP, kI, kD, 0, initialSetpoint);
     }
 
     /**
-     * Constructs a PID with a given PIDConstants.
+     * Constructs a PID with a given PIDConstants and an infinite integration window.
      *
      * @param constants The PIDConstants containing the gains for this controller.
      * @param initialSetpoint The initial setpoint (or target) of the controller.
      */
     public PID(PIDConstants constants, double initialSetpoint) {
-        this(constants.getkP(), constants.getkI(), constants.getkD(), initialSetpoint);
+        this(constants, 0, initialSetpoint);
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public void autoGenerateLogs(
+            DataLog log, String name, String subdirName, boolean publishToNT, boolean recordInLog) {
+        if (!logsConstructed) {
+
+            LoggerFactory<Double> doubleLogFactory =
+                    new LoggerFactory<>(log, subdirName, publishToNT, recordInLog);
+
+            pGainLogger = doubleLogFactory.getLogger(name + "/pGain");
+            iGainLogger = doubleLogFactory.getLogger(name + "/iGain");
+            dGainLogger = doubleLogFactory.getLogger(name + "/dGain");
+
+            setpointLogger = doubleLogFactory.getLogger(name + "/setpoint");
+            measurementLogger = doubleLogFactory.getLogger(name + "/measurement");
+            errorLogger = doubleLogFactory.getLogger(name + "/error");
+            integralAccumulationLogger = doubleLogFactory.getLogger(name + "/integralAccumulation");
+            errorVelocityLogger = doubleLogFactory.getLogger(name + "/errorVelocity");
+
+            totalControlEffortLogger = doubleLogFactory.getLogger(name + "/totalControlEffort");
+            pControlEffortLogger = doubleLogFactory.getLogger(name + "/pControlEffort");
+            iControlEffortLogger = doubleLogFactory.getLogger(name + "/iControlEffort");
+            dControlEffortLogger = doubleLogFactory.getLogger(name + "/dControlEffort");
+
+            maxAbsControlEffortLogger = doubleLogFactory.getLogger(name + "/maxAbsControlEffort");
+            maxAbsPContributionLogger = doubleLogFactory.getLogger(name + "/maxAbsPControlEffort");
+            maxAbsIContributionLogger = doubleLogFactory.getLogger(name + "/maxAbsIControlEffort");
+            maxAbsDContributionLogger = doubleLogFactory.getLogger(name + "/maxAbsDControlEffort");
+
+            atSetpointLogger =
+                    new Logger<>(log, name + "/atSetpoint", subdirName, publishToNT, recordInLog);
+
+            setpointPositionToleranceLogger =
+                    doubleLogFactory.getLogger(name + "/setpointPositionTolerance");
+            setpointVelocityToleranceLogger =
+                    doubleLogFactory.getLogger(name + "/setpointVelocityTolerance");
+
+            logsConstructed = true;
+        }
     }
 
     /**
@@ -257,20 +377,14 @@ public class PID {
         this.kD = kD;
     }
 
-    /**
-     * Sets the setpoint (target) of the controller.
-     *
-     * @param value The new target of the controller.
-     */
+    @Override
+    /** {@inheritDoc} */
     public void setSetpoint(double value) {
         setpoint = value;
     }
 
-    /**
-     * Returns the current setpoint (target) of the controller.
-     *
-     * @return The current setpoint.
-     */
+    @Override
+    /** {@inheritDoc} */
     public double getSetpoint() {
         return setpoint;
     }
@@ -282,12 +396,18 @@ public class PID {
      * @return The integral of error with respect to time from the last reset to now.
      */
     public double getIntegralAccumulation() {
-        return integralAccumulation;
+        double integrationSum = 0;
+
+        for (double entry : integrationStack) {
+            integrationSum += entry;
+        }
+
+        return integrationSum;
     }
 
     /** Resets accumulation of past error in the integral term. */
     public void resetIntegralAccumulation() {
-        integralAccumulation = 0;
+        integrationStack.clear();
     }
 
     /** Resets the previous measurement used for velocity approximation for the derivative term. */
@@ -297,6 +417,7 @@ public class PID {
     }
 
     /** Resets all references to past states in the controller, effectively restarting it. */
+    @Override
     public void reset() {
         resetIntegralAccumulation();
         resetPreviousMeasurement();
@@ -310,6 +431,7 @@ public class PID {
      * @param velocityTolerance The maximum allowed absolute velocity per second, as a proportion of
      *     the setpoint / second.
      */
+    @Override
     public void setSetpointTolerance(double positionTolerance, double velocityTolerance) {
         this.positionTolerance = positionTolerance;
         this.velocityTolerance = velocityTolerance;
@@ -333,25 +455,11 @@ public class PID {
         return velocityTolerance;
     }
 
-    /**
-     * Returns the last reported measurement given to the controller.
-     *
-     * @return The last reported measurement (0 if none have been given).
-     */
-    public double getCurrentState() {
-        return lastMeasurement;
-    }
-
-    /**
-     * Returns an output from the controller with a given dt.
-     *
-     * @param measurement The value of the measured feedback.
-     * @param dt The time, in seconds, since the last update of this controller.
-     * @return The sum of the P, I, and D terms of the controller.
-     */
+    @Override
+    /** {@inheritDoc} */
     public double calculate(double measurement, double dt) {
 
-        integralAccumulation += dt * (setpoint - measurement);
+        integrationStack.push(dt * (setpoint - measurement));
 
         if (dt == 0) { // sensible way to handle dt of zero
             velocity = 0;
@@ -359,34 +467,187 @@ public class PID {
             velocity = (((setpoint - measurement) - (lastSetpoint - lastMeasurement)) / dt);
         }
 
-        double p = kP * (setpoint - measurement);
-        double i = kI * integralAccumulation;
-        double d = kD * velocity;
+        double integrationSum = 0;
+
+        for (double entry : integrationStack) {
+            integrationSum += entry;
+        }
+
+        double rawP = kP * (setpoint - measurement);
+        double rawI = kI * integrationSum;
+        double rawD = kD * velocity;
+
+        if (Math.abs(maxAbsPContribution) == 0) lastPContribution = rawP;
+        else lastPContribution = UtilityMath.clamp(maxAbsPContribution, rawP);
+
+        if (Math.abs(maxAbsIContribution) == 0) lastIContribution = rawI;
+        else lastIContribution = UtilityMath.clamp(maxAbsIContribution, rawI);
+
+        if (Math.abs(maxAbsDContribution) == 0) lastDContribution = rawD;
+        else lastDContribution = UtilityMath.clamp(maxAbsDContribution, rawD);
 
         lastMeasurement = measurement;
         lastSetpoint = setpoint;
 
-        return p + i + d;
+        double effortsSum = lastPContribution + lastIContribution + lastDContribution;
+
+        if (Math.abs(maxAbsControlEffort) == 0) currentValue = effortsSum;
+        else currentValue = UtilityMath.clamp(maxAbsControlEffort, effortsSum);
+
+        return currentValue;
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public void updateLogs() {
+        if (logsConstructed) {
+            pGainLogger.update(getkP());
+            iGainLogger.update(getkI());
+            dGainLogger.update(getkD());
+
+            setpointLogger.update(lastSetpoint);
+            measurementLogger.update(lastMeasurement);
+            errorLogger.update(lastSetpoint - lastMeasurement);
+            integralAccumulationLogger.update(getIntegralAccumulation());
+            errorVelocityLogger.update(velocity);
+
+            totalControlEffortLogger.update(currentValue);
+            pControlEffortLogger.update(getPContribution());
+            iControlEffortLogger.update(getIContribution());
+            dControlEffortLogger.update(getDContribution());
+
+            maxAbsControlEffortLogger.update(maxAbsControlEffort);
+            maxAbsPContributionLogger.update(maxAbsPContribution);
+            maxAbsIContributionLogger.update(maxAbsIContribution);
+            maxAbsDContributionLogger.update(maxAbsDContribution);
+
+            atSetpointLogger.update(atSetpoint());
+            setpointPositionToleranceLogger.update(positionTolerance);
+            setpointVelocityToleranceLogger.update(velocityTolerance);
+        }
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public double getCurrentValue() {
+        return currentValue;
     }
 
     /**
-     * Returns an output from the controller with the default robot loop time.
+     * Returns the last result of just the P term.
      *
-     * <p>This must be called at a rate of once every robot loop to be consistent.
-     *
-     * @param measurement The value of the measured feedback.
-     * @return The sum of the P, I, and D terms of the controller.
+     * @return The last P result. Equal to 0 if {@code calculate()} has not been called.
      */
+    public double getPContribution() {
+        return lastPContribution;
+    }
+
+    /**
+     * Returns the last result of just the I term.
+     *
+     * @return The last I result. Equal to 0 if {@code calculate()} has not been called.
+     */
+    public double getIContribution() {
+        return lastIContribution;
+    }
+
+    /**
+     * Returns the last result of just the D term.
+     *
+     * @return The last D result. Equal to 0 if {@code calculate()} has not been called.
+     */
+    public double getDContribution() {
+        return lastDContribution;
+    }
+
+    /**
+     * Sets a new value to use to constrain the maximum absolute control effort from the controller.
+     *
+     * @param newValue The maximum absolute control effort. If zero, no limits are applied.
+     */
+    public void setMaxAbsControlEffort(double newValue) {
+        maxAbsControlEffort = newValue;
+    }
+
+    /**
+     * Sets a new value to use to constrain the maximum absolute contribution from the Proportional
+     * term of the controller.
+     *
+     * @param newValue The maximum absolute contribution of the P term. If zero, no limits are
+     *     applied.
+     */
+    public void setMaxAbsPContribution(double newValue) {
+        maxAbsPContribution = Math.abs(newValue);
+    }
+
+    /**
+     * Sets a new value to use to constrain the maximum absolute contribution from the Integral term
+     * of the controller.
+     *
+     * @param newValue The maximum absolute contribution of the I term. If zero, no limits are
+     *     applied.
+     */
+    public void setMaxAbsIContribution(double newValue) {
+        maxAbsIContribution = Math.abs(newValue);
+    }
+
+    /**
+     * Sets a new value to use to constrain the maximum absolute contribution from the Derivative
+     * term of the controller.
+     *
+     * @param newValue The maximum absolute contribution of the D term. If zero, no limits are
+     *     applied.
+     */
+    public void setMaxDContribution(double newValue) {
+        maxAbsDContribution = Math.abs(newValue);
+    }
+
+    /**
+     * Returns the maximum absolute control effort allowed from the controller.
+     *
+     * @return The maximum absolute P contribution. If zero, no limits are being applied.
+     */
+    public double getMaxAbsControlEffort() {
+        return maxAbsControlEffort;
+    }
+
+    /**
+     * Returns the maximum absolute contribution allowed from the Proportional term of the
+     * controller.
+     *
+     * @return The maximum absolute P contribution. If zero, no limits are being applied.
+     */
+    public double getMaxAbsPContribution() {
+        return maxAbsPContribution;
+    }
+
+    /**
+     * Returns the maximum absolute contribution allowed from the Integral term of the controller.
+     *
+     * @return The maximum absolute I contribution. If zero, no limits are being applied.
+     */
+    public double getMaxAbsIContribution() {
+        return maxAbsIContribution;
+    }
+
+    /**
+     * Returns the maximum absolute contribution allowed from the Derivative term of the controller.
+     *
+     * @return The maximum absolute D contribution. If zero, no limits are being applied.
+     */
+    public double getMaxAbsDContribution() {
+        return maxAbsDContribution;
+    }
+
+    @Override
+    /** {@inheritDoc} */
     public double calculate(double measurement) {
         return calculate(measurement, 0.02);
     }
 
-    /**
-     * Returns whether the controller has reached the setpoint with minimal velocity.
-     *
-     * @return Whether the controller is within the minimum position and velocity errors.
-     */
-    public boolean isAtSetpoint() {
+    @Override
+    /** {@inheritDoc} */
+    public boolean atSetpoint() {
         return (Math.abs(setpoint - lastMeasurement) < Math.abs(positionTolerance * setpoint)
                 && Math.abs(velocity) < Math.abs(velocityTolerance * setpoint));
     }

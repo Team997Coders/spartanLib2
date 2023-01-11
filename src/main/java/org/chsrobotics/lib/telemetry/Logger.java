@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -39,6 +39,60 @@ import java.util.List;
  * @param <T> The data type of the log entry.
  */
 public class Logger<T> {
+
+    /**
+     * Factory class to simplify creating many similar logs at once.
+     *
+     * @param <U> Data type of the loggers to create.
+     */
+    public static class LoggerFactory<U> {
+        private final DataLog log;
+        private final String subdirName;
+        private final boolean publishToNT;
+        private final boolean recordInLog;
+
+        /**
+         * Constructs a LoggerFactory.
+         *
+         * <p>All Loggers constructed with this factory will share these settings.
+         *
+         * @param log The DataLog to log values inside of, most likely from {@code
+         *     HighLevelLogger.getLog()} or whatever log is being used program-wide.
+         * @param subdirName The string name of the existing or new NetworkTables sub-table to write
+         *     to.
+         * @param publishToNT Whether this should push logged values to NetworkTables.
+         * @param recordInLog Whether this should store logged values in an on-robot log file.
+         */
+        public LoggerFactory(
+                DataLog log, String subdirName, boolean publishToNT, boolean recordInLog) {
+            this.log = log;
+            this.subdirName = subdirName;
+            this.publishToNT = publishToNT;
+            this.recordInLog = recordInLog;
+        }
+
+        /**
+         * Constructs a Logger using {@code HighLevelLogger.getLog()}, publishing to NT and logging.
+         *
+         * @param subdirName The string name of the existing or new NetworkTables sub-table to write
+         *     to.
+         */
+        public LoggerFactory(String subdirName) {
+            this(HighLevelLogger.getInstance().getLog(), subdirName, true, true);
+        }
+
+        /**
+         * Constructs and returns a new logger with the parameters given above.
+         *
+         * @param key A string identifier to associate with and describe the data on the dashboard.
+         *     In the log, the string identifier will be "{@code [subdirName]_[key]}".
+         * @return A new Logger.
+         */
+        public Logger<U> getLogger(String key) {
+            return new Logger<>(log, key, subdirName, publishToNT, recordInLog);
+        }
+    }
+
     private final DataLog log;
     private boolean publishToNT;
     private boolean recordInLog;
@@ -90,7 +144,7 @@ public class Logger<T> {
      * @param subdirName The string name of the existing or new NetworkTables sub-table to write to.
      */
     public Logger(String key, String subdirName) {
-        this(HighLevelLogger.getLog(), key, subdirName, true, true);
+        this(HighLevelLogger.getInstance().getLog(), key, subdirName, true, true);
     }
 
     /**
@@ -140,7 +194,8 @@ public class Logger<T> {
     public void update(T value) {
         // this looks *terrible* but it's just the same code repeated over and over for various
         // types
-        if (value instanceof Number) {
+        if (value == null) { // don't care, just catch it
+        } else if (value instanceof Number) {
 
             if (!logEntryExists) {
                 doubleLogEntry = new DoubleLogEntry(log, logEntryIdentifier);
@@ -149,7 +204,7 @@ public class Logger<T> {
             if (recordInLog && !value.equals(previousValue))
                 doubleLogEntry.append(((Number) value).doubleValue());
             if (publishToNT && !value.equals(previousValue))
-                ntEntry.forceSetDouble(((Number) value).doubleValue());
+                ntEntry.setDouble(((Number) value).doubleValue());
 
         } else if (value instanceof Number[]) {
 
@@ -162,7 +217,7 @@ public class Logger<T> {
                 logEntryExists = true;
             }
             if (recordInLog && !value.equals(previousValue)) doubleArrayLogEntry.append(castArray);
-            if (publishToNT && !value.equals(previousValue)) ntEntry.forceSetDoubleArray(castArray);
+            if (publishToNT && !value.equals(previousValue)) ntEntry.setDoubleArray(castArray);
 
         } else if (value instanceof Boolean) {
 
@@ -171,8 +226,7 @@ public class Logger<T> {
                 logEntryExists = true;
             }
             if (recordInLog && !value.equals(previousValue)) boolLogEntry.append((boolean) value);
-            if (publishToNT && !value.equals(previousValue))
-                ntEntry.forceSetBoolean((boolean) value);
+            if (publishToNT && !value.equals(previousValue)) ntEntry.setBoolean((boolean) value);
 
         } else if (value instanceof Boolean[]) {
 
@@ -183,7 +237,7 @@ public class Logger<T> {
             if (recordInLog && !value.equals(previousValue))
                 boolArrayLogEntry.append((boolean[]) value);
             if (publishToNT && !value.equals(previousValue))
-                ntEntry.forceSetBooleanArray((boolean[]) value);
+                ntEntry.setBooleanArray((boolean[]) value);
 
         } else if (value instanceof String) {
 
@@ -192,7 +246,7 @@ public class Logger<T> {
                 logEntryExists = true;
             }
             if (recordInLog && !value.equals(previousValue)) stringLogEntry.append((String) value);
-            if (publishToNT && !value.equals(previousValue)) ntEntry.forceSetString((String) value);
+            if (publishToNT && !value.equals(previousValue)) ntEntry.setString((String) value);
 
         } else if (value instanceof String[]) {
 
@@ -203,7 +257,7 @@ public class Logger<T> {
             if (recordInLog && !value.equals(previousValue))
                 stringArrayLogEntry.append((String[]) value);
             if (publishToNT && !value.equals(previousValue))
-                ntEntry.forceSetStringArray((String[]) value);
+                ntEntry.setStringArray((String[]) value);
 
         } else {
 
@@ -214,7 +268,7 @@ public class Logger<T> {
             if (recordInLog && !value.equals(previousValue))
                 stringLogEntry.append(value.toString());
             if (publishToNT && !value.equals(previousValue)) {
-                ntEntry.forceSetString(value.toString());
+                ntEntry.setString(value.toString());
             }
         }
         previousValue = value;
