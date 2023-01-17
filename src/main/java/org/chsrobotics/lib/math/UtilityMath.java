@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -209,38 +209,6 @@ public class UtilityMath {
         double neg = (-coeffB - Math.pow(sqrtSafety, 0.5)) / (2 * coeffA);
 
         return Tuple2.of(pos, neg);
-    }
-
-    /**
-     * Takes in a series of numbers and returns their arithmetic mean.
-     *
-     * @param inputs The values to average. If empty, this will return {@code 0}.
-     * @return The arithmetic mean of the values.
-     */
-    public static double arithmeticMean(double... inputs) {
-        if (inputs.length == 0) return 0;
-
-        double sum = 0;
-
-        for (double value : inputs) sum += value;
-
-        return sum / inputs.length;
-    }
-
-    /**
-     * Takes in a series of numbers and returns their geometric mean.
-     *
-     * @param inputs The values to average. If empty, this will return {@code 0}.
-     * @return The geometric mean of the values.
-     */
-    public static double geometricMean(double... inputs) {
-        if (inputs.length == 0) return 0;
-
-        double product = 1;
-
-        for (double value : inputs) product = product * value;
-
-        return root(product, inputs.length);
     }
 
     /**
@@ -465,5 +433,66 @@ public class UtilityMath {
      */
     public static Tuple2<Double> fromCartesianToPolar(double x, double y) {
         return Tuple2.of(Math.atan2(y, x), hypotenuse(x, y));
+    }
+
+    /**
+     * Computes the arithmetic mean, often called the average, of a set of numbers.
+     *
+     * @param values The numbers to find the arithmetic mean of. If empty, this will return {@code
+     *     0}.
+     * @return The arithmetic mean.
+     */
+    public static double arithmeticMean(double[] values) {
+        if (values.length == 0) return 0;
+
+        double sum = 0;
+
+        for (double entry : values) {
+            sum += entry;
+        }
+
+        return (sum / values.length);
+    }
+
+    /**
+     * Computes the geometric mean of a series of numbers.
+     *
+     * @param values The numbers to find the geometric mean of. If empty, this will return {@code
+     *     0}.
+     * @return The geometric mean.
+     */
+    public static double geometricMean(double[] values) {
+        if (values.length == 0) return 0;
+
+        double product = 1;
+
+        for (double entry : values) {
+            product = product * entry;
+        }
+
+        return Math.pow(product, 1 / values.length);
+    }
+
+    /**
+     * Computes the harmonic mean of a series of numbers.
+     *
+     * <p>If a number input to this is 0, its reciprocal will be defined as 0, and if the arithmetic
+     * mean before reciprocation is 0, this will return 0.
+     *
+     * @param values The numbers to find the harmonic mean of. If empty, this will return {@code 0}.
+     * @return The geometric mean.
+     */
+    public static double harmonicMean(double[] values) {
+        double[] reciprocals = new double[values.length];
+
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] == 0) reciprocals[i] = 0;
+            else reciprocals[i] = (1 / values[i]);
+        }
+
+        double aMean = arithmeticMean(reciprocals);
+
+        if (aMean == 0) return 0;
+        else return (1 / aMean);
     }
 }

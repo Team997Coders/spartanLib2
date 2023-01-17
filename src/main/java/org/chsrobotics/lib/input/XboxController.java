@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -57,6 +57,7 @@ public class XboxController {
     /**
      * Constructs an XboxController connected to a specific port in the driver station application.
      *
+     * @param pollingLoop The EventLoop used to poll button press actions.
      * @param port The port reported by the driver station for this controller.
      */
     public XboxController(EventLoop pollingLoop, int port) {
@@ -64,6 +65,12 @@ public class XboxController {
         this.pollingLoop = pollingLoop;
     }
 
+    /**
+     * Constructs an XboxController connected to a specific port in the driver station application,
+     * using the default CommandScheduler event loop.
+     *
+     * @param port The port reported by the driver station for this controller.
+     */
     public XboxController(int port) {
         this(CommandScheduler.getInstance().getDefaultButtonLoop(), port);
     }
@@ -274,7 +281,8 @@ public class XboxController {
 
     private JoystickButton getJoystickButton(int index) {
         if (buttonAllocations.get(index)) {
-            HighLevelLogger.logWarning("Joystick button at port " + index + " already allocated!");
+            HighLevelLogger.getInstance()
+                    .logWarning("Joystick button at port " + index + " already allocated!");
         } else buttonAllocations.replace(index, true);
 
         return new JoystickButton(
@@ -283,7 +291,8 @@ public class XboxController {
 
     private JoystickAxis getJoystickAxis(int index) {
         if (axisAllocations.get(index)) {
-            HighLevelLogger.logWarning("Joystick axis at port " + index + " already allocated!");
+            HighLevelLogger.getInstance()
+                    .logWarning("Joystick axis at port " + index + " already allocated!");
         } else {
             axisAllocations.replace(index, true);
         }

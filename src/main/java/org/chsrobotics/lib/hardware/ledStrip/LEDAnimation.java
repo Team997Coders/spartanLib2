@@ -1,5 +1,5 @@
 /**
-Copyright 2022-2023 FRC Team 997
+Copyright 2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -14,23 +14,24 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.math.geometry;
+package org.chsrobotics.lib.hardware.ledStrip;
 
-/** Special case of a Vector3D in two dimensions. */
-public class Vector2D extends Vector3D {
+/**
+ * Interface for LEDAnimation sequences, which can pre-generated or made at runtime by implementing
+ * classes.
+ */
+public interface LEDAnimation {
     /**
-     * Constructs a 2-dimensional vector.
+     * Returns the number of pixels per each frame.
      *
-     * @param x The X (i-hat, positive to the horizontal right on a graph) component of the vector.
-     * @param y The Y (j-hat, positive up vertically on a graph) component of the vector.
+     * @return The expected number of pixels contained by every frame.
      */
-    public Vector2D(double x, double y) {
-        super(x, y, 0);
-    }
+    int numberOfPixelsPerFrame();
 
-    @Override
-    /** {@inheritDoc} */
-    public double getZ() {
-        return 0;
-    }
+    /**
+     * Returns the current frame of the LEDAnimation.
+     *
+     * @return The LEDAnimation to display.
+     */
+    LEDAnimationFrame getNextFrame();
 }

@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -16,9 +16,13 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.controllers.feedback;
 
+import edu.wpi.first.util.datalog.DataLog;
 import java.util.Objects;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.chsrobotics.lib.math.UtilityMath;
+import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
+import org.chsrobotics.lib.telemetry.Logger;
+import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
+import org.chsrobotics.lib.util.SizedStack;
 
 /**
  * Implementation of a simple Proportional-Integral-Derivative feedback controller.
@@ -59,7 +63,7 @@ import org.chsrobotics.lib.math.UtilityMath;
  * to make a velocity PID controller, or something else with a controlled quantity other than
  * position.
  */
-public class PID implements FeedbackController {
+public class PID implements FeedbackController, IntrinsicLoggable {
 
     /** Data class for holding the gains to a PID controller. */
     public static class PIDConstants {
@@ -142,6 +146,8 @@ public class PID implements FeedbackController {
     private double lastIContribution = 0;
     private double lastDContribution = 0;
 
+    private double maxAbsControlEffort = 0;
+
     private double maxAbsPContribution = 0;
     private double maxAbsIContribution = 0;
     private double maxAbsDContribution = 0;
@@ -155,7 +161,33 @@ public class PID implements FeedbackController {
 
     private double currentValue = 0;
 
-    private final DescriptiveStatistics integrationValues;
+    private final SizedStack<Double> integrationStack;
+
+    private boolean logsConstructed = false;
+
+    private Logger<Double> pGainLogger;
+    private Logger<Double> iGainLogger;
+    private Logger<Double> dGainLogger;
+
+    private Logger<Double> setpointLogger;
+    private Logger<Double> measurementLogger;
+    private Logger<Double> errorLogger;
+    private Logger<Double> integralAccumulationLogger;
+    private Logger<Double> errorVelocityLogger;
+
+    private Logger<Double> totalControlEffortLogger;
+    private Logger<Double> pControlEffortLogger;
+    private Logger<Double> iControlEffortLogger;
+    private Logger<Double> dControlEffortLogger;
+
+    private Logger<Double> maxAbsControlEffortLogger;
+    private Logger<Double> maxAbsPContributionLogger;
+    private Logger<Double> maxAbsIContributionLogger;
+    private Logger<Double> maxAbsDContributionLogger;
+
+    private Logger<Boolean> atSetpointLogger;
+    private Logger<Double> setpointPositionToleranceLogger;
+    private Logger<Double> setpointVelocityToleranceLogger;
 
     /**
      * Constructs a PID with given gains and a finite integration window.
@@ -172,10 +204,7 @@ public class PID implements FeedbackController {
         this.kI = kI;
         this.kD = kD;
 
-        integrationValues =
-                (integrationWindow < 1)
-                        ? new DescriptiveStatistics()
-                        : new DescriptiveStatistics(integrationWindow);
+        integrationStack = new SizedStack<>(integrationWindow);
 
         setpoint = initialSetpoint;
         lastSetpoint = initialSetpoint;
@@ -218,6 +247,47 @@ public class PID implements FeedbackController {
      */
     public PID(PIDConstants constants, double initialSetpoint) {
         this(constants, 0, initialSetpoint);
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public void autoGenerateLogs(
+            DataLog log, String name, String subdirName, boolean publishToNT, boolean recordInLog) {
+        if (!logsConstructed) {
+
+            LoggerFactory<Double> doubleLogFactory =
+                    new LoggerFactory<>(log, subdirName, publishToNT, recordInLog);
+
+            pGainLogger = doubleLogFactory.getLogger(name + "/pGain");
+            iGainLogger = doubleLogFactory.getLogger(name + "/iGain");
+            dGainLogger = doubleLogFactory.getLogger(name + "/dGain");
+
+            setpointLogger = doubleLogFactory.getLogger(name + "/setpoint");
+            measurementLogger = doubleLogFactory.getLogger(name + "/measurement");
+            errorLogger = doubleLogFactory.getLogger(name + "/error");
+            integralAccumulationLogger = doubleLogFactory.getLogger(name + "/integralAccumulation");
+            errorVelocityLogger = doubleLogFactory.getLogger(name + "/errorVelocity");
+
+            totalControlEffortLogger = doubleLogFactory.getLogger(name + "/totalControlEffort");
+            pControlEffortLogger = doubleLogFactory.getLogger(name + "/pControlEffort");
+            iControlEffortLogger = doubleLogFactory.getLogger(name + "/iControlEffort");
+            dControlEffortLogger = doubleLogFactory.getLogger(name + "/dControlEffort");
+
+            maxAbsControlEffortLogger = doubleLogFactory.getLogger(name + "/maxAbsControlEffort");
+            maxAbsPContributionLogger = doubleLogFactory.getLogger(name + "/maxAbsPControlEffort");
+            maxAbsIContributionLogger = doubleLogFactory.getLogger(name + "/maxAbsIControlEffort");
+            maxAbsDContributionLogger = doubleLogFactory.getLogger(name + "/maxAbsDControlEffort");
+
+            atSetpointLogger =
+                    new Logger<>(log, name + "/atSetpoint", subdirName, publishToNT, recordInLog);
+
+            setpointPositionToleranceLogger =
+                    doubleLogFactory.getLogger(name + "/setpointPositionTolerance");
+            setpointVelocityToleranceLogger =
+                    doubleLogFactory.getLogger(name + "/setpointVelocityTolerance");
+
+            logsConstructed = true;
+        }
     }
 
     /**
@@ -326,12 +396,18 @@ public class PID implements FeedbackController {
      * @return The integral of error with respect to time from the last reset to now.
      */
     public double getIntegralAccumulation() {
-        return integrationValues.getSum();
+        double integrationSum = 0;
+
+        for (double entry : integrationStack) {
+            integrationSum += entry;
+        }
+
+        return integrationSum;
     }
 
     /** Resets accumulation of past error in the integral term. */
     public void resetIntegralAccumulation() {
-        integrationValues.clear();
+        integrationStack.clear();
     }
 
     /** Resets the previous measurement used for velocity approximation for the derivative term. */
@@ -383,7 +459,7 @@ public class PID implements FeedbackController {
     /** {@inheritDoc} */
     public double calculate(double measurement, double dt) {
 
-        integrationValues.addValue(dt * (setpoint - measurement));
+        integrationStack.push(dt * (setpoint - measurement));
 
         if (dt == 0) { // sensible way to handle dt of zero
             velocity = 0;
@@ -391,8 +467,14 @@ public class PID implements FeedbackController {
             velocity = (((setpoint - measurement) - (lastSetpoint - lastMeasurement)) / dt);
         }
 
+        double integrationSum = 0;
+
+        for (double entry : integrationStack) {
+            integrationSum += entry;
+        }
+
         double rawP = kP * (setpoint - measurement);
-        double rawI = kI * integrationValues.getSum();
+        double rawI = kI * integrationSum;
         double rawD = kD * velocity;
 
         if (Math.abs(maxAbsPContribution) == 0) lastPContribution = rawP;
@@ -407,9 +489,42 @@ public class PID implements FeedbackController {
         lastMeasurement = measurement;
         lastSetpoint = setpoint;
 
-        currentValue = lastPContribution + lastIContribution + lastDContribution;
+        double effortsSum = lastPContribution + lastIContribution + lastDContribution;
+
+        if (Math.abs(maxAbsControlEffort) == 0) currentValue = effortsSum;
+        else currentValue = UtilityMath.clamp(maxAbsControlEffort, effortsSum);
 
         return currentValue;
+    }
+
+    @Override
+    /** {@inheritDoc} */
+    public void updateLogs() {
+        if (logsConstructed) {
+            pGainLogger.update(getkP());
+            iGainLogger.update(getkI());
+            dGainLogger.update(getkD());
+
+            setpointLogger.update(lastSetpoint);
+            measurementLogger.update(lastMeasurement);
+            errorLogger.update(lastSetpoint - lastMeasurement);
+            integralAccumulationLogger.update(getIntegralAccumulation());
+            errorVelocityLogger.update(velocity);
+
+            totalControlEffortLogger.update(currentValue);
+            pControlEffortLogger.update(getPContribution());
+            iControlEffortLogger.update(getIContribution());
+            dControlEffortLogger.update(getDContribution());
+
+            maxAbsControlEffortLogger.update(maxAbsControlEffort);
+            maxAbsPContributionLogger.update(maxAbsPContribution);
+            maxAbsIContributionLogger.update(maxAbsIContribution);
+            maxAbsDContributionLogger.update(maxAbsDContribution);
+
+            atSetpointLogger.update(atSetpoint());
+            setpointPositionToleranceLogger.update(positionTolerance);
+            setpointVelocityToleranceLogger.update(velocityTolerance);
+        }
     }
 
     @Override
@@ -446,6 +561,15 @@ public class PID implements FeedbackController {
     }
 
     /**
+     * Sets a new value to use to constrain the maximum absolute control effort from the controller.
+     *
+     * @param newValue The maximum absolute control effort. If zero, no limits are applied.
+     */
+    public void setMaxAbsControlEffort(double newValue) {
+        maxAbsControlEffort = newValue;
+    }
+
+    /**
      * Sets a new value to use to constrain the maximum absolute contribution from the Proportional
      * term of the controller.
      *
@@ -476,6 +600,15 @@ public class PID implements FeedbackController {
      */
     public void setMaxDContribution(double newValue) {
         maxAbsDContribution = Math.abs(newValue);
+    }
+
+    /**
+     * Returns the maximum absolute control effort allowed from the controller.
+     *
+     * @return The maximum absolute P contribution. If zero, no limits are being applied.
+     */
+    public double getMaxAbsControlEffort() {
+        return maxAbsControlEffort;
     }
 
     /**
