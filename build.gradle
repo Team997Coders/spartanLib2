@@ -90,7 +90,7 @@ publishing {
 		maven(MavenPublication) {
 			groupId 'org.chsrobotics.lib'
 			artifactId 'spartanLib2'
-			version '1.2.0'
+			version '1.3.0-BETA'
 
 			from components.java
 
