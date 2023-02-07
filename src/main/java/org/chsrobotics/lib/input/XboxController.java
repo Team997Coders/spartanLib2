@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.event.EventLoop;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import java.util.HashMap;
 import java.util.Map;
 import org.chsrobotics.lib.telemetry.HighLevelLogger;
 
@@ -30,27 +31,29 @@ public class XboxController {
     private double rightRumble = 0;
     private double leftRumble = 0;
 
-    private final Map<Integer, Boolean> axisAllocations =
-            Map.ofEntries(
-                    Map.entry(0, false),
-                    Map.entry(1, false),
-                    Map.entry(2, false),
-                    Map.entry(3, false),
-                    Map.entry(4, false),
-                    Map.entry(5, false));
+    private final HashMap<Integer, Boolean> axisAllocations =
+            new HashMap<>(
+                    Map.ofEntries(
+                            Map.entry(0, false),
+                            Map.entry(1, false),
+                            Map.entry(2, false),
+                            Map.entry(3, false),
+                            Map.entry(4, false),
+                            Map.entry(5, false)));
 
-    private final Map<Integer, Boolean> buttonAllocations =
-            Map.ofEntries(
-                    Map.entry(1, false),
-                    Map.entry(2, false),
-                    Map.entry(3, false),
-                    Map.entry(4, false),
-                    Map.entry(5, false),
-                    Map.entry(6, false),
-                    Map.entry(7, false),
-                    Map.entry(8, false),
-                    Map.entry(9, false),
-                    Map.entry(10, false));
+    private final HashMap<Integer, Boolean> buttonAllocations =
+            new HashMap<>(
+                    Map.ofEntries(
+                            Map.entry(1, false),
+                            Map.entry(2, false),
+                            Map.entry(3, false),
+                            Map.entry(4, false),
+                            Map.entry(5, false),
+                            Map.entry(6, false),
+                            Map.entry(7, false),
+                            Map.entry(8, false),
+                            Map.entry(9, false),
+                            Map.entry(10, false)));
 
     private final EventLoop pollingLoop;
 
