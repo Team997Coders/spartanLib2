@@ -43,6 +43,15 @@ public class Node<T> {
     }
 
     /**
+     * Constructs a new node.
+     *
+     * @param data Data to associate with this node.
+     */
+    public Node(T data) {
+        this.data = data;
+    }
+
+    /**
      * Returns the data associated with this node.
      *
      * @return The data held by the node.

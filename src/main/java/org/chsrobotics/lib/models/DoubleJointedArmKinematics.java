@@ -14,7 +14,7 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.kinematics;
+package org.chsrobotics.lib.models;
 
 import org.chsrobotics.lib.util.Tuple2;
 
@@ -24,21 +24,22 @@ import org.chsrobotics.lib.util.Tuple2;
  *
  * <p>Units of linear distance in this class are not specified, but must be consistent.
  */
-public class RevoluteRevoluteKinematics {
+public class DoubleJointedArmKinematics {
 
     /** Data class holding information about the state of a double revolute-jointed arm. */
     public static class RRConfiguration {
         /**
-         * Angle of joint A (the joint connected to the root), in radians, from (counterclockwise)
-         * the horizontal (or the positive x-axis in non-vertically oriented setups).
+         * Angle of the local joint (the joint connected to the root), in radians, from
+         * (counterclockwise) the horizontal (or the positive x-axis in non-vertically oriented
+         * setups).
          */
-        public final double jointAAngle;
+        public final double localAngle;
 
         /**
-         * Angle of joint B (the joint between arm segments), in radians, from (counterclockwise)
-         * parallel with joint A.
+         * Angle of the distal joint (the joint between arm segments), in radians, from
+         * (counterclockwise) parallel with joint A.
          */
-        public final double jointBAngle;
+        public final double distalAngle;
 
         /**
          * Angle of the end effector, in radians, from (counterclockwise) the horizontal (or the
@@ -55,24 +56,24 @@ public class RevoluteRevoluteKinematics {
         /**
          * Constructs an RRConfiguration.
          *
-         * @param jointAAngle Angle of joint A (the joint connected to the root), in radians, from
-         *     (counterclockwise) the horizontal (or the positive x-axis in non-vertically oriented
-         *     setups).
-         * @param jointBAngle Angle of joint B (the joint between arm segments), in radians, from
-         *     (counterclockwise) parallel with joint A.
+         * @param localAngle Angle of the local joint (the joint connected to the root), in radians,
+         *     from (counterclockwise) the horizontal (or the positive x-axis in non-vertically
+         *     oriented setups).
+         * @param distalAngle Angle of the distal joint (the joint between arm segments), in
+         *     radians, from (counterclockwise) parallel with the local joint.
          * @param endEffectorAngle Angle of the end effector, in radians, from (counterclockwise)
          *     the horizontal (or the positive x-axis in non-vertically oriented setups).
          * @param endEffectorX The x-position of the end effector in Cartesian space.
          * @param endEffectorY The y-position of the end effector in Cartesian space.
          */
         public RRConfiguration(
-                double jointAAngle,
-                double jointBAngle,
+                double localAngle,
+                double distalAngle,
                 double endEffectorAngle,
                 double endEffectorX,
                 double endEffectorY) {
-            this.jointAAngle = jointAAngle;
-            this.jointBAngle = jointBAngle;
+            this.localAngle = localAngle;
+            this.distalAngle = distalAngle;
             this.endEffectorAngle = endEffectorAngle;
             this.endEffectorX = endEffectorX;
             this.endEffectorY = endEffectorY;
@@ -80,10 +81,10 @@ public class RevoluteRevoluteKinematics {
 
         @Override
         public String toString() {
-            return ("RevoluteRevolute Configuration: jointAAngle: "
-                    + jointAAngle
-                    + ", jointBAngle: "
-                    + jointBAngle
+            return ("Double Jointed Arm Configuration: localAngle: "
+                    + localAngle
+                    + ", distalAngle: "
+                    + distalAngle
                     + ", endEffectorAngle: "
                     + endEffectorAngle
                     + ", endEffectorX: "
@@ -97,8 +98,8 @@ public class RevoluteRevoluteKinematics {
             if (other instanceof RRConfiguration) {
                 RRConfiguration rhs = (RRConfiguration) other;
 
-                return (rhs.jointAAngle == this.jointAAngle
-                        && rhs.jointBAngle == this.jointBAngle
+                return (rhs.localAngle == this.localAngle
+                        && rhs.distalAngle == this.distalAngle
                         && rhs.endEffectorAngle == this.endEffectorAngle
                         && rhs.endEffectorX == this.endEffectorX
                         && rhs.endEffectorY == this.endEffectorY);
@@ -106,45 +107,47 @@ public class RevoluteRevoluteKinematics {
         }
     }
 
-    /** Length of arm segment A (the segment closest to the root). */
-    public final double lengthA;
+    /** Length of the local segment (the segment closest to the root). */
+    public final double localLength;
 
-    /** Length of arm segment B (the segment closest to the end effector). */
-    public final double lengthB;
+    /** Length of the distal segment (the segment closest to the end effector). */
+    public final double distalLength;
 
     /**
-     * Constructs a RevoluteRevoluteKinematics.
+     * Constructs a DoubleJointedArmKinematics.
      *
      * <p>If either of the below are zero or less, this class's methods will return {@code null}.
      *
-     * @param lengthA Length of arm segment A (the segment closest to the root).
-     * @param lengthB Length of arm segment B (the segment closest to the end effector).
+     * @param localLength Length of the local segment (the segment closest to the root).
+     * @param distalLength Length of the distal segment (the segment closest to the end effector).
      */
-    public RevoluteRevoluteKinematics(double lengthA, double lengthB) {
-        this.lengthA = lengthA;
-        this.lengthB = lengthB;
+    public DoubleJointedArmKinematics(double localLength, double distalLength) {
+        this.localLength = localLength;
+        this.distalLength = distalLength;
     }
 
     /**
      * Determines the position of the end effector in 2-dimensional space, given the angles of the
      * joints.
      *
-     * @param jointAAngle Angle of joint A (the joint connected to the root), in radians, from
-     *     (counterclockwise) the horizontal (or the positive x-axis in non-vertically oriented
+     * @param localAngle Angle of the local joint (the joint connected to the root), in radians,
+     *     from (counterclockwise) the horizontal (or the positive x-axis in non-vertically oriented
      *     setups).
-     * @param jointBAngle Angle of joint B (the joint between arm segments), in radians, from
-     *     (counterclockwise) parallel with joint A.
+     * @param distalAngle Angle of the distal joint (the joint between arm segments), in radians,
+     *     from (counterclockwise) parallel with the local joint.
      * @return A RRConfiguration describing the orientation.
      */
-    public RRConfiguration forwardKinematics(double jointAAngle, double jointBAngle) {
-        if (lengthA <= 0 || lengthB <= 0) return null;
+    public RRConfiguration forwardKinematics(double localAngle, double distalAngle) {
+        if (localLength <= 0 || distalLength <= 0) return null;
 
-        double endEffectorAngle = jointAAngle + jointBAngle;
+        double endEffectorAngle = localAngle + distalAngle;
 
-        double x = (lengthA * Math.cos(jointAAngle)) + (lengthB * Math.cos(endEffectorAngle));
-        double y = (lengthA * Math.sin(jointAAngle)) + (lengthB * Math.sin(endEffectorAngle));
+        double x =
+                (localLength * Math.cos(localAngle)) + (distalLength * Math.cos(endEffectorAngle));
+        double y =
+                (localLength * Math.sin(localAngle)) + (distalLength * Math.sin(endEffectorAngle));
 
-        return new RRConfiguration(jointAAngle, jointBAngle, endEffectorAngle, x, y);
+        return new RRConfiguration(localAngle, distalAngle, endEffectorAngle, x, y);
     }
 
     /**
@@ -168,7 +171,7 @@ public class RevoluteRevoluteKinematics {
      * @return A Tuple2 of up to 2 (possibly 0!) unique valid inverse kinematic solutions.
      */
     public Tuple2<RRConfiguration> inverseKinematics(double endEffectorX, double endEffectorY) {
-        if ((lengthA <= 0 || lengthB <= 0) || (endEffectorX == 0 && endEffectorY == 0))
+        if ((localLength <= 0 || distalLength <= 0) || (endEffectorX == 0 && endEffectorY == 0))
             return Tuple2.of(null, null);
 
         double rootToEffectorVectorDirection = Math.atan2(endEffectorY, endEffectorX);
@@ -179,20 +182,20 @@ public class RevoluteRevoluteKinematics {
         double cosAlpha =
                 (Math.pow(endEffectorX, 2)
                                 + Math.pow(endEffectorY, 2)
-                                + Math.pow(lengthA, 2)
-                                - Math.pow(lengthB, 2))
+                                + Math.pow(localLength, 2)
+                                - Math.pow(distalLength, 2))
                         / (2
-                                * lengthA
+                                * localLength
                                 * Math.pow(
                                         Math.pow(endEffectorX, 2) + Math.pow(endEffectorY, 2),
                                         0.5));
 
         double cosBeta =
-                (Math.pow(lengthA, 2)
-                                + Math.pow(lengthB, 2)
+                (Math.pow(localLength, 2)
+                                + Math.pow(distalLength, 2)
                                 - Math.pow(endEffectorX, 2)
                                 - Math.pow(endEffectorY, 2))
-                        / (2 * lengthA * lengthB);
+                        / (2 * localLength * distalLength);
 
         if (cosAlpha < -1 || cosAlpha > 1 || cosBeta < -1 || cosBeta > 1) {
             lefty = null;

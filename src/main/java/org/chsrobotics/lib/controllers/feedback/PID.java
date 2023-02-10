@@ -16,6 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.controllers.feedback;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.util.datalog.DataLog;
 import java.util.Objects;
 import org.chsrobotics.lib.math.UtilityMath;
@@ -135,6 +136,8 @@ public class PID implements FeedbackController, IntrinsicLoggable {
         }
     }
 
+    private final boolean angular;
+
     private double kP;
     private double kI;
     private double kD;
@@ -198,20 +201,73 @@ public class PID implements FeedbackController, IntrinsicLoggable {
      * @param integrationWindow The number of past values to consider for integral accumulation. If
      *     less than or equal to 0, will be an infinite window.
      * @param initialSetpoint The initial setpoint (or target) of the controller.
+     * @param angular Whether the controller is controlling an angular quantaty that "wraps".
+     *     Measurements and setpoints are expected to be in radians if this is true.
      */
-    public PID(double kP, double kI, double kD, int integrationWindow, double initialSetpoint) {
+    public PID(
+            double kP,
+            double kI,
+            double kD,
+            int integrationWindow,
+            double initialSetpoint,
+            boolean angular) {
         this.kP = kP;
         this.kI = kI;
         this.kD = kD;
 
         integrationStack = new SizedStack<>(integrationWindow);
 
-        setpoint = initialSetpoint;
-        lastSetpoint = initialSetpoint;
+        if (angular) {
+            setpoint = MathUtil.angleModulus(initialSetpoint);
+            lastSetpoint = setpoint;
+        } else {
+            setpoint = initialSetpoint;
+            lastSetpoint = initialSetpoint;
+        }
+
+        this.angular = angular;
+    }
+
+    /**
+     * Constructs a non-angular PID with given gains and a finite integration window.
+     *
+     * @param kP The initial proportional gain of the controller.
+     * @param kI The initial integral gain of the controller.
+     * @param kD The initial derivative gain of the controller.
+     * @param integrationWindow The number of past values to consider for integral accumulation. If
+     *     less than or equal to 0, will be an infinite window.
+     * @param initialSetpoint The initial setpoint (or target) of the controller.
+     */
+    public PID(double kP, double kI, double kD, int integrationWindow, double initialSetpoint) {
+        this(kP, kI, kD, integrationWindow, initialSetpoint, false);
     }
 
     /**
      * Constructs a PID with a given PIDConstants and a finite integration window.
+     *
+     * @param constants The PIDConstants containing the gains for this controller.
+     * @param integrationWindow The number of past values to consider for integral accumulation. If
+     *     less than or equal to 0, will be an infinite window.
+     * @param initialSetpoint The initial setpoint (or target) of the controller.
+     * @param angular Whether the controller is controlling an angular quantaty that "wraps".
+     *     Measurements and setpoints are expected to be in radians if this is true.
+     */
+    public PID(
+            PIDConstants constants,
+            int integrationWindow,
+            double initialSetpoint,
+            boolean angular) {
+        this(
+                constants.getkP(),
+                constants.getkI(),
+                constants.getkD(),
+                integrationWindow,
+                initialSetpoint,
+                angular);
+    }
+
+    /**
+     * Constructs a non-angular PID with a given PIDConstants and a finite integration window.
      *
      * @param constants The PIDConstants containing the gains for this controller.
      * @param integrationWindow The number of past values to consider for integral accumulation. If
@@ -224,7 +280,8 @@ public class PID implements FeedbackController, IntrinsicLoggable {
                 constants.getkI(),
                 constants.getkD(),
                 integrationWindow,
-                initialSetpoint);
+                initialSetpoint,
+                false);
     }
 
     /**
@@ -234,13 +291,39 @@ public class PID implements FeedbackController, IntrinsicLoggable {
      * @param kI The initial integral gain of the controller.
      * @param kD The initial derivative gain of the controller.
      * @param initialSetpoint The initial setpoint (or target) of the controller.
+     * @param angular Whether the controller is controlling an angular quantaty that "wraps".
+     *     Measurements and setpoints are expected to be in radians if this is true.
+     */
+    public PID(double kP, double kI, double kD, double initialSetpoint, boolean angular) {
+        this(kP, kI, kD, 0, initialSetpoint, angular);
+    }
+
+    /**
+     * Constructs a non-angular PID with given gains and an infinite integration window.
+     *
+     * @param kP The initial proportional gain of the controller.
+     * @param kI The initial integral gain of the controller.
+     * @param kD The initial derivative gain of the controller.
+     * @param initialSetpoint The initial setpoint (or target) of the controller.
      */
     public PID(double kP, double kI, double kD, double initialSetpoint) {
-        this(kP, kI, kD, 0, initialSetpoint);
+        this(kP, kI, kD, 0, initialSetpoint, false);
     }
 
     /**
      * Constructs a PID with a given PIDConstants and an infinite integration window.
+     *
+     * @param constants The PIDConstants containing the gains for this controller.
+     * @param initialSetpoint The initial setpoint (or target) of the controller.
+     * @param angular Whether the controller is controlling an angular quantaty that "wraps".
+     *     Measurements and setpoints are expected to be in radians if this is true.
+     */
+    public PID(PIDConstants constants, double initialSetpoint, boolean angular) {
+        this(constants, 0, initialSetpoint, angular);
+    }
+
+    /**
+     * Constructs a non-angular PID with a given PIDConstants and an infinite integration window.
      *
      * @param constants The PIDConstants containing the gains for this controller.
      * @param initialSetpoint The initial setpoint (or target) of the controller.
@@ -380,7 +463,8 @@ public class PID implements FeedbackController, IntrinsicLoggable {
     @Override
     /** {@inheritDoc} */
     public void setSetpoint(double value) {
-        setpoint = value;
+        if (angular) setpoint = MathUtil.angleModulus(value);
+        else setpoint = value;
     }
 
     @Override
@@ -458,13 +542,19 @@ public class PID implements FeedbackController, IntrinsicLoggable {
     @Override
     /** {@inheritDoc} */
     public double calculate(double measurement, double dt) {
+        if (angular) measurement = MathUtil.angleModulus(measurement);
 
-        integrationStack.push(dt * (setpoint - measurement));
+        double error =
+                angular
+                        ? MathUtil.inputModulus(setpoint - measurement, -Math.PI, Math.PI)
+                        : setpoint - measurement;
+
+        integrationStack.push(dt * error);
 
         if (dt == 0) { // sensible way to handle dt of zero
             velocity = 0;
         } else {
-            velocity = (((setpoint - measurement) - (lastSetpoint - lastMeasurement)) / dt);
+            velocity = ((error - (lastSetpoint - lastMeasurement)) / dt);
         }
 
         double integrationSum = 0;
@@ -473,7 +563,7 @@ public class PID implements FeedbackController, IntrinsicLoggable {
             integrationSum += entry;
         }
 
-        double rawP = kP * (setpoint - measurement);
+        double rawP = kP * (error);
         double rawI = kI * integrationSum;
         double rawD = kD * velocity;
 

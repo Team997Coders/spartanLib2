@@ -86,4 +86,20 @@ public class Polygon {
         // times
         return (intersectionCounter % 2 == 1);
     }
+
+    /**
+     * Statically constructs and returns a rectangular polygon.
+     *
+     * @param root A Vector2d with endpoint representing the start of the shape.
+     * @param length The length in the x-axis of the shape, positive or negative.
+     * @param height The height in the y-axis of the shape, positive or negative.
+     * @return A new Polygon.
+     */
+    public static Polygon getRectangle(Vector2D root, double length, double height) {
+        return new Polygon(
+                root,
+                new Vector2D(root.getX() + length, root.getY()),
+                new Vector2D(root.getX() + length, root.getY() + height),
+                new Vector2D(root.getX(), root.getY() + height));
+    }
 }

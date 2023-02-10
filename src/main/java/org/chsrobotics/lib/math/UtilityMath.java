@@ -340,7 +340,7 @@ public class UtilityMath {
      * Takes the trigonometric cotangent of an angle.
      *
      * @param thetaRadians The angle. If coterminal to 0 or pi, this will return {@code NaN}.
-     * @return
+     * @return The cotangent of the angle.
      */
     public static double cot(double thetaRadians) {
         if (Math.sin(thetaRadians) == 0) return Double.NaN;

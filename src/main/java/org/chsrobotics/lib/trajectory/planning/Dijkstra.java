@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.chsrobotics.lib.math.geometry.Vector3D;
+import org.chsrobotics.lib.math.geometry.Vector2D;
 import org.chsrobotics.lib.util.Node;
 
 /**
@@ -44,6 +44,13 @@ public class Dijkstra {
      */
     public interface CostFunction<T> {
         double evaluate(T valueA, T valueB);
+    }
+
+    private static class VectorCostFunction implements CostFunction<Vector2D> {
+        @Override
+        public double evaluate(Vector2D valueA, Vector2D valueB) {
+            return valueA.subtract(valueB).getMagnitude();
+        }
     }
 
     /**
@@ -82,6 +89,8 @@ public class Dijkstra {
 
         previousNodes.put(source, null);
         costs.put(source, 0.0);
+
+        costs.put(target, Double.POSITIVE_INFINITY);
 
         while (unexploredNodes.size() > 0) {
             Node<T> currentNode = unexploredNodes.get(0); // needed to keep compiler from screaming
@@ -144,16 +153,37 @@ public class Dijkstra {
      * @return An ordered list of vectors, representing the shortest path, through the nodes, from
      *     startpoint to endpoint. Contains startpoint and endpoint.
      */
-    public static List<Vector3D> generateSpatialPath(
-            List<Node<Vector3D>> nodes, Node<Vector3D> source, Node<Vector3D> target) {
-
-        class VectorCostFunction implements CostFunction<Vector3D> {
-            @Override
-            public double evaluate(Vector3D valueA, Vector3D valueB) {
-                return valueA.subtract(valueB).getMagnitude();
-            }
-        }
+    public static List<Vector2D> generateSpatialPath(
+            List<Node<Vector2D>> nodes, Node<Vector2D> source, Node<Vector2D> target) {
 
         return generatePath(nodes, source, target, new VectorCostFunction());
+    }
+
+    /**
+     * Returns the cost to navigate through a given path.
+     *
+     * @param <T> The data type of the path.
+     * @param path A list of ordered data to find the total cost of.
+     * @param costFunction A function which returns the cost to travel between two objects.
+     * @return The cost to navigate through a given path.
+     */
+    public static <T> double getTotalCost(List<T> path, CostFunction<T> costFunction) {
+        double cost = 0;
+
+        for (int i = 1; i < path.size(); i++) {
+            cost += costFunction.evaluate(path.get(i), path.get(i - 1));
+        }
+
+        return cost;
+    }
+
+    /**
+     * Returns the cost to navigate through a given path in 2-dimensional Euclidean space.
+     *
+     * @param path A list of ordered data to find the total cost of.
+     * @return The cost to navigate through a given path.
+     */
+    public static double getTotalSpatialCost(List<Vector2D> path) {
+        return getTotalCost(path, new VectorCostFunction());
     }
 }

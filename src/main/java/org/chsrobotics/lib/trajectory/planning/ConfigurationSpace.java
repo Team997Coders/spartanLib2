@@ -27,7 +27,7 @@ import org.chsrobotics.lib.math.geometry.Vector2D;
 public class ConfigurationSpace {
 
     /** A dimension of a configuration space. */
-    public class ConfigurationSpaceDimension {
+    public static class ConfigurationSpaceDimension {
         /**
          * Minimum numerical value attainable in this dimension. If {@code wrap} is enabled, is
          * geometrically equivalent to {@code max}.
@@ -49,9 +49,10 @@ public class ConfigurationSpace {
         /**
          * Constructs a ConfigurationSpaceDimension.
          *
-         * @param min
-         * @param max
-         * @param wrap
+         * @param min The minimum value of the dimension.
+         * @param max The maximum value of the dimension.
+         * @param wrap Whether the dimension should overlap, or, have the minimum and maximum be the
+         *     same point.
          */
         public ConfigurationSpaceDimension(double min, double max, boolean wrap) {
             this.min = min;
