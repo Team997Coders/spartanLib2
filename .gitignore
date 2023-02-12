@@ -2,6 +2,7 @@
 .vscode/*
 .idea/*
 build/*
+bin/
 
 # Secrets
 gradle.properties

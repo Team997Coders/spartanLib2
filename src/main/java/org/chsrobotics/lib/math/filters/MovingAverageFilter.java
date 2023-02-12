@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -16,11 +16,24 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math.filters;
 
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.chsrobotics.lib.math.UtilityMath;
+import org.chsrobotics.lib.util.SizedStack;
 
 /** Filter which computes the arithmetic mean of a stream of data. */
 public class MovingAverageFilter extends Filter {
-    private final DescriptiveStatistics series;
+
+    /** Enum of different definitions of the mean. */
+    public enum MEAN_IMPLEMENTATION {
+        ARITHMETIC,
+        GEOMETRIC,
+        HARMONIC
+    }
+
+    private final SizedStack<Double> stack;
+
+    private double currentOutput = 0;
+
+    private final MEAN_IMPLEMENTATION impl;
 
     /**
      * Constructs a MovingAverageFilter.
@@ -28,16 +41,31 @@ public class MovingAverageFilter extends Filter {
      * @param window Number of values to look back when calculating the average. If zero or
      *     negative, will be an indefinite window.
      */
-    public MovingAverageFilter(int window) {
-        if (window > 0) series = new DescriptiveStatistics(window);
-        else series = new DescriptiveStatistics();
+    public MovingAverageFilter(int window, MEAN_IMPLEMENTATION impl) {
+        stack = new SizedStack<>(window);
+        this.impl = impl;
     }
 
     @Override
     /** {@inheritDoc} */
     public double calculate(double value) {
-        series.addValue(value);
-        return series.getMean();
+        stack.push(value);
+
+        double[] asArray = new double[stack.size()];
+
+        for (int i = 0; i < stack.size(); i++) {
+            asArray[i] = stack.get(i);
+        }
+
+        if (impl == MEAN_IMPLEMENTATION.GEOMETRIC) {
+            currentOutput = UtilityMath.geometricMean(asArray);
+        } else if (impl == MEAN_IMPLEMENTATION.HARMONIC) {
+            currentOutput = UtilityMath.harmonicMean(asArray);
+        } else {
+            currentOutput = UtilityMath.arithmeticMean(asArray);
+        }
+
+        return currentOutput;
     }
 
     @Override
@@ -49,13 +77,12 @@ public class MovingAverageFilter extends Filter {
     @Override
     /** {@inheritDoc} */
     public void reset() {
-        series.clear();
+        stack.clear();
     }
 
     @Override
     /** {@inheritDoc} */
     public double getCurrentOutput() {
-        if (Double.isNaN(series.getMean())) return 0;
-        else return series.getMean();
+        return currentOutput;
     }
 }

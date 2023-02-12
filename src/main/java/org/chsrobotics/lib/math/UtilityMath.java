@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -214,38 +214,6 @@ public class UtilityMath {
     }
 
     /**
-     * Takes in a series of numbers and returns their arithmetic mean.
-     *
-     * @param inputs The values to average. If empty, this will return {@code 0}.
-     * @return The arithmetic mean of the values.
-     */
-    public static double arithmeticMean(double... inputs) {
-        if (inputs.length == 0) return 0;
-
-        double sum = 0;
-
-        for (double value : inputs) sum += value;
-
-        return sum / inputs.length;
-    }
-
-    /**
-     * Takes in a series of numbers and returns their geometric mean.
-     *
-     * @param inputs The values to average. If empty, this will return {@code 0}.
-     * @return The geometric mean of the values.
-     */
-    public static double geometricMean(double... inputs) {
-        if (inputs.length == 0) return 0;
-
-        double product = 1;
-
-        for (double value : inputs) product = product * value;
-
-        return root(product, inputs.length);
-    }
-
-    /**
      * Returns whether two values are equal to within an epsilon (calculated by their difference and
      * expected from floating-point arithmetic). Essentially just "close enough".
      *
@@ -374,7 +342,7 @@ public class UtilityMath {
      * Takes the trigonometric cotangent of an angle.
      *
      * @param thetaRadians The angle. If coterminal to 0 or pi, this will return {@code NaN}.
-     * @return
+     * @return The cotangent of the angle.
      */
     public static double cot(double thetaRadians) {
         if (Math.sin(thetaRadians) == 0) return Double.NaN;
@@ -444,6 +412,90 @@ public class UtilityMath {
     public static boolean inRange(double boundaryA, double boundaryB, double toCheck) {
         return (((boundaryA <= toCheck) && (toCheck <= boundaryB))
                 || ((boundaryA >= toCheck) && (toCheck >= boundaryB)));
+    }
+
+    /*
+     * Converts a point in polar coordinates into a point in Cartesian coordinates.
+     *
+     * @param angle The angle, in radians counterclockwise from the positive x-axis, of the point
+     *     vector.
+     * @param magnitude The magnitude of the point vector.
+     * @return A Tuple2 of the Cartesian coordinates, as (x, y).
+     */
+    public static Tuple2<Double> fromPolarToCartesian(double angle, double magnitude) {
+        return Tuple2.of(magnitude * Math.cos(angle), magnitude * Math.sin(angle));
+    }
+
+    /**
+     * Converts a point in Cartesian coordinates into a point in polar coordinates.
+     *
+     * @param x The x-value of the point.
+     * @param y The y-value of the point.
+     * @return A Tuple2 of the polar coordinates, as (angle, magnitude).
+     */
+    public static Tuple2<Double> fromCartesianToPolar(double x, double y) {
+        return Tuple2.of(Math.atan2(y, x), hypotenuse(x, y));
+    }
+
+    /**
+     * Computes the arithmetic mean, often called the average, of a set of numbers.
+     *
+     * @param values The numbers to find the arithmetic mean of. If empty, this will return {@code
+     *     0}.
+     * @return The arithmetic mean.
+     */
+    public static double arithmeticMean(double[] values) {
+        if (values.length == 0) return 0;
+
+        double sum = 0;
+
+        for (double entry : values) {
+            sum += entry;
+        }
+
+        return (sum / values.length);
+    }
+
+    /**
+     * Computes the geometric mean of a series of numbers.
+     *
+     * @param values The numbers to find the geometric mean of. If empty, this will return {@code
+     *     0}.
+     * @return The geometric mean.
+     */
+    public static double geometricMean(double[] values) {
+        if (values.length == 0) return 0;
+
+        double product = 1;
+
+        for (double entry : values) {
+            product = product * entry;
+        }
+
+        return Math.pow(product, 1 / values.length);
+    }
+
+    /**
+     * Computes the harmonic mean of a series of numbers.
+     *
+     * <p>If a number input to this is 0, its reciprocal will be defined as 0, and if the arithmetic
+     * mean before reciprocation is 0, this will return 0.
+     *
+     * @param values The numbers to find the harmonic mean of. If empty, this will return {@code 0}.
+     * @return The geometric mean.
+     */
+    public static double harmonicMean(double[] values) {
+        double[] reciprocals = new double[values.length];
+
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] == 0) reciprocals[i] = 0;
+            else reciprocals[i] = (1 / values[i]);
+        }
+
+        double aMean = arithmeticMean(reciprocals);
+
+        if (aMean == 0) return 0;
+        else return (1 / aMean);
     }
 
     /**
