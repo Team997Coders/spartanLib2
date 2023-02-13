@@ -18,17 +18,13 @@ package org.chsrobotics.lib.math;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import org.chsrobotics.lib.util.Sampleable;
 
 /**
  * Representation of a standard polynomial function, with restrictions on the upper and lower limits
  * of the domain.
  */
-public class PolynomialInterval implements Sampleable<Double> {
+public class PolynomialInterval {
     private final Map<Integer, Double> terms;
-
-    private final double min;
-    private final double max;
 
     /**
      * Constructs a PolynomialInterval.
@@ -37,38 +33,18 @@ public class PolynomialInterval implements Sampleable<Double> {
      *     the equation {@code 2x^5 - 3x + 5} would be encoded as a map of {@code (5,2), (1,-3),
      *     (0,5)}. Exponents can be negative, but care should be taken to avoid domain issues (0
      *     should not be part of the allowable values if there are negative exponents).
-     * @param min The minimum value to accept as an input to the polynomial function.
-     * @param max The maximum value to accept as an input to the polynomial function.
      */
-    public PolynomialInterval(Map<Integer, Double> terms, double min, double max) {
+    public PolynomialInterval(Map<Integer, Double> terms) {
         this.terms = terms;
-
-        this.min = min;
-        this.max = max;
     }
 
-    @Override
-    /** {@inheritDoc} */
-    public double getMinReference() {
-        return min;
-    }
-
-    @Override
-    /** {@inheritDoc} */
-    public double getMaxReference() {
-        return max;
-    }
-
-    @Override
     /**
      * Samples the polynomial at a certain value.
      *
      * @param reference The value to sample the polynomial for.
-     * @return The output of the polynomial function. If {@code reference} is outside of the
-     *     polynomial's domain, returns {@code NaN}.
+     * @return The output of the polynomial function.
      */
     public Double sample(double reference) {
-        if (isOutOfBounds(reference)) return Double.NaN;
 
         double sum = 0;
 

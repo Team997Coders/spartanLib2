@@ -55,7 +55,7 @@ public class AsymmetricTrapezoidProfileTests {
 
     @Test
     public void AsymmetricTrapezoidProfilePositiveTriangleTotalTime() {
-        assertEquals(positiveTriangleProfile.getMaxReference(), 1.7320508075688772, epsilon);
+        assertEquals(positiveTriangleProfile.totalTime(), 1.7320508075688772, epsilon);
     }
 
     @Test
@@ -86,7 +86,7 @@ public class AsymmetricTrapezoidProfileTests {
 
     @Test
     public void AsymmetricTrapezoidProfileNegativeTrapezoidTotalTime() {
-        assertEquals(negativeTrapezoidProfile.getMaxReference(), 3.5, epsilon);
+        assertEquals(negativeTrapezoidProfile.totalTime(), 3.5, epsilon);
     }
 
     @Test

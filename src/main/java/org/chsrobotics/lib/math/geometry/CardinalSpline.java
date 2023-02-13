@@ -17,7 +17,6 @@ If not, see <https://www.gnu.org/licenses/>.
 package org.chsrobotics.lib.math.geometry;
 
 import edu.wpi.first.math.geometry.Rotation3d;
-import org.chsrobotics.lib.util.Sampleable;
 
 /**
  * Implementation of a Cardinal spline curve in 3- (or fewer) dimensional space.
@@ -39,7 +38,7 @@ import org.chsrobotics.lib.util.Sampleable;
  *
  * <p><a href="https://www.youtube.com/watch?v=jvPPXbo87ds">The Continuity of Splines</a>
  */
-public class CardinalSpline implements Sampleable<Vector3D> {
+public class CardinalSpline {
     private final double tension;
 
     private final Vector3D[] points;
@@ -72,19 +71,6 @@ public class CardinalSpline implements Sampleable<Vector3D> {
         this.endAngle = endAngle;
     }
 
-    @Override
-    /** {@inheritDoc} */
-    public double getMinReference() {
-        return 0;
-    }
-
-    @Override
-    /** {@inheritDoc} */
-    public double getMaxReference() {
-        return points.length;
-    }
-
-    @Override
     /**
      * Returns the position of the spline as a vector with endpoint representing the point.
      *
@@ -94,10 +80,7 @@ public class CardinalSpline implements Sampleable<Vector3D> {
      *     number of control points, returns {@code null}.
      */
     public Vector3D sample(double reference) {
-        if (isOutOfBounds(reference)) return null;
-
-        if (reference == 0) return getStart();
-        if (reference == points.length - 1) return getEnd();
+        if (reference < 0 || reference > points.length - 1) return null;
 
         Vector3D hermiteStart = points[(int) reference];
         Vector3D hermiteEnd = points[(int) reference + 1];
@@ -109,7 +92,7 @@ public class CardinalSpline implements Sampleable<Vector3D> {
         // tangents
 
         if (reference > 1)
-            startTan = points[(int) reference - 1].subtract(hermiteEnd).scalarMultiply(tension);
+            startTan = hermiteEnd.subtract(points[(int) reference - 1]).scalarMultiply(tension);
         else
             startTan =
                     new Vector3D(
@@ -118,7 +101,7 @@ public class CardinalSpline implements Sampleable<Vector3D> {
                             startAngle.getQuaternion().getZ());
 
         if (reference < points.length - 2)
-            endTan = hermiteStart.subtract(points[(int) reference + 2]).scalarMultiply(tension);
+            endTan = points[(int) reference + 2].subtract(hermiteStart).scalarMultiply(tension);
         else
             endTan =
                     new Vector3D(
@@ -128,12 +111,12 @@ public class CardinalSpline implements Sampleable<Vector3D> {
 
         double localReference = reference - ((int) reference);
 
+        Vector3D startControlPoint = points[(int) reference];
+        Vector3D endControlPoint = points[(int) reference + 1];
+
         Vector3D h00 =
-                getStart()
-                        .scalarMultiply(
-                                (2 * Math.pow(localReference, 3))
-                                        - (3 * Math.pow(localReference, 2))
-                                        + 1);
+                startControlPoint.scalarMultiply(
+                        (2 * Math.pow(localReference, 3)) - (3 * Math.pow(localReference, 2)) + 1);
 
         Vector3D h10 =
                 startTan.scalarMultiply(
@@ -142,9 +125,8 @@ public class CardinalSpline implements Sampleable<Vector3D> {
                                 + localReference);
 
         Vector3D h11 =
-                getEnd().scalarMultiply(
-                                (-2 * Math.pow(localReference, 3))
-                                        + (3 * Math.pow(localReference, 2)));
+                endControlPoint.scalarMultiply(
+                        (-2 * Math.pow(localReference, 3)) + (3 * Math.pow(localReference, 2)));
 
         Vector3D h01 =
                 endTan.scalarMultiply(Math.pow(localReference, 3) - Math.pow(localReference, 2));

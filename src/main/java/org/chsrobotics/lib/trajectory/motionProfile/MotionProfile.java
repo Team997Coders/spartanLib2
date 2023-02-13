@@ -19,7 +19,6 @@ package org.chsrobotics.lib.trajectory.motionProfile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.chsrobotics.lib.util.Sampleable;
 
 /**
  * A group of ProfilePhases that represents an arbitrary trajectory of compound accelerations,
@@ -35,7 +34,7 @@ import org.chsrobotics.lib.util.Sampleable;
  * {@link AsymmetricTrapezoidProfile} and {@link TrapezoidProfile} extend this to create profiles
  * out of constraints and desired states.
  */
-public class MotionProfile implements Sampleable<MotionProfile.State> {
+public class MotionProfile {
     protected List<ProfilePhase> phases = new ArrayList<>();
     protected State initialState;
 
@@ -123,31 +122,11 @@ public class MotionProfile implements Sampleable<MotionProfile.State> {
         return List.copyOf(phases);
     }
 
-    @Override
-    /** {@inheritDoc} */
-    public double getMinReference() {
-        return 0;
-    }
-
-    @Override
-    /** {@inheritDoc} */
-    public double getMaxReference() {
-        double timeSum = 0;
-
-        for (ProfilePhase phase : getPhases()) {
-            timeSum += phase.time;
-        }
-
-        return timeSum;
-    }
-
-    @Override
     /**
      * Calculates the current State of the profile at a given time.
      *
-     * <p>If the time sampled is less than 0, returns a State of 0 position and velocity. If it is
-     * greater than the timespan of the profile, returns a State of the aggregated position and zero
-     * velocity.
+     * <p>If the time sampled is less than 0, returns the initial State. If it is greater than the
+     * timespan of the profile, returns a State of the aggregated position and zero velocity.
      *
      * @param time The time since the beginning of the profile.
      * @return The position and velocity of the profile at that time.
@@ -171,5 +150,13 @@ public class MotionProfile implements Sampleable<MotionProfile.State> {
         }
         // case where there are no phases, or the time is greater than the length of the profile
         return new State(position, 0);
+    }
+
+    public double totalTime() {
+        double time = 0;
+
+        for (ProfilePhase phase : phases) time += phase.time;
+
+        return time;
     }
 }
