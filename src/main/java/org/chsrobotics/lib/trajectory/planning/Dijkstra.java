@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.chsrobotics.lib.math.geometry.Vector2D;
-import org.chsrobotics.lib.util.Node;
+import org.chsrobotics.lib.util.NodeGraph;
 
 /**
  * Implementation of Edsger Dijkstra's algorithm for cost-optimal graph traversal.
@@ -69,15 +69,18 @@ public class Dijkstra {
      *     (including source and target nodes).
      */
     public static <T> List<T> generatePath(
-            List<Node<T>> nodes, Node<T> source, Node<T> target, CostFunction<T> costFunction) {
+            NodeGraph<T> nodes,
+            NodeGraph<T>.Node source,
+            NodeGraph<T>.Node target,
+            CostFunction<T> costFunction) {
 
-        Map<Node<T>, Node<T>> previousNodes = new HashMap<>();
-        Map<Node<T>, Double> costs = new HashMap<>();
+        Map<NodeGraph<T>.Node, NodeGraph<T>.Node> previousNodes = new HashMap<>();
+        Map<NodeGraph<T>.Node, Double> costs = new HashMap<>();
 
-        List<Node<T>> unexploredNodes = new ArrayList<>();
+        List<NodeGraph<T>.Node> unexploredNodes = new ArrayList<>();
 
         // populate initial data
-        for (Node<T> node : nodes) {
+        for (NodeGraph<T>.Node node : nodes.getAllNodes()) {
             previousNodes.put(node, null);
             costs.put(node, Double.POSITIVE_INFINITY);
 
@@ -93,13 +96,14 @@ public class Dijkstra {
         costs.put(target, Double.POSITIVE_INFINITY);
 
         while (unexploredNodes.size() > 0) {
-            Node<T> currentNode = unexploredNodes.get(0); // needed to keep compiler from screaming
+            NodeGraph<T>.Node currentNode =
+                    unexploredNodes.get(0); // needed to keep compiler from screaming
 
             // sets the working node to unexplored node with smallest cost
 
             // on first iteration, all nodes but start have infinite cost, making working node the
             // start node
-            for (Node<T> testNode : unexploredNodes) {
+            for (NodeGraph<T>.Node testNode : unexploredNodes) {
                 if (costs.get(testNode) < costs.get(currentNode)) {
                     currentNode = testNode;
                 }
@@ -112,7 +116,7 @@ public class Dijkstra {
             unexploredNodes.remove(currentNode);
 
             // loop through all neighbors of the point that have not been explored
-            for (Node<T> neighbor : currentNode.getConnections()) {
+            for (NodeGraph<T>.Node neighbor : nodes.getConnectedNodes(currentNode)) {
                 if (unexploredNodes.contains(neighbor)) {
                     double altCost =
                             costs.get(currentNode)
@@ -129,7 +133,7 @@ public class Dijkstra {
             }
         }
 
-        Node<T> currentNode = target;
+        NodeGraph<T>.Node currentNode = target;
         ArrayList<T> sequence = new ArrayList<>();
 
         // step backwards from the target, using stored previous connections, to the start (where
@@ -154,7 +158,9 @@ public class Dijkstra {
      *     startpoint to endpoint. Contains startpoint and endpoint.
      */
     public static List<Vector2D> generateSpatialPath(
-            List<Node<Vector2D>> nodes, Node<Vector2D> source, Node<Vector2D> target) {
+            NodeGraph<Vector2D> nodes,
+            NodeGraph<Vector2D>.Node source,
+            NodeGraph<Vector2D>.Node target) {
 
         return generatePath(nodes, source, target, new VectorCostFunction());
     }
