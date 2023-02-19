@@ -17,6 +17,7 @@ If not, see <https://www.gnu.org/licenses/>.
 package org.chsrobotics.lib.math.geometry;
 
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 
 /**
  * Implementation of a Cardinal spline curve in 3- (or fewer) dimensional space.
@@ -88,26 +89,20 @@ public class CardinalSpline {
         Vector3D startTan;
         Vector3D endTan;
 
-        // use the rotation axis vector of the quaternion representation of the start angle for
-        // tangents
-
         if (reference > 1)
             startTan = hermiteEnd.subtract(points[(int) reference - 1]).scalarMultiply(tension);
-        else
-            startTan =
-                    new Vector3D(
-                            startAngle.getQuaternion().getX(),
-                            startAngle.getQuaternion().getY(),
-                            startAngle.getQuaternion().getZ());
+        else {
+            // initial tangents are an x unit vector rotated by the angle
+            Translation3d rotated = new Translation3d(1, 0, 0).rotateBy(startAngle);
+            startTan = new Vector3D(rotated.getX(), rotated.getY(), rotated.getZ());
+        }
 
         if (reference < points.length - 2)
             endTan = points[(int) reference + 2].subtract(hermiteStart).scalarMultiply(tension);
-        else
-            endTan =
-                    new Vector3D(
-                            endAngle.getQuaternion().getX(),
-                            endAngle.getQuaternion().getY(),
-                            endAngle.getQuaternion().getZ());
+        else {
+            Translation3d rotated = new Translation3d(1, 0, 0).rotateBy(endAngle);
+            endTan = new Vector3D(rotated.getX(), rotated.getY(), rotated.getZ());
+        }
 
         double localReference = reference - ((int) reference);
 
