@@ -35,6 +35,9 @@ public class LineOfSightPathOptimize {
      * point. That point is set as the current point, and the process is then repeated until the
      * goal is reached.
      *
+     * <p>If the given path is invalid in the given configuration space, this _will_ hang and not
+     * finish execution.
+     *
      * @param environment The configuration space the points lie in.
      * @param path The ordered series of points to optimize. Must all be valid points in the
      *     configuration space, and each point must have valid line-of-sight to at least its

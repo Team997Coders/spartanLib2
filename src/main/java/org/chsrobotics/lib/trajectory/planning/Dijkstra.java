@@ -57,12 +57,14 @@ public class Dijkstra {
      * Generates a cost-optimal path through the given connected graph nodes from a source node to a
      * target.
      *
+     * <p>If there are no possible paths between the source and target nodes, this _will_ hang, or
+     * not finish execution.
+     *
      * @param <T> The data type of the nodes.
      * @param nodes The set of connected nodes to find a path through.
      * @param source The source, or starting, node of the path. Should be connected to the other
-     *     nodes, but should not be a member of the object already passed.
-     * @param target The target node of the path. Should be connected to the other nodes, but should
-     *     not be a member of the object already passed.
+     *     nodes.
+     * @param target The target node of the path. Should be connected to the other nodes.
      * @param costFunction A function to determine the cost of traveling from one node to another,
      *     based on the contained data.
      * @return An ordered list of the data type, representing the optimal path through the nodes
