@@ -37,15 +37,6 @@ import org.chsrobotics.lib.util.NodeGraph;
  * complex graph structures for some problems.
  */
 public class Dijkstra {
-
-    /**
-     * Interface implementing a cost function for Dijkstra's algorithm, which returns the cost of
-     * traversing from a node holding a certain value to another.
-     */
-    public interface CostFunction<T> {
-        double evaluate(T valueA, T valueB);
-    }
-
     private static class VectorCostFunction implements CostFunction<Vector2D> {
         @Override
         public double evaluate(Vector2D valueA, Vector2D valueB) {
@@ -76,36 +67,36 @@ public class Dijkstra {
             NodeGraph<T>.Node target,
             CostFunction<T> costFunction) {
 
-        Map<NodeGraph<T>.Node, NodeGraph<T>.Node> previousNodes = new HashMap<>();
+        Map<NodeGraph<T>.Node, NodeGraph<T>.Node> closedNodes = new HashMap<>();
         Map<NodeGraph<T>.Node, Double> costs = new HashMap<>();
 
-        List<NodeGraph<T>.Node> unexploredNodes = new ArrayList<>();
+        List<NodeGraph<T>.Node> openNodes = new ArrayList<>();
 
         // populate initial data
         for (NodeGraph<T>.Node node : nodes.getAllNodes()) {
-            previousNodes.put(node, null);
+            closedNodes.put(node, null);
             costs.put(node, Double.POSITIVE_INFINITY);
 
-            unexploredNodes.add(node);
+            openNodes.add(node);
         }
 
-        unexploredNodes.add(source);
-        unexploredNodes.add(target);
+        openNodes.add(source);
+        openNodes.add(target);
 
-        previousNodes.put(source, null);
+        closedNodes.put(source, null);
         costs.put(source, 0.0);
 
         costs.put(target, Double.POSITIVE_INFINITY);
 
-        while (unexploredNodes.size() > 0) {
+        while (openNodes.size() > 0) {
             NodeGraph<T>.Node currentNode =
-                    unexploredNodes.get(0); // needed to keep compiler from screaming
+                    openNodes.get(0); // needed to keep compiler from screaming
 
-            // sets the working node to unexplored node with smallest cost
+            // sets the working node to open node with smallest cost
 
             // on first iteration, all nodes but start have infinite cost, making working node the
             // start node
-            for (NodeGraph<T>.Node testNode : unexploredNodes) {
+            for (NodeGraph<T>.Node testNode : openNodes) {
                 if (costs.get(testNode) < costs.get(currentNode)) {
                     currentNode = testNode;
                 }
@@ -115,11 +106,11 @@ public class Dijkstra {
             // the loop, we're done
             if (currentNode.equals(target)) break;
 
-            unexploredNodes.remove(currentNode);
+            openNodes.remove(currentNode);
 
-            // loop through all neighbors of the point that have not been explored
+            // loop through all open neighbors
             for (NodeGraph<T>.Node neighbor : nodes.getConnectedNodes(currentNode)) {
-                if (unexploredNodes.contains(neighbor)) {
+                if (openNodes.contains(neighbor)) {
                     double altCost =
                             costs.get(currentNode)
                                     + costFunction.evaluate(
@@ -129,7 +120,7 @@ public class Dijkstra {
                     // with the shortest already discovered path, replace that path with this
                     if (altCost < costs.get(neighbor)) {
                         costs.put(neighbor, altCost);
-                        previousNodes.put(neighbor, currentNode);
+                        closedNodes.put(neighbor, currentNode);
                     }
                 }
             }
@@ -142,7 +133,7 @@ public class Dijkstra {
         // the previous node == null)
         while (currentNode != null) {
             sequence.add(0, currentNode.getData());
-            currentNode = previousNodes.get(currentNode);
+            currentNode = closedNodes.get(currentNode);
         }
 
         return sequence;
