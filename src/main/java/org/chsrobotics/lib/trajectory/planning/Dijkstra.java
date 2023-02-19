@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.chsrobotics.lib.math.geometry.Vector2D;
-import org.chsrobotics.lib.util.Node;
+import org.chsrobotics.lib.util.NodeGraph;
 
 /**
  * Implementation of Edsger Dijkstra's algorithm for cost-optimal graph traversal.
@@ -37,15 +37,6 @@ import org.chsrobotics.lib.util.Node;
  * complex graph structures for some problems.
  */
 public class Dijkstra {
-
-    /**
-     * Interface implementing a cost function for Dijkstra's algorithm, which returns the cost of
-     * traversing from a node holding a certain value to another.
-     */
-    public interface CostFunction<T> {
-        double evaluate(T valueA, T valueB);
-    }
-
     private static class VectorCostFunction implements CostFunction<Vector2D> {
         @Override
         public double evaluate(Vector2D valueA, Vector2D valueB) {
@@ -57,49 +48,55 @@ public class Dijkstra {
      * Generates a cost-optimal path through the given connected graph nodes from a source node to a
      * target.
      *
+     * <p>If there are no possible paths between the source and target nodes, this _will_ hang, or
+     * not finish execution.
+     *
      * @param <T> The data type of the nodes.
      * @param nodes The set of connected nodes to find a path through.
      * @param source The source, or starting, node of the path. Should be connected to the other
-     *     nodes, but should not be a member of the object already passed.
-     * @param target The target node of the path. Should be connected to the other nodes, but should
-     *     not be a member of the object already passed.
+     *     nodes.
+     * @param target The target node of the path. Should be connected to the other nodes.
      * @param costFunction A function to determine the cost of traveling from one node to another,
      *     based on the contained data.
      * @return An ordered list of the data type, representing the optimal path through the nodes
      *     (including source and target nodes).
      */
     public static <T> List<T> generatePath(
-            List<Node<T>> nodes, Node<T> source, Node<T> target, CostFunction<T> costFunction) {
+            NodeGraph<T> nodes,
+            NodeGraph<T>.Node source,
+            NodeGraph<T>.Node target,
+            CostFunction<T> costFunction) {
 
-        Map<Node<T>, Node<T>> previousNodes = new HashMap<>();
-        Map<Node<T>, Double> costs = new HashMap<>();
+        Map<NodeGraph<T>.Node, NodeGraph<T>.Node> closedNodes = new HashMap<>();
+        Map<NodeGraph<T>.Node, Double> costs = new HashMap<>();
 
-        List<Node<T>> unexploredNodes = new ArrayList<>();
+        List<NodeGraph<T>.Node> openNodes = new ArrayList<>();
 
         // populate initial data
-        for (Node<T> node : nodes) {
-            previousNodes.put(node, null);
+        for (NodeGraph<T>.Node node : nodes.getAllNodes()) {
+            closedNodes.put(node, null);
             costs.put(node, Double.POSITIVE_INFINITY);
 
-            unexploredNodes.add(node);
+            openNodes.add(node);
         }
 
-        unexploredNodes.add(source);
-        unexploredNodes.add(target);
+        openNodes.add(source);
+        openNodes.add(target);
 
-        previousNodes.put(source, null);
+        closedNodes.put(source, null);
         costs.put(source, 0.0);
 
         costs.put(target, Double.POSITIVE_INFINITY);
 
-        while (unexploredNodes.size() > 0) {
-            Node<T> currentNode = unexploredNodes.get(0); // needed to keep compiler from screaming
+        while (openNodes.size() > 0) {
+            NodeGraph<T>.Node currentNode =
+                    openNodes.get(0); // needed to keep compiler from screaming
 
-            // sets the working node to unexplored node with smallest cost
+            // sets the working node to open node with smallest cost
 
             // on first iteration, all nodes but start have infinite cost, making working node the
             // start node
-            for (Node<T> testNode : unexploredNodes) {
+            for (NodeGraph<T>.Node testNode : openNodes) {
                 if (costs.get(testNode) < costs.get(currentNode)) {
                     currentNode = testNode;
                 }
@@ -109,11 +106,11 @@ public class Dijkstra {
             // the loop, we're done
             if (currentNode.equals(target)) break;
 
-            unexploredNodes.remove(currentNode);
+            openNodes.remove(currentNode);
 
-            // loop through all neighbors of the point that have not been explored
-            for (Node<T> neighbor : currentNode.getConnections()) {
-                if (unexploredNodes.contains(neighbor)) {
+            // loop through all open neighbors
+            for (NodeGraph<T>.Node neighbor : nodes.getConnectedNodes(currentNode)) {
+                if (openNodes.contains(neighbor)) {
                     double altCost =
                             costs.get(currentNode)
                                     + costFunction.evaluate(
@@ -123,20 +120,20 @@ public class Dijkstra {
                     // with the shortest already discovered path, replace that path with this
                     if (altCost < costs.get(neighbor)) {
                         costs.put(neighbor, altCost);
-                        previousNodes.put(neighbor, currentNode);
+                        closedNodes.put(neighbor, currentNode);
                     }
                 }
             }
         }
 
-        Node<T> currentNode = target;
+        NodeGraph<T>.Node currentNode = target;
         ArrayList<T> sequence = new ArrayList<>();
 
         // step backwards from the target, using stored previous connections, to the start (where
         // the previous node == null)
         while (currentNode != null) {
             sequence.add(0, currentNode.getData());
-            currentNode = previousNodes.get(currentNode);
+            currentNode = closedNodes.get(currentNode);
         }
 
         return sequence;
@@ -154,7 +151,9 @@ public class Dijkstra {
      *     startpoint to endpoint. Contains startpoint and endpoint.
      */
     public static List<Vector2D> generateSpatialPath(
-            List<Node<Vector2D>> nodes, Node<Vector2D> source, Node<Vector2D> target) {
+            NodeGraph<Vector2D> nodes,
+            NodeGraph<Vector2D>.Node source,
+            NodeGraph<Vector2D>.Node target) {
 
         return generatePath(nodes, source, target, new VectorCostFunction());
     }

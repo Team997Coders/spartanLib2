@@ -30,10 +30,7 @@ import java.util.List;
 public class Tree<T> {
 
     /**
-     * Node as a component of the tree data structure.
-     *
-     * <p>Differs from {@link Node}, as this differentiates between parents and children, and can
-     * only have strictly one parent.
+     * Node part of a tree data structure. This node can have multiple children but only one parent.
      *
      * @param <U> Data type held by this node.
      */
