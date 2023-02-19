@@ -16,6 +16,8 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import org.chsrobotics.lib.math.geometry.Vector3D;
 import org.chsrobotics.lib.util.Tuple2;
 
@@ -412,7 +414,7 @@ public class UtilityMath {
                 || ((boundaryA >= toCheck) && (toCheck >= boundaryB)));
     }
 
-    /**
+    /*
      * Converts a point in polar coordinates into a point in Cartesian coordinates.
      *
      * @param angle The angle, in radians counterclockwise from the positive x-axis, of the point
@@ -494,5 +496,15 @@ public class UtilityMath {
 
         if (aMean == 0) return 0;
         else return (1 / aMean);
+    }
+
+    /**
+     * Converts a Rotation2d into a Rotation3d.
+     *
+     * @param original The Rotation2d to convert.
+     * @return A Rotation3d with a pitch and roll of 0, and a yaw of the Rotation2d's value.
+     */
+    public static Rotation3d fromRotation2d(Rotation2d original) {
+        return new Rotation3d(0, 0, original.getRadians());
     }
 }

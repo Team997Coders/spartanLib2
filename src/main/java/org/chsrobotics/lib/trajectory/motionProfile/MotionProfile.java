@@ -123,39 +123,15 @@ public class MotionProfile {
     }
 
     /**
-     * Returns the total timespan of the profile.
-     *
-     * @return The duration of the profile, in seconds.
-     */
-    public double totalTime() {
-        double time = 0;
-        for (ProfilePhase phase : phases) {
-            time += phase.time;
-        }
-        return time;
-    }
-
-    /**
-     * Returns true if the provided time is greater than the length of the profile.
-     *
-     * @param time The time since the beginning of the profile, in seconds.
-     * @return True if the profile has finished all its phases.
-     */
-    public boolean isFinished(double time) {
-        return time >= totalTime();
-    }
-
-    /**
      * Calculates the current State of the profile at a given time.
      *
-     * <p>If the time sampled is less than 0, returns a State of 0 position and velocity. If it is
-     * greater than the timespan of the profile, returns a State of the aggregated position and zero
-     * velocity.
+     * <p>If the time sampled is less than 0, returns the initial State. If it is greater than the
+     * timespan of the profile, returns a State of the aggregated position and zero velocity.
      *
      * @param time The time since the beginning of the profile.
      * @return The position and velocity of the profile at that time.
      */
-    public State calculate(double time) {
+    public State sample(double time) {
         if (time <= 0) {
             return initialState;
         }
@@ -174,5 +150,13 @@ public class MotionProfile {
         }
         // case where there are no phases, or the time is greater than the length of the profile
         return new State(position, 0);
+    }
+
+    public double totalTime() {
+        double time = 0;
+
+        for (ProfilePhase phase : phases) time += phase.time;
+
+        return time;
     }
 }

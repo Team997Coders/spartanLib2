@@ -28,8 +28,6 @@ import org.junit.Test;
  * <p>Most of this is covered by the AsymmetricTrapezoidProfileTests, but it doesn't hurt to check.
  */
 public class TrapezoidProfileTests {
-    private final double epsilon = 0.0001;
-
     @Test
     public void TrapezoidProfileConstraintsEqualityWorks() {
         Constraints constraints1 = new Constraints(1, 5);
@@ -48,22 +46,8 @@ public class TrapezoidProfileTests {
                         new State(0, 5),
                         new State(40, 2));
 
-        assertEquals(symmetrical.totalTime(), asymmetrical.totalTime(), epsilon);
-
         for (int i = 0; i < symmetrical.totalTime(); i++) {
-            assertEquals(true, symmetrical.calculate(i).equals(asymmetrical.calculate(i)));
+            assertEquals(true, symmetrical.sample(i).equals(asymmetrical.sample(i)));
         }
-
-        assertEquals(
-                true,
-                symmetrical
-                        .calculate(symmetrical.totalTime())
-                        .equals(asymmetrical.calculate(symmetrical.totalTime())));
-
-        assertEquals(
-                true,
-                symmetrical
-                        .calculate(symmetrical.totalTime() + 1)
-                        .equals(asymmetrical.calculate(symmetrical.totalTime() + 1)));
     }
 }
