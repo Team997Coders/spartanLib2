@@ -55,7 +55,7 @@ public class TankDrive implements DifferentialDriveMode {
      * @param rightAxis The {@link JoystickAxis} to be used for the right side.
      */
     public TankDrive(JoystickAxis leftAxis, JoystickAxis rightAxis) {
-        this(leftAxis, rightAxis, 0, 0);
+        this(leftAxis, rightAxis, 1, 0);
     }
 
     /** {@inheritDoc} */
