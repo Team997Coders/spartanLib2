@@ -69,6 +69,9 @@ public class LineOfSightPathOptimize {
                 // if there's a valid line of sight, that is the new best point
                 if (!environment.intersectsObstacle(new Line2D(workingPoint, path.get(i)))) {
                     candidatePoint = path.get(i);
+                } else if (i == path.size() - 1) {
+                    // prevents algorithm hanging
+                    return path;
                 }
             }
 

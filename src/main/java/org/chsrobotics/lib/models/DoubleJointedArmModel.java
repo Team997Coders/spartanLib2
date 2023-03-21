@@ -46,6 +46,8 @@ public class DoubleJointedArmModel {
 
     private final DCMotor distalDrive;
 
+    private final double kG;
+
     /**
      * Constructs a new DoubleJointedArmModel.
      *
@@ -61,6 +63,7 @@ public class DoubleJointedArmModel {
      * @param distalMoment Moment of inertia of the distal arm about its center of gravity, in kg
      *     m^2.
      * @param distalDrive A DCMotor to power the distal arm segment. Should include any reductions.
+     * @param kG A scalar scaling factor to apply to gravitational torques.
      */
     public DoubleJointedArmModel(
             double localMass,
@@ -71,7 +74,8 @@ public class DoubleJointedArmModel {
             double distalMass,
             double distalCGRadius,
             double distalMoment,
-            DCMotor distalDrive) {
+            DCMotor distalDrive,
+            double kG) {
         this.localMass = localMass;
         this.localCGRadius = localCGRadius;
         this.localMoment = localMoment;
@@ -84,6 +88,8 @@ public class DoubleJointedArmModel {
         this.distalMoment = distalMoment;
 
         this.distalDrive = distalDrive;
+
+        this.kG = kG;
     }
 
     /**
@@ -285,6 +291,6 @@ public class DoubleJointedArmModel {
                         * distalCGRadius
                         * Math.cos(positions.get(0, 0) + positions.get(1, 0)));
 
-        return mat;
+        return mat.times(kG);
     }
 }
