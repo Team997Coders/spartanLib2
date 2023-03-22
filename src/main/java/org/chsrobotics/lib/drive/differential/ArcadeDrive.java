@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -16,15 +16,17 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.drive.differential;
 
+import java.util.function.Supplier;
 import org.chsrobotics.lib.input.JoystickAxis;
 import org.chsrobotics.lib.math.filters.RateLimiter;
 
 /** Moves the robot in teleop using separate inputs for linear and rotational motion. */
 public class ArcadeDrive implements DifferentialDriveMode {
-    private final JoystickAxis linearAxis;
-    private final JoystickAxis rotationalAxis;
-    private final double driveModifier;
-    private final double turnModifier;
+    // TODO Joystick Axis should implement supplier
+    private final Supplier<Double> linearAxis;
+    private final Supplier<Double> rotationalAxis;
+    private final Supplier<Double> driveModifier;
+    private final Supplier<Double> turnModifier;
     private final RateLimiter driveLimiter;
     private final RateLimiter turnLimiter;
 
@@ -41,10 +43,10 @@ public class ArcadeDrive implements DifferentialDriveMode {
      *     second. If equal to 0, no rate limiting will be applied.
      */
     public ArcadeDrive(
-            JoystickAxis linearAxis,
-            JoystickAxis rotationalAxis,
-            double driveModifier,
-            double turnModifier,
+            Supplier<Double> linearAxis,
+            Supplier<Double> rotationalAxis,
+            Supplier<Double> driveModifier,
+            Supplier<Double> turnModifier,
             double driveLimiter,
             double turnLimiter) {
         this.linearAxis = linearAxis;
@@ -58,8 +60,8 @@ public class ArcadeDrive implements DifferentialDriveMode {
     /** {@inheritDoc} */
     @Override
     public DifferentialDrivetrainInput execute() {
-        double linear = driveLimiter.calculate(linearAxis.getValue() * driveModifier);
-        double rotation = turnLimiter.calculate(rotationalAxis.getValue() * turnModifier);
+        double linear = driveLimiter.calculate(linearAxis.get() * driveModifier.get());
+        double rotation = turnLimiter.calculate(rotationalAxis.get() * turnModifier.get());
 
         double left = linear + rotation;
         double right = linear - rotation;
