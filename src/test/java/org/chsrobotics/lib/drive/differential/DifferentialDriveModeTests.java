@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -41,7 +41,7 @@ public class DifferentialDriveModeTests {
     public void tankDriveExecute() {
         JoystickAxis left = constructTestAxis(0.5);
         JoystickAxis right = constructTestAxis(0.25);
-        DifferentialDriveMode drive = new TankDrive(left, right, 1, 0);
+        DifferentialDriveMode drive = new TankDrive(left::getValue, right::getValue, () -> 1.0, 0);
         assertEquals(drive.execute(), new DifferentialDrivetrainInput(0.5, 0.25));
     }
 
@@ -49,7 +49,8 @@ public class DifferentialDriveModeTests {
     public void arcadeDriveExecute() {
         JoystickAxis linear = constructTestAxis(0.5);
         JoystickAxis rotational = constructTestAxis(0.25);
-        DifferentialDriveMode drive = new ArcadeDrive(linear, rotational, 1.0, 1.0, 0, 0);
+        DifferentialDriveMode drive =
+                new ArcadeDrive(linear::getValue, rotational::getValue, () -> 1.0, () -> 1.0, 0, 0);
         assertEquals(drive.execute(), new DifferentialDrivetrainInput(0.75, 0.25));
     }
 
@@ -57,7 +58,9 @@ public class DifferentialDriveModeTests {
     public void curvatureDriveExecute() {
         JoystickAxis linear = constructTestAxis(0.5);
         JoystickAxis rotational = constructTestAxis(0.25);
-        DifferentialDriveMode drive = new CurvatureDrive(linear, rotational, 1.0, 1.0, 0, 0, false);
+        DifferentialDriveMode drive =
+                new CurvatureDrive(
+                        linear::getValue, rotational::getValue, () -> 1.0, () -> 1.0, 0, 0, false);
         assertEquals(drive.execute(), new DifferentialDrivetrainInput(0.625, 0.375));
     }
 
@@ -68,8 +71,23 @@ public class DifferentialDriveModeTests {
         DifferentialDriveMode drive =
                 new MixedDrive(
                         Map.of(
-                                new ArcadeDrive(linear, rotational, 1.0, 1.0, 0, 0), 0.5,
-                                new CurvatureDrive(linear, rotational, 1.0, 1.0, 0, 0, true), 0.5));
+                                new ArcadeDrive(
+                                                linear::getValue,
+                                                rotational::getValue,
+                                                () -> 1.0,
+                                                () -> 1.0,
+                                                0,
+                                                0),
+                                        0.5,
+                                new CurvatureDrive(
+                                                linear::getValue,
+                                                rotational::getValue,
+                                                () -> 1.0,
+                                                () -> 1.0,
+                                                0,
+                                                0,
+                                                true),
+                                        0.5));
         assertEquals(drive.execute(), new DifferentialDrivetrainInput(0.6875, 0.3125));
     }
 }
