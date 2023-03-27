@@ -20,7 +20,7 @@ import java.util.ArrayList;
 
 /** Represents a closed shape with a definite number of sides in 2-dimensional space. */
 public class Polygon {
-    private final Vector2D[] vertices;
+    private final ArrayList<Line2D> sides = new ArrayList<>();
 
     /**
      * Constructs a Polygon.
@@ -30,7 +30,28 @@ public class Polygon {
      *     them in this constructor. The last edge is connected automatically.
      */
     public Polygon(Vector2D... vertices) {
-        this.vertices = vertices;
+        // create sides between vertices
+        for (int i = 0; i < vertices.length - 1; i++) {
+            sides.add(new Line2D(vertices[i], vertices[i + 1]));
+        }
+
+        sides.add(new Line2D(vertices[vertices.length - 1], vertices[0]));
+    }
+
+    /**
+     * Returns whether the provided line intersects any of the edges of the polygon.
+     *
+     * @param line The Line2D to check for intersection.
+     * @return Whether the lines intersect (including colinearity over the same space).
+     */
+    public boolean lineIntersectsAnyEdge(Line2D line) {
+        boolean retVal = false;
+
+        for (Line2D edge : sides) {
+            if (!retVal) retVal = edge.intersects(line);
+        }
+
+        return retVal;
     }
 
     /**
@@ -40,18 +61,6 @@ public class Polygon {
      * @return Whether the point lies within the bounds of the polygon.
      */
     public boolean pointLiesWithin(Vector2D point) {
-        if (vertices.length == 0) return false;
-
-        // create sides between vertices
-
-        ArrayList<Line2D> sides = new ArrayList<>();
-
-        for (int i = 0; i < vertices.length - 1; i++) {
-            sides.add(new Line2D(vertices[i], vertices[i + 1]));
-        }
-
-        sides.add(new Line2D(vertices[vertices.length - 1], vertices[0]));
-
         for (Line2D side : sides) {
             if (side.pointOn(point)) return true;
         }
@@ -76,5 +85,21 @@ public class Polygon {
         // if a point is inside the polygon, a projected line will intersect edges an odd number of
         // times
         return (intersectionCounter % 2 == 1);
+    }
+
+    /**
+     * Statically constructs and returns a rectangular polygon.
+     *
+     * @param root A Vector2d with endpoint representing the start of the shape.
+     * @param length The length in the x-axis of the shape, positive or negative.
+     * @param height The height in the y-axis of the shape, positive or negative.
+     * @return A new Polygon.
+     */
+    public static Polygon getRectangle(Vector2D root, double length, double height) {
+        return new Polygon(
+                root,
+                new Vector2D(root.getX() + length, root.getY()),
+                new Vector2D(root.getX() + length, root.getY() + height),
+                new Vector2D(root.getX(), root.getY() + height));
     }
 }

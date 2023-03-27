@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -14,14 +14,14 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.trajectory;
+package org.chsrobotics.lib.trajectory.motionProfile;
 
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.chsrobotics.lib.trajectory.AsymmetricTrapezoidProfile.*;
-import org.chsrobotics.lib.trajectory.MotionProfile.State;
+import org.chsrobotics.lib.trajectory.motionProfile.AsymmetricTrapezoidProfile.*;
+import org.chsrobotics.lib.trajectory.motionProfile.MotionProfile.State;
 import org.junit.Test;
 
 /** Tests for the AsymmetricTrapezoidProfile. */
@@ -60,19 +60,13 @@ public class AsymmetricTrapezoidProfileTests {
 
     @Test
     public void AsymmetricTrapezoidProfilePositiveTriangleCalculate() {
-        assertEquals(positiveTriangleProfile.calculate(0), new State(1.0, 0.0));
-        assertEquals(positiveTriangleProfile.calculate(0.5), new State(1.125, 0.5));
-        assertEquals(positiveTriangleProfile.calculate(1.1), new State(1.605, 1.1));
+        assertEquals(positiveTriangleProfile.sample(0), new State(1.0, 0.0));
+        assertEquals(positiveTriangleProfile.sample(0.5), new State(1.125, 0.5));
+        assertEquals(positiveTriangleProfile.sample(1.1), new State(1.605, 1.1));
         assertEquals(
-                positiveTriangleProfile.calculate(1.5),
+                positiveTriangleProfile.sample(1.5),
                 new State(1.9461524227066316, 0.4641016151377544));
-        assertEquals(positiveTriangleProfile.calculate(2.0), new State(2.0, 0.0));
-    }
-
-    @Test
-    public void AsymmetricTrapezoidProfilePositiveTriangleIsFinished() {
-        assertFalse(positiveTriangleProfile.isFinished(1.2));
-        assertTrue(positiveTriangleProfile.isFinished(2.0));
+        assertEquals(positiveTriangleProfile.sample(2.0), new State(2.0, 0.0));
     }
 
     AsymmetricTrapezoidProfile negativeTrapezoidProfile =
@@ -97,17 +91,11 @@ public class AsymmetricTrapezoidProfileTests {
 
     @Test
     public void AsymmetricTrapezoidProfileNegativeTrapezoidCalculate() {
-        assertEquals(negativeTrapezoidProfile.calculate(0), new State(3.0, 0.0));
-        assertEquals(negativeTrapezoidProfile.calculate(0.5), new State(2.875, -0.5));
-        assertEquals(negativeTrapezoidProfile.calculate(1.1), new State(2.395, -1.1));
-        assertEquals(negativeTrapezoidProfile.calculate(3.0), new State(-0.75, -1.0));
-        assertEquals(negativeTrapezoidProfile.calculate(3.5), new State(-1.0, 0.0));
-    }
-
-    @Test
-    public void AsymmetricTrapezoidProfileNegativeTrapezoidIsFinished() {
-        assertFalse(negativeTrapezoidProfile.isFinished(1.2));
-        assertTrue(negativeTrapezoidProfile.isFinished(3.5));
+        assertEquals(negativeTrapezoidProfile.sample(0), new State(3.0, 0.0));
+        assertEquals(negativeTrapezoidProfile.sample(0.5), new State(2.875, -0.5));
+        assertEquals(negativeTrapezoidProfile.sample(1.1), new State(2.395, -1.1));
+        assertEquals(negativeTrapezoidProfile.sample(3.0), new State(-0.75, -1.0));
+        assertEquals(negativeTrapezoidProfile.sample(3.5), new State(-1.0, 0.0));
     }
 
     AsymmetricTrapezoidProfile positiveRampProfile =

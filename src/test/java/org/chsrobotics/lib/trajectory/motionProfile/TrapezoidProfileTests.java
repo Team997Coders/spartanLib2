@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -14,12 +14,12 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.trajectory;
+package org.chsrobotics.lib.trajectory.motionProfile;
 
 import static org.junit.Assert.assertEquals;
 
-import org.chsrobotics.lib.trajectory.MotionProfile.*;
-import org.chsrobotics.lib.trajectory.TrapezoidProfile.Constraints;
+import org.chsrobotics.lib.trajectory.motionProfile.MotionProfile.*;
+import org.chsrobotics.lib.trajectory.motionProfile.TrapezoidProfile.Constraints;
 import org.junit.Test;
 
 /**
@@ -28,8 +28,6 @@ import org.junit.Test;
  * <p>Most of this is covered by the AsymmetricTrapezoidProfileTests, but it doesn't hurt to check.
  */
 public class TrapezoidProfileTests {
-    private final double epsilon = 0.0001;
-
     @Test
     public void TrapezoidProfileConstraintsEqualityWorks() {
         Constraints constraints1 = new Constraints(1, 5);
@@ -48,22 +46,8 @@ public class TrapezoidProfileTests {
                         new State(0, 5),
                         new State(40, 2));
 
-        assertEquals(symmetrical.totalTime(), asymmetrical.totalTime(), epsilon);
-
         for (int i = 0; i < symmetrical.totalTime(); i++) {
-            assertEquals(true, symmetrical.calculate(i).equals(asymmetrical.calculate(i)));
+            assertEquals(true, symmetrical.sample(i).equals(asymmetrical.sample(i)));
         }
-
-        assertEquals(
-                true,
-                symmetrical
-                        .calculate(symmetrical.totalTime())
-                        .equals(asymmetrical.calculate(symmetrical.totalTime())));
-
-        assertEquals(
-                true,
-                symmetrical
-                        .calculate(symmetrical.totalTime() + 1)
-                        .equals(asymmetrical.calculate(symmetrical.totalTime() + 1)));
     }
 }

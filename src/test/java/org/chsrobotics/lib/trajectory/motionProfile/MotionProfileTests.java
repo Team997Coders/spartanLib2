@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -14,11 +14,11 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.trajectory;
+package org.chsrobotics.lib.trajectory.motionProfile;
 
 import static org.junit.Assert.assertEquals;
 
-import org.chsrobotics.lib.trajectory.MotionProfile.State;
+import org.chsrobotics.lib.trajectory.motionProfile.MotionProfile.State;
 import org.junit.Test;
 
 /** Tests for the MotionProfile. */
@@ -36,21 +36,21 @@ public class MotionProfileTests {
     public void MotionProfileHandlesProfileWithNoPhases() {
         MotionProfile profile = new MotionProfile(new State(0, 0));
 
-        assertEquals(new State(0, 0), profile.calculate(5));
+        assertEquals(new State(0, 0), profile.sample(5));
     }
 
     @Test
     public void MotionProfileHandlesSampleTimeLessThanZero() {
         MotionProfile profile = new MotionProfile(new ProfilePhase(1, 1, 1));
 
-        assertEquals(new State(0, 0), profile.calculate(-10));
+        assertEquals(new State(0, 0), profile.sample(-10));
     }
 
     @Test
     public void MotionProfileHandlesSampleTimeGreaterThanRuntime() {
         MotionProfile profile = new MotionProfile(new ProfilePhase(10, 10, 2));
 
-        assertEquals(new State(40, 0), profile.calculate(5));
+        assertEquals(new State(40, 0), profile.sample(5));
     }
 
     @Test
@@ -61,13 +61,13 @@ public class MotionProfileTests {
 
         MotionProfile profile = new MotionProfile(new State(0, 0), phase1, phase2, phase3);
 
-        assertEquals(18, profile.calculate(5).position, epsilon);
+        assertEquals(18, profile.sample(5).position, epsilon);
     }
 
     @Test
     public void MotionProfileHandlesSamplingInMidpointOfPhase() {
         MotionProfile profile = new MotionProfile(new ProfilePhase(1, 0, 5));
 
-        assertEquals(new State(8, 4), profile.calculate(4));
+        assertEquals(new State(8, 4), profile.sample(4));
     }
 }

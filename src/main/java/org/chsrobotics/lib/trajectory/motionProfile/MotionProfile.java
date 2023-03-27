@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -14,7 +14,7 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.trajectory;
+package org.chsrobotics.lib.trajectory.motionProfile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,39 +123,15 @@ public class MotionProfile {
     }
 
     /**
-     * Returns the total timespan of the profile.
-     *
-     * @return The duration of the profile, in seconds.
-     */
-    public double totalTime() {
-        double time = 0;
-        for (ProfilePhase phase : phases) {
-            time += phase.time;
-        }
-        return time;
-    }
-
-    /**
-     * Returns true if the provided time is greater than the length of the profile.
-     *
-     * @param time The time since the beginning of the profile, in seconds.
-     * @return True if the profile has finished all its phases.
-     */
-    public boolean isFinished(double time) {
-        return time >= totalTime();
-    }
-
-    /**
      * Calculates the current State of the profile at a given time.
      *
-     * <p>If the time sampled is less than 0, returns a State of 0 position and velocity. If it is
-     * greater than the timespan of the profile, returns a State of the aggregated position and zero
-     * velocity.
+     * <p>If the time sampled is less than 0, returns the initial State. If it is greater than the
+     * timespan of the profile, returns a State of the aggregated position and zero velocity.
      *
      * @param time The time since the beginning of the profile.
      * @return The position and velocity of the profile at that time.
      */
-    public State calculate(double time) {
+    public State sample(double time) {
         if (time <= 0) {
             return initialState;
         }
@@ -174,5 +150,13 @@ public class MotionProfile {
         }
         // case where there are no phases, or the time is greater than the length of the profile
         return new State(position, 0);
+    }
+
+    public double totalTime() {
+        double time = 0;
+
+        for (ProfilePhase phase : phases) time += phase.time;
+
+        return time;
     }
 }
