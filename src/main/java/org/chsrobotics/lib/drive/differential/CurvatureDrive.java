@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -16,6 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.drive.differential;
 
+import java.util.function.Supplier;
 import org.chsrobotics.lib.input.JoystickAxis;
 import org.chsrobotics.lib.math.filters.RateLimiter;
 
@@ -24,10 +25,10 @@ import org.chsrobotics.lib.math.filters.RateLimiter;
  * dependent on linear speeds.
  */
 public class CurvatureDrive implements DifferentialDriveMode {
-    private final JoystickAxis linearAxis;
-    private final JoystickAxis rotationalAxis;
-    private final double turnModifier;
-    private final double driveModifier;
+    private final Supplier<Double> linearAxis;
+    private final Supplier<Double> rotationalAxis;
+    private final Supplier<Double> turnModifier;
+    private final Supplier<Double> driveModifier;
     private final RateLimiter driveLimiter;
     private final RateLimiter turnLimiter;
     private final boolean invertReverseTurning;
@@ -46,10 +47,10 @@ public class CurvatureDrive implements DifferentialDriveMode {
      * @param invertReverseTurning Whether turning in reverse should be inverted.
      */
     public CurvatureDrive(
-            JoystickAxis linearAxis,
-            JoystickAxis rotationalAxis,
-            double driveModifier,
-            double turnModifier,
+            Supplier<Double> linearAxis,
+            Supplier<Double> rotationalAxis,
+            Supplier<Double> driveModifier,
+            Supplier<Double> turnModifier,
             double driveLimiter,
             double turnLimiter,
             boolean invertReverseTurning) {
@@ -66,12 +67,12 @@ public class CurvatureDrive implements DifferentialDriveMode {
     @Override
     public DifferentialDrivetrainInput execute() {
         double rotationMultiplier =
-                invertReverseTurning ? Math.abs(linearAxis.getValue()) : linearAxis.getValue();
+                invertReverseTurning ? Math.abs(linearAxis.get()) : linearAxis.get();
         // rotation = (linear * rotational input)
         double rotation =
                 turnLimiter.calculate(
-                        (rotationalAxis.getValue() * rotationMultiplier * turnModifier));
-        double linear = driveLimiter.calculate(linearAxis.getValue() * driveModifier);
+                        (rotationalAxis.get() * rotationMultiplier * turnModifier.get()));
+        double linear = driveLimiter.calculate(linearAxis.get() * driveModifier.get());
 
         double left = linear + rotation;
         double right = linear - rotation;
