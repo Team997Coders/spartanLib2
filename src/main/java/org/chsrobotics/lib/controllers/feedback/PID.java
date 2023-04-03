@@ -23,6 +23,7 @@ import org.chsrobotics.lib.math.UtilityMath;
 import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
 import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
+import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 import org.chsrobotics.lib.util.SizedStack;
 
 /**
@@ -370,6 +371,8 @@ public class PID implements FeedbackController, IntrinsicLoggable {
                     doubleLogFactory.getLogger(name + "/setpointVelocityTolerance");
 
             logsConstructed = true;
+
+            PeriodicCallbackHandler.registerCallback(this::updateLogs);
         }
     }
 
@@ -587,9 +590,7 @@ public class PID implements FeedbackController, IntrinsicLoggable {
         return currentValue;
     }
 
-    @Override
-    /** {@inheritDoc} */
-    public void updateLogs() {
+    private void updateLogs(double dtSeconds) {
         if (logsConstructed) {
             pGainLogger.update(getkP());
             iGainLogger.update(getkI());

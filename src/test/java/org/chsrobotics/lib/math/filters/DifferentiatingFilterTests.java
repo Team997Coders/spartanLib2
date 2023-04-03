@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -53,5 +53,14 @@ public class DifferentiatingFilterTests {
         assertEquals(1, filter.calculate(2, 2), epsilon);
         assertEquals(1, filter.calculate(3, 1), epsilon);
         assertEquals(-4, filter.calculate(1, 0.5), epsilon);
+    }
+
+    @Test
+    public void DifferentatingFilterAngularWorks() {
+        DifferentiatingFilter filter = new DifferentiatingFilter(true);
+
+        assertEquals(0.5, filter.calculate(1, 2), epsilon);
+        assertEquals(-1, filter.calculate((2 * Math.PI) - 1, 2), epsilon);
+        assertEquals(0.5, filter.calculate(0, 2), epsilon);
     }
 }

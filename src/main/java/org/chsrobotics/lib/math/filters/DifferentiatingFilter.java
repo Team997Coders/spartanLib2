@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -16,6 +16,8 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math.filters;
 
+import org.chsrobotics.lib.math.UtilityMath;
+
 /**
  * A filter that returns the rate of change (derivative) of a stream of data.
  *
@@ -25,6 +27,24 @@ public class DifferentiatingFilter extends Filter {
     private final double defaultRobotPeriodSeconds = 0.02;
     private double lastValue = 0;
     private double currentDeriv = 0;
+
+    private final boolean angular;
+
+    /**
+     * Constructs a DifferentiatingFilter.
+     *
+     * @param angular Whether the given values are angles which can wrap. If true, the angles must
+     *     be in radians. This will make the assumption that the smallest possible angle is
+     *     traversed between steps, which may not necessarily be true for large dts.
+     */
+    public DifferentiatingFilter(boolean angular) {
+        this.angular = angular;
+    }
+
+    /** Constructs a non-angular DifferentiatingFilter. */
+    public DifferentiatingFilter() {
+        this(false);
+    }
 
     @Override
     /**
@@ -36,7 +56,8 @@ public class DifferentiatingFilter extends Filter {
      * <p>Returns 0 if {@code dt} is equal to 0 (although negative values of dt won't be meaningful
      * either).
      *
-     * @param value The double value to input to the filter.
+     * @param value The double value to input to the filter. If this filter is configured to be
+     *     angular, must be in radians.
      * @param dt The elapsed time (in seconds) since the last call of either {@code calculate}
      *     method.
      * @return The rate of change, in units/second, between the current {@code value} and the
@@ -44,7 +65,13 @@ public class DifferentiatingFilter extends Filter {
      */
     public double calculate(double value, double dtSeconds) {
         if (dtSeconds == 0) return 0;
-        currentDeriv = (value - lastValue) / dtSeconds;
+
+        double delta;
+
+        if (!angular) delta = value - lastValue;
+        else delta = UtilityMath.smallestAngleRadiansBetween(lastValue, value);
+
+        currentDeriv = delta / dtSeconds;
         lastValue = value;
         return currentDeriv;
     }

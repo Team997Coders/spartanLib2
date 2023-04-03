@@ -43,7 +43,4 @@ public interface IntrinsicLoggable {
     default void autoGenerateLogs(String name, String subdirName) {
         autoGenerateLogs(HighLevelLogger.getInstance().getLog(), name, subdirName, true, true);
     }
-
-    /** Updates the internally generated Loggers. */
-    void updateLogs();
 }

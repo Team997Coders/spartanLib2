@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
+import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
 /**
  * Convenience wrapper class for telemetry/ logging with built-in logging for robot-agnostic data
@@ -69,6 +70,8 @@ public class HighLevelLogger implements IntrinsicLoggable {
     private Logger<Double> logger5vCurrent;
 
     private Logger<Integer> brownoutCountLogger;
+
+    private Logger<Double> loopTimeLogger;
 
     private boolean loggersConstructed = false;
 
@@ -221,13 +224,15 @@ public class HighLevelLogger implements IntrinsicLoggable {
 
             brownoutCountLogger = new Logger<>("brownoutCount", "system");
 
+            loopTimeLogger = doubleLogFactory.getLogger("loopTime_seconds");
+
             loggersConstructed = true;
+
+            PeriodicCallbackHandler.registerCallback(this::updateLogs);
         }
     }
 
-    @Override
-    /** {@inheritDoc} */
-    public void updateLogs() {
+    private void updateLogs(double dtSeconds) {
         if (!loggersConstructed) {
             if (RobotController.getBatteryVoltage() < RobotController.getBrownoutVoltage()) {
                 brownoutCounter++;
@@ -256,6 +261,8 @@ public class HighLevelLogger implements IntrinsicLoggable {
 
             logger3_3vCurrent.update(RobotController.getCurrent3V3());
             logger5vCurrent.update(RobotController.getCurrent5V());
+
+            loopTimeLogger.update(dtSeconds);
         }
     }
 
