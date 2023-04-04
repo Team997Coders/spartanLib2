@@ -22,6 +22,13 @@ dependencies {
 	testImplementation 'junit:junit:4.13.2'
 }
 
+if (hasProperty('buildScan')) {
+	buildScan {
+		termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+		termsOfServiceAgree = 'yes'
+	}
+}
+
 test {
 	testLogging.showStandardStreams = true
 }
@@ -53,6 +60,10 @@ javadoc {
 	}
 }
 
+java {
+	withJavadocJar()
+}
+
 tasks.register('updateGitHooks', Copy) {
 	from new File(rootProject.rootDir, 'scripts/pre-commit')
 	into { new File(rootProject.rootDir, '.git/hooks') }
@@ -61,18 +72,21 @@ tasks.register('updateGitHooks', Copy) {
 compileJava.dependsOn updateGitHooks
 
 tasks.register('sourceJar', Jar) {
-	classifier "sources"
+	archiveClassifier.set("sources")
 	from sourceSets.main.allJava
 }
 
-tasks.register('javadocJar', Jar) {
-	classifier "javadoc"
-	from javadoc.destinationDir
-}.configure {
-	mustRunAfter javadoc
+tasks.register('prePublish') {
+	doLast {
+		if (!(project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword'))) {
+			throw new GradleException("gradle.properties must be configured with a valid ossrhUsername and ossrhPassword to publish to Sonatype!")
+		}
+	}
 }
 
 publishToMavenLocal.dependsOn build
+publish.dependsOn build
+publish.dependsOn prePublish
 
 artifacts {
 	archives jar
@@ -140,7 +154,7 @@ publishing {
 		}
 	}
 	repositories {
-		if (project.hasProperty('ossrhUsername')) {
+		if (project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword')) {
 			maven {
 				name = "OSSRH"
 				setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
