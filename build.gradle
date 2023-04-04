@@ -76,7 +76,17 @@ tasks.register('sourceJar', Jar) {
 	from sourceSets.main.allJava
 }
 
+tasks.register('prePublish') {
+	doLast {
+		if (!(project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword'))) {
+			throw new GradleException("gradle.properties must be configured with a valid ossrhUsername and ossrhPassword to publish to Sonatype!")
+		}
+	}
+}
+
 publishToMavenLocal.dependsOn build
+publish.dependsOn build
+publish.dependsOn prePublish
 
 artifacts {
 	archives jar
@@ -153,8 +163,6 @@ publishing {
 					password = ossrhPassword
 				}
 			}
-		} else {
-			throw new GradleException("gradle.properties must be configured with a valid ossrhUsername and ossrhPassword to publish to Sonatype!")
 		}
 	}
 }
