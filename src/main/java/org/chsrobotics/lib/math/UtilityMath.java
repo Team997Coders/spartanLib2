@@ -16,8 +16,10 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math;
 
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.numbers.N2;
 import org.chsrobotics.lib.math.geometry.Vector3D;
 import org.chsrobotics.lib.util.Tuple2;
 
@@ -506,5 +508,29 @@ public class UtilityMath {
      */
     public static Rotation3d fromRotation2d(Rotation2d original) {
         return new Rotation3d(0, 0, original.getRadians());
+    }
+
+    /**
+     * Returns a rotation matrix for 2-dimensional vectors.
+     *
+     * <p>To use, multiply the returned matrix by a column vector (WPILib Vector is a column
+     * vector). Note that matrix multiplication is non-commutative and the rotation matrix is only
+     * valid if it is the first of the multiplicands.
+     *
+     * @param angleRadians An angle, in radians, to generate a rotation matrix for.
+     * @return The 2-dimensional rotation matrix for the given angle.
+     */
+    public static Matrix<N2, N2> get2DRotationMatrix(double angleRadians) {
+        var mat = new Matrix<>(N2.instance, N2.instance);
+
+        mat.set(0, 0, Math.cos(angleRadians));
+
+        mat.set(0, 1, -Math.sin(angleRadians));
+
+        mat.set(1, 0, Math.sin(angleRadians));
+
+        mat.set(1, 1, Math.cos(angleRadians));
+
+        return mat;
     }
 }

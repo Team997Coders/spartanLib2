@@ -19,6 +19,7 @@ package org.chsrobotics.lib.math;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import edu.wpi.first.math.VecBuilder;
 import org.junit.Test;
 
 /** Tests for the various small math functions in the UtilityMath class. */
@@ -165,5 +166,31 @@ public class UtilityMathTests {
         double[] actualOutput = UtilityMath.normalizeSet(inputArray, 0.5);
 
         assertArrayEquals(expectedOuput, actualOutput, epsilon);
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // rotation matrices
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    @Test
+    public void UtilityMath2DRotationMatrixWorks() {
+        var inp = VecBuilder.fill(2, 1);
+
+        var mat = UtilityMath.get2DRotationMatrix(0);
+
+        assertEquals(inp, mat.times(inp));
+
+        mat = UtilityMath.get2DRotationMatrix(Math.PI / 2);
+
+        var res = mat.times(inp);
+
+        assertEquals(-1, res.get(0, 0), epsilon);
+        assertEquals(2, res.get(1, 0), epsilon);
+
+        mat = UtilityMath.get2DRotationMatrix(-Math.PI / 4);
+
+        res = mat.times(inp);
+
+        assertEquals((3 * Math.sqrt(2) / 2), res.get(0, 0), epsilon);
+        assertEquals(-Math.sqrt(2) / 2, res.get(1, 0), epsilon);
     }
 }
