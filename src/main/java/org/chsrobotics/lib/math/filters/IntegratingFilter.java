@@ -19,14 +19,16 @@ package org.chsrobotics.lib.math.filters;
 import org.chsrobotics.lib.util.SizedStack;
 
 /**
- * Filter which returns the time-weighted sum (integral) of a series of values.
+ * Filter which returns an time-weighted sum (integral) of a series of values.
  *
- * <p>Approximated with finite timesteps.
+ * <p>Approximated with finite timesteps using a trapezoidal Riemann sum.
  */
 public class IntegratingFilter extends Filter {
     private final SizedStack<Double> stack;
 
     private double currentOutput = 0;
+
+    private double previousInputValue = 0;
 
     /**
      * Constructs an IntegratingFilter.
@@ -59,13 +61,15 @@ public class IntegratingFilter extends Filter {
      * @return Value of the (approximated) integral.
      */
     public double calculate(double value, double dt) {
-        stack.push(value * dt);
+        stack.push(dt * 0.5 * (value + previousInputValue));
 
         double sum = 0;
 
         for (double entry : stack) sum += entry;
 
         currentOutput = sum;
+
+        previousInputValue = value;
 
         return sum;
     }

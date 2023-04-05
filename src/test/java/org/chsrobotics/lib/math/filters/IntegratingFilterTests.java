@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -28,19 +28,19 @@ public class IntegratingFilterTests {
         IntegratingFilter filter = new IntegratingFilter(0);
 
         assertEquals(0, filter.calculate(0, 1), epsilon);
-        assertEquals(5, filter.calculate(10, 0.5), epsilon);
-        assertEquals(-5, filter.calculate(-5, 2), epsilon);
+        assertEquals(2.5, filter.calculate(10, 0.5), epsilon);
+        assertEquals(7.5, filter.calculate(-5, 2), epsilon);
     }
 
     @Test
     public void IntegratingFilterWorksFiniteWindow() {
         IntegratingFilter filter = new IntegratingFilter(3);
 
-        assertEquals(4, filter.calculate(2, 2), epsilon);
-        assertEquals(2, filter.calculate(-4, 0.5), epsilon);
-        assertEquals(3, filter.calculate(1, 1), epsilon);
+        assertEquals(2, filter.calculate(2, 2), epsilon);
+        assertEquals(1.5, filter.calculate(-4, 0.5), epsilon);
+        assertEquals(0, filter.calculate(1, 1), epsilon);
 
-        assertEquals(-1, filter.calculate(0, 1), epsilon);
-        assertEquals(2, filter.calculate(1, 1), epsilon);
+        assertEquals(-1.5, filter.calculate(0, 1), epsilon);
+        assertEquals(-0.5, filter.calculate(1, 1), epsilon);
     }
 }
