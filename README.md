@@ -41,21 +41,21 @@ repositories {
 	maven { url 'https://jitpack.io' }
 }
 ```
-2) Add the dependancy:
-1) For stable releases:
-```groovy
-	dependencies {
-		...
-		implementation 'com.github.Team997Coders:spartanLib2:1.3.1'
-	}
-```
-2) For developement versions:
-```groovy
-	dependencies {
-		...
-		implementation 'com.github.Team997Coders:spartanLib2:dev-SNAPSHOT'
-	}
-```
+2) Add the dependency:
+   1) For stable releases:
+   ```groovy
+    dependencies {
+        ...
+        implementation 'com.github.Team997Coders:spartanLib2:1.3.1'
+    }
+   ``` 
+   2) For developement versions:
+   ```groovy
+    dependencies {
+        ...
+        implementation 'com.github.Team997Coders:spartanLib2:dev-SNAPSHOT'
+    }
+   ```
 
 ## Contributing:
 If you're a member of the Team997Coders org, you can simply create a branch inside this repo and make a pull request to `dev` when you're finished. Currently, 1 review is required and checks must pass to merge to `dev`. No direct commits to `main` are allowed.
