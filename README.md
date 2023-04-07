@@ -36,7 +36,7 @@ Artifacts are published through JitPack, so installation is easy.
 1) Add the JitPack repository:
 ```groovy
 repositories {
-	maven { url 'https://jitpack.io' }
+    maven { url 'https://jitpack.io' }
 }
 ```
 2) Add the dependency:
