@@ -35,7 +35,7 @@ spotless {
 	ratchetFrom('origin/dev')
 	format 'misc', {
 		target fileTree(rootDir) {
-			include '*.gradle', '*.md', '.gitignore'
+			include '*.gradle', '.gitignore'
 			exclude 'LICENSE.md'
 		}
 
