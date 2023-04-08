@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -16,14 +16,15 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.drive.differential;
 
+import java.util.function.Supplier;
 import org.chsrobotics.lib.input.JoystickAxis;
 import org.chsrobotics.lib.math.filters.RateLimiter;
 
 /** Moves the robot in teleoperated mode using one input directly mapped to each wheel. */
 public class TankDrive implements DifferentialDriveMode {
-    private final JoystickAxis leftAxis;
-    private final JoystickAxis rightAxis;
-    private final double driveModifier;
+    private final Supplier<Double> leftAxis;
+    private final Supplier<Double> rightAxis;
+    private final Supplier<Double> driveModifier;
     private RateLimiter leftDriveLimiter;
     private RateLimiter rightDriveLimiter;
 
@@ -37,9 +38,9 @@ public class TankDrive implements DifferentialDriveMode {
      *     equal to 0, no rate limiting will be applied.
      */
     public TankDrive(
-            JoystickAxis leftAxis,
-            JoystickAxis rightAxis,
-            double driveModifier,
+            Supplier<Double> leftAxis,
+            Supplier<Double> rightAxis,
+            Supplier<Double> driveModifier,
             double driveLimiter) {
         this.leftAxis = leftAxis;
         this.rightAxis = rightAxis;
@@ -54,15 +55,15 @@ public class TankDrive implements DifferentialDriveMode {
      * @param leftAxis The {@link JoystickAxis} to be used for the left side.
      * @param rightAxis The {@link JoystickAxis} to be used for the right side.
      */
-    public TankDrive(JoystickAxis leftAxis, JoystickAxis rightAxis) {
-        this(leftAxis, rightAxis, 1, 0);
+    public TankDrive(Supplier<Double> leftAxis, Supplier<Double> rightAxis) {
+        this(leftAxis, rightAxis, () -> 1.0, 0);
     }
 
     /** {@inheritDoc} */
     @Override
     public DifferentialDrivetrainInput execute() {
-        double left = leftAxis.getValue() * driveModifier;
-        double right = rightAxis.getValue() * driveModifier;
+        double left = leftAxis.get() * driveModifier.get();
+        double right = rightAxis.get() * driveModifier.get();
 
         left = leftDriveLimiter.calculate(left);
         right = rightDriveLimiter.calculate(right);
