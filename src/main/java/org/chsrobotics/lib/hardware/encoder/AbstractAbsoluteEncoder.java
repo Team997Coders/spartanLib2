@@ -75,7 +75,7 @@ public abstract class AbstractAbsoluteEncoder extends AbstractEncoder {
         }
     }
 
-    private void updateLogs(double dtSeconds) {
+    private void updateLogs() {
         if (logsConstructed) {
             rawPositionLogger.update(getRawPosition());
             rawVelocityLogger.update(getRawVelocity());

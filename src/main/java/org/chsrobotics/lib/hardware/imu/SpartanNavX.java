@@ -16,9 +16,12 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.imu;
 
+import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.wpilibj.TimedRobot;
 import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
@@ -32,8 +35,14 @@ public class SpartanNavX extends AbstractIMU {
 
     private boolean logsConstructed = false;
 
+    private AHRS navx;
+
+    private final boolean real;
+
     public SpartanNavX(NavXConfig config) {
         this.config = config;
+
+        real = TimedRobot.isReal();
 
         PeriodicCallbackHandler.registerCallback(this::updateLogs);
     }
@@ -69,24 +78,51 @@ public class SpartanNavX extends AbstractIMU {
 
     @Override
     public Translation3d getRawAccelerationVector() {
-        throw new UnsupportedOperationException("Unimplemented method 'getRawAccelerationVector'");
+        final double g = 9.81;
+
+        // TODO: ensure axes align as expected on physical hardware
+
+        if (real)
+            return new Translation3d(
+                    g * navx.getRawAccelX(), g * navx.getRawAccelY(), g * navx.getRawAccelZ());
+        else return new Translation3d();
     }
 
     @Override
     public Rotation3d getRawOrientation() {
-        throw new UnsupportedOperationException("Unimplemented method 'getRawOrientation'");
+        if (real) {
+            // navx api is downright psychotic
+            double qW = -Math.PI * navx.getQuaternionW();
+            double qX = -Math.PI * navx.getQuaternionX();
+            double qY = -Math.PI * navx.getQuaternionY();
+            double qZ = -Math.PI * navx.getQuaternionZ();
+
+            // TODO: check to make sure this aligns with actual hardware
+            return new Rotation3d(new Quaternion(qW, qX, qY, qZ));
+        } else return new Rotation3d();
     }
 
     public boolean isCalibrating() {
-        return false;
+        if (real) return navx.isCalibrating();
+        else return false;
     }
 
-    public void startCalibration() {}
+    public void startCalibration() {
+        if (real) navx.calibrate();
+    }
 
-    private void updateLogs(double dtSeconds) {
+    private void updateLogs() {
         if (logsConstructed) {
-            temperatureLogger.update(null);
-            isCalibratingLogger.update(null);
+            if (real) {
+                temperatureLogger.update((double) navx.getTempC());
+            }
+
+            isCalibratingLogger.update(isCalibrating());
         }
+    }
+
+    @Override
+    public boolean shouldIncrementStalenessCounter() {
+        return (getRawPitchVelocity() == 0);
     }
 }

@@ -19,13 +19,14 @@ package org.chsrobotics.lib.hardware.imu;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.util.datalog.DataLog;
+import org.chsrobotics.lib.hardware.StalenessWatchable;
 import org.chsrobotics.lib.math.filters.DifferentiatingFilter;
 import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
 import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
-public abstract class AbstractIMU implements IntrinsicLoggable {
+public abstract class AbstractIMU implements IntrinsicLoggable, StalenessWatchable {
     private boolean logsConstructed = false;
 
     private Logger<Double> unoffsetAccelXLogger;
@@ -76,6 +77,11 @@ public abstract class AbstractIMU implements IntrinsicLoggable {
     private final DifferentiatingFilter offsetYawAFilter = new DifferentiatingFilter();
     private final DifferentiatingFilter offsetRollAFilter = new DifferentiatingFilter();
 
+    private int numStaleCycles = 0;
+    private int stalenessThresholdCycles = StalenessWatchable.defaultStalenessThresholdCycles;
+
+    private Logger<Boolean> stalenessWatchdogTriggeredLogger;
+
     public AbstractIMU() {
         PeriodicCallbackHandler.registerCallback(this::periodic);
     }
@@ -124,12 +130,20 @@ public abstract class AbstractIMU implements IntrinsicLoggable {
             offsetRollALogger =
                     factory.getLogger(name + "/offsetRollAcceleration_rad_per_s_squared");
 
+            stalenessWatchdogTriggeredLogger =
+                    new Logger<>(
+                            log,
+                            name + "/stalenessWatchdogTriggered",
+                            subdirName,
+                            publishToNT,
+                            recordInLog);
+
             logsConstructed = true;
             PeriodicCallbackHandler.registerCallback(this::updateLogs);
         }
     }
 
-    private void updateLogs(double dtSeconds) {
+    private void updateLogs() {
         if (logsConstructed) {
             unoffsetAccelXLogger.update(getRawAccelerationX());
             unoffsetAccelYLogger.update(getRawAccelerationY());
@@ -162,6 +176,8 @@ public abstract class AbstractIMU implements IntrinsicLoggable {
             offsetPitchALogger.update(getOffsetPitchAcceleration());
             offsetYawALogger.update(getOffsetYawAcceleration());
             offsetRollALogger.update(getOffsetRollAcceleration());
+
+            stalenessWatchdogTriggeredLogger.update(getStalenessWatchdogTriggered());
         }
     }
 
@@ -181,6 +197,9 @@ public abstract class AbstractIMU implements IntrinsicLoggable {
         offsetPitchAFilter.calculate(offsetPitchVFilter.getCurrentOutput(), dtSeconds);
         offsetYawAFilter.calculate(offsetPitchVFilter.getCurrentOutput(), dtSeconds);
         offsetRollAFilter.calculate(offsetRollVFilter.getCurrentOutput(), dtSeconds);
+
+        if (shouldIncrementStalenessCounter()) stalenessThresholdCycles++;
+        else resetStalenessWatchdog();
     }
 
     public abstract Rotation3d getRotationOffset();
@@ -291,5 +310,30 @@ public abstract class AbstractIMU implements IntrinsicLoggable {
 
     public double getOffsetRollAcceleration() {
         return offsetRollAFilter.getCurrentOutput();
+    }
+
+    @Override
+    public boolean getStalenessWatchdogTriggered() {
+        return (numStaleCycles >= stalenessThresholdCycles);
+    }
+
+    @Override
+    public void resetStalenessWatchdog() {
+        numStaleCycles = 0;
+    }
+
+    @Override
+    public void setStalenessThreshold(int cycles) {
+        stalenessThresholdCycles = cycles;
+    }
+
+    @Override
+    public int getStalenessThresholdCycles() {
+        return stalenessThresholdCycles;
+    }
+
+    @Override
+    public int getCurrentStalenessCount() {
+        return numStaleCycles;
     }
 }

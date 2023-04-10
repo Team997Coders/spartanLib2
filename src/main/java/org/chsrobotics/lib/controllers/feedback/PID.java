@@ -590,7 +590,7 @@ public class PID implements FeedbackController, IntrinsicLoggable {
         return currentValue;
     }
 
-    private void updateLogs(double dtSeconds) {
+    private void updateLogs() {
         if (logsConstructed) {
             pGainLogger.update(getkP());
             iGainLogger.update(getkI());

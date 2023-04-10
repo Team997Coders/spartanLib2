@@ -16,24 +16,36 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.motorController;
 
+import edu.wpi.first.util.datalog.DataLog;
 import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
+import org.chsrobotics.lib.telemetry.Logger;
+import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
 public abstract class AbstractMotorController implements IntrinsicLoggable {
-    public static enum IdleMode {
-        COAST,
-        BRAKE;
+    private Logger<Double> setVoltageLogger;
 
-        public com.revrobotics.CANSparkMax.IdleMode asRev() {
-            if (this == IdleMode.BRAKE) return com.revrobotics.CANSparkMax.IdleMode.kBrake;
-            else return com.revrobotics.CANSparkMax.IdleMode.kCoast;
-        }
-    }
+    private boolean logsConstructed = false;
 
     public abstract void setVoltage(double volts);
 
     public abstract double getSetVoltage();
 
-    public abstract void setIdleMode(IdleMode idleMode);
+    @Override
+    public void autoGenerateLogs(
+            DataLog log, String name, String subdirName, boolean publishToNT, boolean recordInLog) {
+        if (!logsConstructed) {
+            setVoltageLogger =
+                    new Logger<>(log, name + "/setVoltage_V", subdirName, publishToNT, recordInLog);
 
-    public abstract IdleMode getIdleMode();
+            logsConstructed = true;
+
+            PeriodicCallbackHandler.registerCallback(this::updateLogs);
+        }
+    }
+
+    private void updateLogs() {
+        if (logsConstructed) {
+            setVoltageLogger.update(getSetVoltage());
+        }
+    }
 }

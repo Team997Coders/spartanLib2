@@ -16,51 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.encoder;
 
-import edu.wpi.first.util.datalog.DataLog;
-import org.chsrobotics.lib.util.PeriodicCallbackHandler;
-
 public class SpartanAnalogAbsoluteEncoder extends AbstractAbsoluteEncoder {
-
-    @Override
-    public void autoGenerateLogs(
-            DataLog log, String name, String subdirName, boolean publishToNT, boolean recordInLog) {
-        PeriodicCallbackHandler.registerCallback(this::updateLogs);
-        throw new UnsupportedOperationException("Unimplemented method 'autoGenerateLogs'");
-    }
-
-    private void updateLogs(double dtSeconds) {
-        throw new UnsupportedOperationException("Unimplemented method 'updateLogs'");
-    }
-
-    @Override
-    public double getRawPosition() {
-        throw new UnsupportedOperationException("Unimplemented method 'getRawPosition'");
-    }
-
-    @Override
-    public double getRawVelocity() {
-        throw new UnsupportedOperationException("Unimplemented method 'getRawVelocity'");
-    }
-
-    @Override
-    public double getRawAcceleration() {
-        throw new UnsupportedOperationException("Unimplemented method 'getRawAcceleration'");
-    }
-
-    @Override
-    public double getConvertedPosition() {
-        throw new UnsupportedOperationException("Unimplemented method 'getConvertedPosition'");
-    }
-
-    @Override
-    public double getConvertedVelocity() {
-        throw new UnsupportedOperationException("Unimplemented method 'getConvertedVelocity'");
-    }
-
-    @Override
-    public double getConvertedAcceleration() {
-        throw new UnsupportedOperationException("Unimplemented method 'getConvertedAcceleration'");
-    }
 
     @Override
     public double getOffset() {
@@ -80,19 +36,16 @@ public class SpartanAnalogAbsoluteEncoder extends AbstractAbsoluteEncoder {
 
     @Override
     public double getUnitsPerCount() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getUnitsPerCount'");
     }
 
     @Override
     public boolean getInverted() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getInverted'");
     }
 
     @Override
     public double getRawCounts() {
-        // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'getRawCounts'");
     }
 }

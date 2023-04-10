@@ -16,6 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.DoubleConsumer;
 
@@ -32,15 +33,17 @@ import java.util.function.DoubleConsumer;
 public class PeriodicCallbackHandler {
     private static class CallbackAndTimestamp {
         DoubleConsumer callback;
-        long timestamp;
+        double timestamp;
 
-        CallbackAndTimestamp(DoubleConsumer callback, long timestamp) {
+        CallbackAndTimestamp(DoubleConsumer callback, double timestamp) {
             this.callback = callback;
             this.timestamp = timestamp;
         }
     }
 
-    private static final HashMap<Integer, CallbackAndTimestamp> callbacks = new HashMap<>();
+    private static final HashMap<Integer, CallbackAndTimestamp> timeCallbacks = new HashMap<>();
+
+    private static final ArrayList<Runnable> voidCallbacks = new ArrayList<>();
 
     /**
      * Registers a double consumer for callbacks. The number passed during the callback cooresponds
@@ -49,9 +52,14 @@ public class PeriodicCallbackHandler {
      * @param callback A double consumer (a void-returning method with a single double parameter).
      */
     public static void registerCallback(DoubleConsumer callback) {
-        callbacks.put(
+        timeCallbacks.put(
                 callback.hashCode(),
                 new CallbackAndTimestamp(callback, System.currentTimeMillis()));
+    }
+
+    // TODO: update docs
+    public static void registerCallback(Runnable callback) {
+        voidCallbacks.add(callback);
     }
 
     /**
@@ -61,7 +69,11 @@ public class PeriodicCallbackHandler {
      * @return Whether the double consumer could successfully be removed.
      */
     public static boolean deregisterCallback(DoubleConsumer callback) {
-        return callbacks.remove(callback.hashCode()) != null;
+        return timeCallbacks.remove(callback.hashCode()) != null;
+    }
+
+    public static boolean deregisterCallback(Runnable callback) {
+        return voidCallbacks.remove(callback);
     }
 
     /**
@@ -71,9 +83,15 @@ public class PeriodicCallbackHandler {
      * suggests using your robot's {@code periodic()} method.
      */
     public static void executeCallbacks() {
-        for (CallbackAndTimestamp entry : callbacks.values()) {
-            entry.callback.accept((System.currentTimeMillis() - entry.timestamp) / 1000);
-            entry.timestamp = System.currentTimeMillis();
+        for (CallbackAndTimestamp entry : timeCallbacks.values()) {
+            double currentTime = System.currentTimeMillis() / 1000;
+
+            entry.callback.accept(currentTime - entry.timestamp);
+            entry.timestamp = currentTime;
+        }
+
+        for (Runnable runnable : voidCallbacks) {
+            runnable.run();
         }
     }
 }

@@ -16,13 +16,13 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.motorController;
 
-import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.AnalogInput;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.FaultID;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxAbsoluteEncoder;
 import com.revrobotics.SparkMaxAnalogSensor.Mode;
 import com.revrobotics.SparkMaxRelativeEncoder.Type;
 import edu.wpi.first.util.datalog.DataLog;
@@ -30,10 +30,9 @@ import java.util.ArrayList;
 import org.chsrobotics.lib.hardware.encoder.AbstractAbsoluteEncoder;
 import org.chsrobotics.lib.hardware.encoder.AbstractIncrementalEncoder;
 import org.chsrobotics.lib.telemetry.Logger;
-import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
-public class SpartanSparkMAX extends AbstractMotorController {
+public class SpartanSparkMAX extends AbstractSmartMotorController {
     public static class SparkMaxIncrementalEncoder extends AbstractIncrementalEncoder {
 
         private final boolean inverted;
@@ -66,57 +65,7 @@ public class SpartanSparkMAX extends AbstractMotorController {
     }
 
     private static class SparkMaxAnalogAbsoluteEncoder extends AbstractAbsoluteEncoder {
-        SparkMaxAnalogAbsoluteEncoder(AnalogInput encoder) {
-            PeriodicCallbackHandler.registerCallback(this::periodic);
-        }
-
-        @Override
-        public void autoGenerateLogs(
-                DataLog log,
-                String name,
-                String subdirName,
-                boolean publishToNT,
-                boolean recordInLog) {
-            PeriodicCallbackHandler.registerCallback(this::updateLogs);
-            throw new UnsupportedOperationException("Unimplemented method 'autoGenerateLogs'");
-        }
-
-        private void updateLogs(double dtSeconds) {
-            throw new UnsupportedOperationException("Unimplemented method 'updateLogs'");
-        }
-
-        @Override
-        public double getRawPosition() {
-            throw new UnsupportedOperationException("Unimplemented method 'getRawPosition'");
-        }
-
-        @Override
-        public double getRawVelocity() {
-            throw new UnsupportedOperationException("Unimplemented method 'getRawVelocity'");
-        }
-
-        @Override
-        public double getRawAcceleration() {
-            throw new UnsupportedOperationException("Unimplemented method 'getRawAcceleration'");
-        }
-
-        @Override
-        public double getConvertedPosition() {
-            throw new UnsupportedOperationException("Unimplemented method 'getConvertedPosition'");
-        }
-
-        @Override
-        public double getConvertedVelocity() {
-            throw new UnsupportedOperationException("Unimplemented method 'getConvertedVelocity'");
-        }
-
-        @Override
-        public double getConvertedAcceleration() {
-            throw new UnsupportedOperationException(
-                    "Unimplemented method 'getConvertedAcceleration'");
-        }
-
-        private void periodic(double dtSeconds) {}
+        SparkMaxAnalogAbsoluteEncoder(AnalogInput encoder) {}
 
         @Override
         public double getOffset() {
@@ -137,75 +86,22 @@ public class SpartanSparkMAX extends AbstractMotorController {
 
         @Override
         public double getUnitsPerCount() {
-            // TODO Auto-generated method stub
             throw new UnsupportedOperationException("Unimplemented method 'getUnitsPerCount'");
         }
 
         @Override
         public boolean getInverted() {
-            // TODO Auto-generated method stub
             throw new UnsupportedOperationException("Unimplemented method 'getInverted'");
         }
 
         @Override
         public double getRawCounts() {
-            // TODO Auto-generated method stub
             throw new UnsupportedOperationException("Unimplemented method 'getRawCounts'");
         }
     }
 
     private static class SparkMaxDutyCycleAbsoluteEncoder extends AbstractAbsoluteEncoder {
-        SparkMaxDutyCycleAbsoluteEncoder(AbsoluteEncoder encoder) {
-            PeriodicCallbackHandler.registerCallback(this::periodic);
-        }
-
-        @Override
-        public void autoGenerateLogs(
-                DataLog log,
-                String name,
-                String subdirName,
-                boolean publishToNT,
-                boolean recordInLog) {
-            PeriodicCallbackHandler.registerCallback(this::updateLogs);
-            throw new UnsupportedOperationException("Unimplemented method 'autoGenerateLogs'");
-        }
-
-        private void updateLogs(double dtSeconds) {
-            throw new UnsupportedOperationException("Unimplemented method 'updateLogs'");
-        }
-
-        @Override
-        public double getRawPosition() {
-            throw new UnsupportedOperationException("Unimplemented method 'getRawPosition'");
-        }
-
-        @Override
-        public double getRawVelocity() {
-            throw new UnsupportedOperationException("Unimplemented method 'getRawVelocity'");
-        }
-
-        @Override
-        public double getRawAcceleration() {
-            throw new UnsupportedOperationException("Unimplemented method 'getRawAcceleration'");
-        }
-
-        @Override
-        public double getConvertedPosition() {
-            throw new UnsupportedOperationException("Unimplemented method 'getConvertedPosition'");
-        }
-
-        @Override
-        public double getConvertedVelocity() {
-            throw new UnsupportedOperationException("Unimplemented method 'getConvertedVelocity'");
-        }
-
-        @Override
-        public double getConvertedAcceleration() {
-            throw new UnsupportedOperationException(
-                    "Unimplemented method 'getConvertedAcceleration'");
-        }
-
-        private void periodic(double dtSeconds) {}
+        public SparkMaxDutyCycleAbsoluteEncoder(SparkMaxAbsoluteEncoder encoder) {}
 
         @Override
         public double getOffset() {
@@ -226,47 +122,57 @@ public class SpartanSparkMAX extends AbstractMotorController {
 
         @Override
         public double getUnitsPerCount() {
-            // TODO Auto-generated method stub
             throw new UnsupportedOperationException("Unimplemented method 'getUnitsPerCount'");
         }
 
         @Override
         public boolean getInverted() {
-            // TODO Auto-generated method stub
             throw new UnsupportedOperationException("Unimplemented method 'getInverted'");
         }
 
         @Override
         public double getRawCounts() {
-            // TODO Auto-generated method stub
             throw new UnsupportedOperationException("Unimplemented method 'getRawCounts'");
         }
     }
 
     public static record SparkMaxConfig(
-            int canID, MotorType motorType, boolean inverted, double currentLimitAmps) {
+            int canID,
+            MotorType motorType,
+            boolean inverted,
+            double currentLimitAmps,
+            IdleMode initialIdleMode) {
         public static SparkMaxConfig getDefaultBrushless() {
-            return new SparkMaxConfig(0, MotorType.kBrushless, false, 40);
+            return new SparkMaxConfig(0, MotorType.kBrushless, false, 40, IdleMode.COAST);
         }
 
         public static SparkMaxConfig getDefaultBrushed() {
-            return new SparkMaxConfig(0, MotorType.kBrushed, false, 40);
+            return new SparkMaxConfig(0, MotorType.kBrushed, false, 40, IdleMode.COAST);
         }
 
         public SparkMaxConfig setCANID(int canID) {
-            return new SparkMaxConfig(canID, motorType, inverted, currentLimitAmps);
+            return new SparkMaxConfig(
+                    canID, motorType, inverted, currentLimitAmps, initialIdleMode);
         }
 
         public SparkMaxConfig setMotorType(MotorType motorType) {
-            return new SparkMaxConfig(canID, motorType, inverted, currentLimitAmps);
+            return new SparkMaxConfig(
+                    canID, motorType, inverted, currentLimitAmps, initialIdleMode);
         }
 
         public SparkMaxConfig setInverted(boolean inverted) {
-            return new SparkMaxConfig(canID, motorType, inverted, currentLimitAmps);
+            return new SparkMaxConfig(
+                    canID, motorType, inverted, currentLimitAmps, initialIdleMode);
         }
 
         public SparkMaxConfig setCurrentLimitAmps(double currentLimitAmps) {
-            return new SparkMaxConfig(canID, motorType, inverted, currentLimitAmps);
+            return new SparkMaxConfig(
+                    canID, motorType, inverted, currentLimitAmps, initialIdleMode);
+        }
+
+        public SparkMaxConfig setInitialIdleMode(IdleMode initialIdleMode) {
+            return new SparkMaxConfig(
+                    canID, motorType, inverted, currentLimitAmps, initialIdleMode);
         }
     }
 
@@ -275,19 +181,9 @@ public class SpartanSparkMAX extends AbstractMotorController {
     private final CANSparkMax sparkMax;
 
     private double setVoltage = 0;
-    private IdleMode idleMode = IdleMode.COAST; // defaults to coasts
+    private IdleMode idleMode;
 
     private boolean logsConstructed = false;
-
-    private Logger<IdleMode> idleModeLogger;
-
-    private Logger<Double> ouputCurrentLogger;
-
-    private Logger<Double> busVoltageLogger;
-
-    private Logger<Double> appliedVoltageLogger;
-
-    private Logger<Double> temperatureLogger;
 
     private Logger<Boolean> stalenessWatchdogTriggeredLogger;
 
@@ -301,11 +197,6 @@ public class SpartanSparkMAX extends AbstractMotorController {
 
     private final int notInUsePeriodMS = 10000;
     private final int inUsePeriodMS = 20;
-
-    private int numStaleCycles = 0;
-    private double lastVoltageValue = 0;
-
-    private final int stalenessThresholdCycles = 50;
 
     public SpartanSparkMAX(SparkMaxConfig config) {
         this.config = config;
@@ -372,8 +263,7 @@ public class SpartanSparkMAX extends AbstractMotorController {
     public void autoGenerateLogs(
             DataLog log, String name, String subdirName, boolean publishToNT, boolean recordInLog) {
         if (!logsConstructed) {
-            idleModeLogger =
-                    new Logger<>(log, name + "/idleMode", subdirName, publishToNT, recordInLog);
+            super.autoGenerateLogs(log, name, subdirName, publishToNT, recordInLog);
 
             faultsLogger =
                     new Logger<>(log, name + "/faults", subdirName, publishToNT, recordInLog);
@@ -381,43 +271,14 @@ public class SpartanSparkMAX extends AbstractMotorController {
             stickyFaultsLogger =
                     new Logger<>(log, name + "/stickyFaults", subdirName, publishToNT, recordInLog);
 
-            LoggerFactory<Double> factory =
-                    new LoggerFactory<>(log, subdirName, publishToNT, recordInLog);
-
-            ouputCurrentLogger = factory.getLogger(name + "/outputCurrent_a");
-
-            busVoltageLogger = factory.getLogger(name + "/busVoltage_v");
-
-            appliedVoltageLogger = factory.getLogger(name + "/appliedVoltage_v");
-
-            temperatureLogger = factory.getLogger(name + "/temperature_c");
-
-            stalenessWatchdogTriggeredLogger =
-                    new Logger<>(
-                            log,
-                            name + "/stalenessWatchdogTriggered",
-                            subdirName,
-                            publishToNT,
-                            recordInLog);
-
             PeriodicCallbackHandler.registerCallback(this::updateLogs);
 
             logsConstructed = true;
         }
     }
 
-    private void updateLogs(double dtSeconds) {
+    private void updateLogs() {
         if (logsConstructed) {
-            idleModeLogger.update(getIdleMode());
-
-            ouputCurrentLogger.update(sparkMax.getOutputCurrent());
-
-            busVoltageLogger.update(sparkMax.getBusVoltage());
-
-            appliedVoltageLogger.update(getSetVoltage());
-
-            temperatureLogger.update(sparkMax.getMotorTemperature());
-
             stalenessWatchdogTriggeredLogger.update(getStalenessWatchdogTriggered());
 
             ArrayList<FaultID> faults = new ArrayList<>();
@@ -457,25 +318,25 @@ public class SpartanSparkMAX extends AbstractMotorController {
         return idleMode;
     }
 
-    public boolean getStalenessWatchdogTriggered() {
-        return (numStaleCycles >= stalenessThresholdCycles);
+    @Override
+    public double getBusVoltage() {
+        return sparkMax.getBusVoltage();
+    }
+
+    @Override
+    public double getCurrent() {
+        return sparkMax.getOutputCurrent();
+    }
+
+    @Override
+    public double getMotorTemperature() {
+        return sparkMax.getMotorTemperature();
     }
 
     private void periodic(double dtSeconds) {
         // on sticky fault because it's plausible we miss the fault with the way revlib works
         // sticky faults cleared in configure() so this isn't called every cycle
         if (sparkMax.getStickyFault(FaultID.kHasReset)) configure();
-
-        // The input voltage number is quite noisy and under real-world circumstances would be
-        // astronomically unlikely to remain the same for a significant number of cycles, unless
-        // there
-        // is a communications disconnect somewhere on the bus.
-        double vIn = sparkMax.getBusVoltage();
-
-        if (vIn == lastVoltageValue) numStaleCycles++;
-        else numStaleCycles = 0;
-
-        lastVoltageValue = vIn;
     }
 
     private void configure() {
@@ -490,20 +351,26 @@ public class SpartanSparkMAX extends AbstractMotorController {
 
         sparkMax.clearFaults();
 
+        setIdleMode(config.initialIdleMode);
+
         sparkMax.setInverted(config.inverted);
 
         sparkMax.setSmartCurrentLimit((int) config.currentLimitAmps);
 
         sparkMax.setIdleMode(idleMode.asRev());
 
+        sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus0, inUsePeriodMS);
+
+        sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus1, inUsePeriodMS);
+
         sparkMax.setPeriodicFramePeriod(
                 PeriodicFrame.kStatus2, encPortEncoderInUse ? inUsePeriodMS : notInUsePeriodMS);
 
         sparkMax.setPeriodicFramePeriod(
-                PeriodicFrame.kStatus4, dataPortEncoderInUse ? inUsePeriodMS : notInUsePeriodMS);
+                PeriodicFrame.kStatus3, analogEncoderInUse ? inUsePeriodMS : notInUsePeriodMS);
 
         sparkMax.setPeriodicFramePeriod(
-                PeriodicFrame.kStatus3, analogEncoderInUse ? inUsePeriodMS : notInUsePeriodMS);
+                PeriodicFrame.kStatus4, dataPortEncoderInUse ? inUsePeriodMS : notInUsePeriodMS);
 
         sparkMax.setPeriodicFramePeriod(
                 PeriodicFrame.kStatus5, dutyCycleEncoderInUse ? inUsePeriodMS : notInUsePeriodMS);
@@ -511,6 +378,7 @@ public class SpartanSparkMAX extends AbstractMotorController {
         sparkMax.setPeriodicFramePeriod(
                 PeriodicFrame.kStatus6, dutyCycleEncoderInUse ? inUsePeriodMS : notInUsePeriodMS);
 
+        // TODO: timeout of zero may or may not work?
         sparkMax.setCANTimeout(0);
     }
 }
