@@ -19,15 +19,13 @@ package org.chsrobotics.lib.hardware;
 public interface StalenessWatchable {
     public final int defaultStalenessThresholdCycles = 10;
 
-    public boolean getStalenessWatchdogTriggered();
-
-    public void resetStalenessWatchdog();
-
-    public void setStalenessThreshold(int cycles);
-
-    public int getStalenessThresholdCycles();
-
-    public int getCurrentStalenessCount();
-
-    public boolean shouldIncrementStalenessCounter();
+    /**
+     * Returns whether this piece of hardware is potentially stale (not communicating).
+     *
+     * <p>Some implementations watch for communications, others monitor noisy data that is very
+     * unlikely to remain the same for many cycles.
+     *
+     * @return Whether this hardware might be disconnected.
+     */
+    public boolean isStale();
 }

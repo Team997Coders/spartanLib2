@@ -43,9 +43,6 @@ public abstract class AbstractEncoder implements IntrinsicLoggable, StalenessWat
 
     private Logger<Boolean> stalenessWatchdogTriggeredLogger;
 
-    private int numStaleCycles = 0;
-    private int stalenessThresholdCycles = StalenessWatchable.defaultStalenessThresholdCycles;
-
     public AbstractEncoder() {
         PeriodicCallbackHandler.registerCallback(this::periodic);
     }
@@ -72,18 +69,10 @@ public abstract class AbstractEncoder implements IntrinsicLoggable, StalenessWat
 
     private void periodic(double dtSeconds) {
         rawVFilter.calculate(getRawPosition(), dtSeconds);
-        rawAFilter.calculate(rawVFilter.getCurrentOutput(), dtSeconds);
+        rawAFilter.calculate(getRawVelocity(), dtSeconds);
 
         convVFilter.calculate(getConvertedPosition(), dtSeconds);
-        convAFilter.calculate(convVFilter.getCurrentOutput(), dtSeconds);
-
-        if (shouldIncrementStalenessCounter()) numStaleCycles++;
-        else resetStalenessWatchdog();
-    }
-
-    @Override
-    public boolean shouldIncrementStalenessCounter() {
-        return (getRawVelocity() == 0);
+        convAFilter.calculate(getConvertedVelocity(), dtSeconds);
     }
 
     @Override
@@ -102,12 +91,7 @@ public abstract class AbstractEncoder implements IntrinsicLoggable, StalenessWat
             convALogger = factory.getLogger(name + "/convertedAcceleration");
 
             stalenessWatchdogTriggeredLogger =
-                    new Logger<>(
-                            log,
-                            name + "/stalenessWatchdogTriggered",
-                            subdirName,
-                            publishToNT,
-                            recordInLog);
+                    new Logger<>(log, name + "/isStale", subdirName, publishToNT, recordInLog);
 
             PeriodicCallbackHandler.registerCallback(this::updateLogs);
 
@@ -125,32 +109,7 @@ public abstract class AbstractEncoder implements IntrinsicLoggable, StalenessWat
             convVLogger.update(getConvertedVelocity());
             convALogger.update(getConvertedAcceleration());
 
-            stalenessWatchdogTriggeredLogger.update(getStalenessWatchdogTriggered());
+            stalenessWatchdogTriggeredLogger.update(isStale());
         }
-    }
-
-    @Override
-    public boolean getStalenessWatchdogTriggered() {
-        return (numStaleCycles >= stalenessThresholdCycles);
-    }
-
-    @Override
-    public void resetStalenessWatchdog() {
-        numStaleCycles = 0;
-    }
-
-    @Override
-    public void setStalenessThreshold(int cycles) {
-        stalenessThresholdCycles = cycles;
-    }
-
-    @Override
-    public int getStalenessThresholdCycles() {
-        return stalenessThresholdCycles;
-    }
-
-    @Override
-    public int getCurrentStalenessCount() {
-        return numStaleCycles;
     }
 }

@@ -17,34 +17,38 @@ If not, see <https://www.gnu.org/licenses/>.
 package org.chsrobotics.lib.hardware.encoder;
 
 import edu.wpi.first.wpilibj.Encoder;
+import org.chsrobotics.lib.hardware.StalenessWatchable;
+import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
-public class SpartanQuadratureEncoder extends AbstractIncrementalEncoder {
+public class SpartanQuadratureEncoder extends AbstractEncoder {
     public static record QuadratureConfig(
-            int channelA, int channelB, boolean inverted, double unitsPerCount) {
-        public static QuadratureConfig getDefault() {
-            return new QuadratureConfig(0, 1, false, 1);
-        }
+            int channelA, int channelB, boolean inverted, double countsPerRotation) {
 
         public QuadratureConfig setChannels(int channelA, int channelB) {
-            return new QuadratureConfig(channelA, channelB, inverted, unitsPerCount);
+            return new QuadratureConfig(channelA, channelB, inverted, countsPerRotation);
         }
 
         public QuadratureConfig setInverted(boolean inverted) {
-            return new QuadratureConfig(channelA, channelB, inverted, unitsPerCount);
+            return new QuadratureConfig(channelA, channelB, inverted, countsPerRotation);
         }
 
-        public QuadratureConfig setUnitsPerCount(int unitsPerCount) {
-            return new QuadratureConfig(channelA, channelB, inverted, unitsPerCount);
+        public QuadratureConfig setCountsPerRotation(int countsPerRotation) {
+            return new QuadratureConfig(channelA, channelB, inverted, countsPerRotation);
         }
     }
 
     private final QuadratureConfig config;
     private final Encoder encoder;
 
+    private int stalenessCount = 0;
+    private int stalenessThreshold = StalenessWatchable.defaultStalenessThresholdCycles;
+
     public SpartanQuadratureEncoder(QuadratureConfig config) {
         this.config = config;
 
         this.encoder = new Encoder(config.channelA, config.channelB);
+
+        PeriodicCallbackHandler.registerCallback(this::periodic);
     }
 
     public QuadratureConfig getConfig() {
@@ -52,17 +56,31 @@ public class SpartanQuadratureEncoder extends AbstractIncrementalEncoder {
     }
 
     @Override
-    public double getUnitsPerCount() {
-        return config.unitsPerCount;
+    public double getRawPosition() {
+        if (config.inverted) return -encoder.get();
+        else return encoder.get();
     }
 
     @Override
-    public boolean getInverted() {
-        return config.inverted;
+    public double getConvertedPosition() {
+        return getRawPosition() * ((Math.PI * 2) / config.countsPerRotation);
     }
 
     @Override
-    public double getRawCounts() {
-        return encoder.get();
+    public boolean isStale() {
+        return (stalenessCount >= stalenessThreshold);
+    }
+
+    public void resetStalenessCount() {
+        stalenessCount = 0;
+    }
+
+    public void setStalenessThreshold(int cycles) {
+        stalenessThreshold = cycles;
+    }
+
+    private void periodic() {
+        if (getRawVelocity() == 0) stalenessCount++;
+        else resetStalenessCount();
     }
 }

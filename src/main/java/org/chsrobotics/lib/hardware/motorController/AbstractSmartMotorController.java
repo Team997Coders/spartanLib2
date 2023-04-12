@@ -34,10 +34,6 @@ public abstract class AbstractSmartMotorController extends AbstractMotorControll
         }
     }
 
-    private int numStaleCycles = 0;
-    private int stalenessThresholdCycles = StalenessWatchable.defaultStalenessThresholdCycles;
-    private double previousVIN = 0;
-
     private boolean logsConstructed = false;
 
     private Logger<String> idleModeLogger;
@@ -50,10 +46,6 @@ public abstract class AbstractSmartMotorController extends AbstractMotorControll
 
     private Logger<Boolean> stalenessWatchdogTriggeredLogger;
 
-    public AbstractSmartMotorController() {
-        PeriodicCallbackHandler.registerCallback(this::periodic);
-    }
-
     public abstract void setIdleMode(IdleMode idleMode);
 
     public abstract IdleMode getIdleMode();
@@ -63,47 +55,6 @@ public abstract class AbstractSmartMotorController extends AbstractMotorControll
     public abstract double getCurrent();
 
     public abstract double getMotorTemperature();
-
-    @Override
-    public boolean getStalenessWatchdogTriggered() {
-        return (numStaleCycles >= stalenessThresholdCycles);
-    }
-
-    @Override
-    public void resetStalenessWatchdog() {
-        numStaleCycles = 0;
-    }
-
-    @Override
-    public void setStalenessThreshold(int cycles) {
-        stalenessThresholdCycles = cycles;
-    }
-
-    @Override
-    public int getStalenessThresholdCycles() {
-        return stalenessThresholdCycles;
-    }
-
-    @Override
-    public int getCurrentStalenessCount() {
-        return numStaleCycles;
-    }
-
-    @Override
-    public boolean shouldIncrementStalenessCounter() {
-        boolean retVal = (getBusVoltage() == previousVIN);
-
-        previousVIN = getBusVoltage();
-
-        return retVal;
-    }
-
-    private void periodic(double dtSeconds) {
-        if (shouldIncrementStalenessCounter()) numStaleCycles++;
-        else {
-            resetStalenessWatchdog();
-        }
-    }
 
     @Override
     public void autoGenerateLogs(
@@ -122,12 +73,7 @@ public abstract class AbstractSmartMotorController extends AbstractMotorControll
                     new Logger<>(log, name + "/idleMode", subdirName, publishToNT, recordInLog);
 
             stalenessWatchdogTriggeredLogger =
-                    new Logger<>(
-                            log,
-                            name + "/stalenessWatchdogTriggered",
-                            subdirName,
-                            publishToNT,
-                            recordInLog);
+                    new Logger<>(log, name + "/isStale", subdirName, publishToNT, recordInLog);
 
             logsConstructed = true;
 
@@ -142,7 +88,7 @@ public abstract class AbstractSmartMotorController extends AbstractMotorControll
             motorTemperatureLogger.update(getMotorTemperature());
 
             idleModeLogger.update(getIdleMode().toString());
-            stalenessWatchdogTriggeredLogger.update(getStalenessWatchdogTriggered());
+            stalenessWatchdogTriggeredLogger.update(isStale());
         }
     }
 }

@@ -16,36 +16,76 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.encoder;
 
+import edu.wpi.first.wpilibj.AnalogEncoder;
+import org.chsrobotics.lib.hardware.StalenessWatchable;
+import org.chsrobotics.lib.math.UtilityMath;
+import org.chsrobotics.lib.util.PeriodicCallbackHandler;
+
 public class SpartanAnalogAbsoluteEncoder extends AbstractAbsoluteEncoder {
+    public static record AnalogAbsoluteEncoderConfig(int channel, boolean inverted, double offset) {
+        public AnalogAbsoluteEncoderConfig setChannel(int channel) {
+            return new AnalogAbsoluteEncoderConfig(channel, inverted, offset);
+        }
+
+        public AnalogAbsoluteEncoderConfig setInverted(boolean inverted) {
+            return new AnalogAbsoluteEncoderConfig(channel, inverted, offset);
+        }
+
+        public AnalogAbsoluteEncoderConfig setOffset(double offset) {
+            return new AnalogAbsoluteEncoderConfig(channel, inverted, offset);
+        }
+    }
+
+    private final AnalogAbsoluteEncoderConfig config;
+
+    private final AnalogEncoder encoder;
+
+    private int stalenessCount = 0;
+    private int stalenessThreshold = StalenessWatchable.defaultStalenessThresholdCycles;
+
+    public SpartanAnalogAbsoluteEncoder(AnalogAbsoluteEncoderConfig config) {
+        this.config = config;
+
+        this.encoder = new AnalogEncoder(config.channel);
+
+        PeriodicCallbackHandler.registerCallback(this::periodic);
+    }
+
+    public AnalogAbsoluteEncoderConfig getConfig() {
+        return config;
+    }
 
     @Override
     public double getOffset() {
-        throw new UnsupportedOperationException("Unimplemented method 'getOffset'");
+        return config.offset;
     }
 
     @Override
     public double getUnoffsetConvertedPosition() {
-        throw new UnsupportedOperationException(
-                "Unimplemented method 'getUnoffsetConvertedPosition'");
+        return UtilityMath.normalizeAngleRadians(2 * Math.PI * getRawPosition());
     }
 
     @Override
-    public double getUnoffsetRawPosition() {
-        throw new UnsupportedOperationException("Unimplemented method 'getUnoffsetRawPosition'");
+    public double getRawPosition() {
+        if (config.inverted) return -encoder.getAbsolutePosition();
+        else return encoder.getAbsolutePosition();
     }
 
     @Override
-    public double getUnitsPerCount() {
-        throw new UnsupportedOperationException("Unimplemented method 'getUnitsPerCount'");
+    public boolean isStale() {
+        return (stalenessCount >= stalenessThreshold);
     }
 
-    @Override
-    public boolean getInverted() {
-        throw new UnsupportedOperationException("Unimplemented method 'getInverted'");
+    public void resetStalenessCount() {
+        stalenessCount = 0;
     }
 
-    @Override
-    public double getRawCounts() {
-        throw new UnsupportedOperationException("Unimplemented method 'getRawCounts'");
+    public void setStalenessThreshold(int cycles) {
+        stalenessThreshold = cycles;
+    }
+
+    private void periodic() {
+        if (getRawVelocity() == 0) stalenessCount++;
+        else resetStalenessCount();
     }
 }

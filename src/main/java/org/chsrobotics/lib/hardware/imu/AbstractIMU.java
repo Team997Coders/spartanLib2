@@ -77,9 +77,6 @@ public abstract class AbstractIMU implements IntrinsicLoggable, StalenessWatchab
     private final DifferentiatingFilter offsetYawAFilter = new DifferentiatingFilter();
     private final DifferentiatingFilter offsetRollAFilter = new DifferentiatingFilter();
 
-    private int numStaleCycles = 0;
-    private int stalenessThresholdCycles = StalenessWatchable.defaultStalenessThresholdCycles;
-
     private Logger<Boolean> stalenessWatchdogTriggeredLogger;
 
     public AbstractIMU() {
@@ -131,12 +128,7 @@ public abstract class AbstractIMU implements IntrinsicLoggable, StalenessWatchab
                     factory.getLogger(name + "/offsetRollAcceleration_rad_per_s_squared");
 
             stalenessWatchdogTriggeredLogger =
-                    new Logger<>(
-                            log,
-                            name + "/stalenessWatchdogTriggered",
-                            subdirName,
-                            publishToNT,
-                            recordInLog);
+                    new Logger<>(log, name + "/isStale", subdirName, publishToNT, recordInLog);
 
             logsConstructed = true;
             PeriodicCallbackHandler.registerCallback(this::updateLogs);
@@ -177,7 +169,7 @@ public abstract class AbstractIMU implements IntrinsicLoggable, StalenessWatchab
             offsetYawALogger.update(getOffsetYawAcceleration());
             offsetRollALogger.update(getOffsetRollAcceleration());
 
-            stalenessWatchdogTriggeredLogger.update(getStalenessWatchdogTriggered());
+            stalenessWatchdogTriggeredLogger.update(isStale());
         }
     }
 
@@ -197,9 +189,6 @@ public abstract class AbstractIMU implements IntrinsicLoggable, StalenessWatchab
         offsetPitchAFilter.calculate(offsetPitchVFilter.getCurrentOutput(), dtSeconds);
         offsetYawAFilter.calculate(offsetPitchVFilter.getCurrentOutput(), dtSeconds);
         offsetRollAFilter.calculate(offsetRollVFilter.getCurrentOutput(), dtSeconds);
-
-        if (shouldIncrementStalenessCounter()) stalenessThresholdCycles++;
-        else resetStalenessWatchdog();
     }
 
     public abstract Rotation3d getRotationOffset();
@@ -310,30 +299,5 @@ public abstract class AbstractIMU implements IntrinsicLoggable, StalenessWatchab
 
     public double getOffsetRollAcceleration() {
         return offsetRollAFilter.getCurrentOutput();
-    }
-
-    @Override
-    public boolean getStalenessWatchdogTriggered() {
-        return (numStaleCycles >= stalenessThresholdCycles);
-    }
-
-    @Override
-    public void resetStalenessWatchdog() {
-        numStaleCycles = 0;
-    }
-
-    @Override
-    public void setStalenessThreshold(int cycles) {
-        stalenessThresholdCycles = cycles;
-    }
-
-    @Override
-    public int getStalenessThresholdCycles() {
-        return stalenessThresholdCycles;
-    }
-
-    @Override
-    public int getCurrentStalenessCount() {
-        return numStaleCycles;
     }
 }

@@ -27,112 +27,212 @@ import com.revrobotics.SparkMaxAnalogSensor.Mode;
 import com.revrobotics.SparkMaxRelativeEncoder.Type;
 import edu.wpi.first.util.datalog.DataLog;
 import java.util.ArrayList;
+import org.chsrobotics.lib.hardware.StalenessWatchable;
 import org.chsrobotics.lib.hardware.encoder.AbstractAbsoluteEncoder;
-import org.chsrobotics.lib.hardware.encoder.AbstractIncrementalEncoder;
+import org.chsrobotics.lib.hardware.encoder.AbstractEncoder;
+import org.chsrobotics.lib.hardware.motorController.SpartanSparkMAX.SparkMaxAnalogAbsoluteEncoder.SparkMaxAnalogAbsoluteEncoderConfig;
+import org.chsrobotics.lib.hardware.motorController.SpartanSparkMAX.SparkMaxDutyCycleAbsoluteEncoder.SparkMaxDutyCycleAbsoluteEncoderConfig;
+import org.chsrobotics.lib.hardware.motorController.SpartanSparkMAX.SparkMaxIncrementalEncoder.SparkMaxIncrementalEncoderConfig;
+import org.chsrobotics.lib.math.UtilityMath;
 import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
 public class SpartanSparkMAX extends AbstractSmartMotorController {
-    public static class SparkMaxIncrementalEncoder extends AbstractIncrementalEncoder {
+    public static class SparkMaxIncrementalEncoder extends AbstractEncoder {
+        public static record SparkMaxIncrementalEncoderConfig(
+                boolean inverted, double countsPerRevolution) {
+            public SparkMaxIncrementalEncoderConfig setInverted(boolean inverted) {
+                return new SparkMaxIncrementalEncoderConfig(inverted, countsPerRevolution);
+            }
 
-        private final boolean inverted;
-        private final double unitsPerRotation;
+            public SparkMaxIncrementalEncoderConfig setCountsPerRevolution(
+                    double countsPerRevolution) {
+                return new SparkMaxIncrementalEncoderConfig(inverted, countsPerRevolution);
+            }
+        }
+
+        private final SparkMaxIncrementalEncoderConfig config;
 
         private final RelativeEncoder encoder;
 
+        private int stalenessCount = 0;
+        private int stalenessThreshold = StalenessWatchable.defaultStalenessThresholdCycles;
+
         private SparkMaxIncrementalEncoder(
-                boolean inverted, double unitsPerRotation, RelativeEncoder encoder) {
-            this.inverted = inverted;
-            this.unitsPerRotation = unitsPerRotation;
+                SparkMaxIncrementalEncoderConfig config, RelativeEncoder encoder) {
+            this.config = config;
 
             this.encoder = encoder;
+
+            PeriodicCallbackHandler.registerCallback(this::periodic);
+        }
+
+        public SparkMaxIncrementalEncoderConfig getConfig() {
+            return config;
         }
 
         @Override
-        public double getUnitsPerCount() {
-            return unitsPerRotation;
+        public double getRawPosition() {
+            return encoder.getPosition() * (config.inverted ? -1 : 1);
         }
 
         @Override
-        public boolean getInverted() {
-            return inverted;
+        public double getConvertedPosition() {
+            return getRawPosition() * ((2 * Math.PI) / config.countsPerRevolution);
         }
 
         @Override
-        public double getRawCounts() {
-            return encoder.getPosition();
+        public boolean isStale() {
+            return (stalenessCount >= stalenessThreshold);
+        }
+
+        public void resetStalenessCount() {
+            stalenessCount = 0;
+        }
+
+        public void setStalenessThreshold(int cycles) {
+            stalenessThreshold = cycles;
+        }
+
+        private void periodic() {
+            if (getRawVelocity() == 0) stalenessCount++;
+            else resetStalenessCount();
         }
     }
 
-    private static class SparkMaxAnalogAbsoluteEncoder extends AbstractAbsoluteEncoder {
-        SparkMaxAnalogAbsoluteEncoder(AnalogInput encoder) {}
+    public static class SparkMaxAnalogAbsoluteEncoder extends AbstractAbsoluteEncoder {
+        public static record SparkMaxAnalogAbsoluteEncoderConfig(
+                boolean inverted, double refVoltage, double offset) {
+            public SparkMaxAnalogAbsoluteEncoderConfig setInverted(boolean inverted) {
+                return new SparkMaxAnalogAbsoluteEncoderConfig(inverted, refVoltage, offset);
+            }
+
+            public SparkMaxAnalogAbsoluteEncoderConfig setRefVoltage(double refVoltage) {
+                return new SparkMaxAnalogAbsoluteEncoderConfig(inverted, refVoltage, refVoltage);
+            }
+
+            public SparkMaxAnalogAbsoluteEncoderConfig setOffset(double offset) {
+                return new SparkMaxAnalogAbsoluteEncoderConfig(inverted, offset, offset);
+            }
+        }
+
+        private final AnalogInput input;
+
+        private final SparkMaxAnalogAbsoluteEncoderConfig config;
+
+        private int stalenessCount = 0;
+        private int stalenessThreshold = StalenessWatchable.defaultStalenessThresholdCycles;
+
+        private SparkMaxAnalogAbsoluteEncoder(
+                AnalogInput input, SparkMaxAnalogAbsoluteEncoderConfig config) {
+            this.input = input;
+
+            this.config = config;
+
+            PeriodicCallbackHandler.registerCallback(this::periodic);
+        }
+
+        public SparkMaxAnalogAbsoluteEncoderConfig getConfig() {
+            return config;
+        }
 
         @Override
         public double getOffset() {
-            throw new UnsupportedOperationException("Unimplemented method 'getOffset'");
+            return config.offset;
         }
 
         @Override
         public double getUnoffsetConvertedPosition() {
-            throw new UnsupportedOperationException(
-                    "Unimplemented method 'getUnoffsetConvertedPosition'");
+            return UtilityMath.normalizeAngleRadians(getRawPosition() * 2 * Math.PI);
         }
 
         @Override
-        public double getUnoffsetRawPosition() {
-            throw new UnsupportedOperationException(
-                    "Unimplemented method 'getUnoffsetRawPosition'");
+        public double getRawPosition() {
+            return (input.getVoltage() / config.refVoltage) * (config.inverted ? -1 : 1);
         }
 
         @Override
-        public double getUnitsPerCount() {
-            throw new UnsupportedOperationException("Unimplemented method 'getUnitsPerCount'");
+        public boolean isStale() {
+            return (stalenessCount >= stalenessThreshold);
         }
 
-        @Override
-        public boolean getInverted() {
-            throw new UnsupportedOperationException("Unimplemented method 'getInverted'");
+        public void resetStalenessCount() {
+            stalenessCount = 0;
         }
 
-        @Override
-        public double getRawCounts() {
-            throw new UnsupportedOperationException("Unimplemented method 'getRawCounts'");
+        public void setStalenessThreshold(int cycles) {
+            stalenessThreshold = cycles;
+        }
+
+        private void periodic() {
+            if (getRawVelocity() == 0) stalenessCount++;
+            else resetStalenessCount();
         }
     }
 
-    private static class SparkMaxDutyCycleAbsoluteEncoder extends AbstractAbsoluteEncoder {
-        public SparkMaxDutyCycleAbsoluteEncoder(SparkMaxAbsoluteEncoder encoder) {}
+    public static class SparkMaxDutyCycleAbsoluteEncoder extends AbstractAbsoluteEncoder {
+        public static record SparkMaxDutyCycleAbsoluteEncoderConfig(
+                boolean inverted, double offset) {
+            public SparkMaxDutyCycleAbsoluteEncoderConfig setInverted(boolean inverted) {
+                return new SparkMaxDutyCycleAbsoluteEncoderConfig(inverted, offset);
+            }
+
+            public SparkMaxDutyCycleAbsoluteEncoderConfig setOffset(double offset) {
+                return new SparkMaxDutyCycleAbsoluteEncoderConfig(inverted, offset);
+            }
+        }
+
+        private final SparkMaxAbsoluteEncoder encoder;
+
+        private final SparkMaxDutyCycleAbsoluteEncoderConfig config;
+
+        private int stalenessCount = 0;
+        private int stalenessThreshold = StalenessWatchable.defaultStalenessThresholdCycles;
+
+        private SparkMaxDutyCycleAbsoluteEncoder(
+                SparkMaxAbsoluteEncoder encoder, SparkMaxDutyCycleAbsoluteEncoderConfig config) {
+            this.encoder = encoder;
+
+            this.config = config;
+
+            PeriodicCallbackHandler.registerCallback(this::periodic);
+        }
+
+        public SparkMaxDutyCycleAbsoluteEncoderConfig getConfig() {
+            return config;
+        }
 
         @Override
         public double getOffset() {
-            throw new UnsupportedOperationException("Unimplemented method 'getOffset'");
+            return config.offset;
         }
 
         @Override
         public double getUnoffsetConvertedPosition() {
-            throw new UnsupportedOperationException(
-                    "Unimplemented method 'getUnoffsetConvertedPosition'");
+            return UtilityMath.normalizeAngleRadians(2 * Math.PI * getRawPosition());
         }
 
         @Override
-        public double getUnoffsetRawPosition() {
-            throw new UnsupportedOperationException(
-                    "Unimplemented method 'getUnoffsetRawPosition'");
+        public double getRawPosition() {
+            return encoder.getPosition() * (config.inverted ? -1 : 1);
         }
 
         @Override
-        public double getUnitsPerCount() {
-            throw new UnsupportedOperationException("Unimplemented method 'getUnitsPerCount'");
+        public boolean isStale() {
+            return (stalenessCount >= stalenessThreshold);
         }
 
-        @Override
-        public boolean getInverted() {
-            throw new UnsupportedOperationException("Unimplemented method 'getInverted'");
+        public void resetStalenessCount() {
+            stalenessCount = 0;
         }
 
-        @Override
-        public double getRawCounts() {
-            throw new UnsupportedOperationException("Unimplemented method 'getRawCounts'");
+        public void setStalenessThreshold(int cycles) {
+            stalenessThreshold = cycles;
+        }
+
+        private void periodic() {
+            if (getRawVelocity() == 0) stalenessCount++;
+            else resetStalenessCount();
         }
     }
 
@@ -198,6 +298,11 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
     private final int notInUsePeriodMS = 10000;
     private final int inUsePeriodMS = 20;
 
+    private int stalenessCount = 0;
+    private int stalenessThreshold = 0;
+
+    private double previousBusVoltage = 0;
+
     public SpartanSparkMAX(SparkMaxConfig config) {
         this.config = config;
 
@@ -212,35 +317,36 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
         return config;
     }
 
-    public AbstractIncrementalEncoder getEncoderPortEncoder(double unitsPerRotation) {
+    public SparkMaxIncrementalEncoder getEncoderPortEncoder(
+            SparkMaxIncrementalEncoderConfig config) {
         encPortEncoderInUse = true;
 
         sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus2, inUsePeriodMS);
 
-        return new SparkMaxIncrementalEncoder(false, unitsPerRotation, sparkMax.getEncoder());
+        return new SparkMaxIncrementalEncoder(config, sparkMax.getEncoder());
     }
 
-    public AbstractIncrementalEncoder getEncoderPortEncoder(
-            Type type, int countsPerRevolution, boolean inverted, double unitsPerRotation) {
+    public SparkMaxIncrementalEncoder getEncoderPortEncoder(
+            Type type, SparkMaxIncrementalEncoderConfig config) {
         encPortEncoderInUse = true;
 
         sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus2, inUsePeriodMS);
 
         return new SparkMaxIncrementalEncoder(
-                inverted, unitsPerRotation, sparkMax.getEncoder(type, countsPerRevolution));
+                config, sparkMax.getEncoder(type, (int) config.countsPerRevolution));
     }
 
-    public AbstractIncrementalEncoder getDataPortEncoder(
-            int countsPerRevolution, boolean inverted, double unitsPerRotation) {
+    public SparkMaxIncrementalEncoder getDataPortEncoder(SparkMaxIncrementalEncoderConfig config) {
         dataPortEncoderInUse = true;
 
         sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus4, inUsePeriodMS);
 
         return new SparkMaxIncrementalEncoder(
-                inverted, unitsPerRotation, sparkMax.getAlternateEncoder(countsPerRevolution));
+                config, sparkMax.getAlternateEncoder((int) config.countsPerRevolution));
     }
 
-    public AbstractAbsoluteEncoder getDataPortAbsoluteDutyCycleEncoder() {
+    public SparkMaxDutyCycleAbsoluteEncoder getDataPortAbsoluteDutyCycleEncoder(
+            SparkMaxDutyCycleAbsoluteEncoderConfig config) {
         dutyCycleEncoderInUse = true;
 
         sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus5, inUsePeriodMS);
@@ -248,15 +354,17 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
 
         return new SparkMaxDutyCycleAbsoluteEncoder(
                 sparkMax.getAbsoluteEncoder(
-                        com.revrobotics.SparkMaxAbsoluteEncoder.Type.kDutyCycle));
+                        com.revrobotics.SparkMaxAbsoluteEncoder.Type.kDutyCycle),
+                config);
     }
 
-    public AbstractAbsoluteEncoder getDataPortAbsoluteAnalogEncoder() {
+    public SparkMaxAnalogAbsoluteEncoder getDataPortAbsoluteAnalogEncoder(
+            boolean inverted, SparkMaxAnalogAbsoluteEncoderConfig config) {
         analogEncoderInUse = true;
 
         sparkMax.setPeriodicFramePeriod(PeriodicFrame.kStatus3, inUsePeriodMS);
 
-        return new SparkMaxAnalogAbsoluteEncoder(sparkMax.getAnalog(Mode.kAbsolute));
+        return new SparkMaxAnalogAbsoluteEncoder(sparkMax.getAnalog(Mode.kAbsolute), config);
     }
 
     @Override
@@ -279,7 +387,7 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
 
     private void updateLogs() {
         if (logsConstructed) {
-            stalenessWatchdogTriggeredLogger.update(getStalenessWatchdogTriggered());
+            stalenessWatchdogTriggeredLogger.update(isStale());
 
             ArrayList<FaultID> faults = new ArrayList<>();
             ArrayList<FaultID> stickyFaults = new ArrayList<>();
@@ -333,10 +441,28 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
         return sparkMax.getMotorTemperature();
     }
 
+    @Override
+    public boolean isStale() {
+        return (stalenessCount >= stalenessThreshold);
+    }
+
+    public void resetStalenessCount() {
+        stalenessCount = 0;
+    }
+
+    public void setStalenessThreshold(int cycles) {
+        stalenessThreshold = cycles;
+    }
+
     private void periodic(double dtSeconds) {
         // on sticky fault because it's plausible we miss the fault with the way revlib works
         // sticky faults cleared in configure() so this isn't called every cycle
         if (sparkMax.getStickyFault(FaultID.kHasReset)) configure();
+
+        if (getBusVoltage() == previousBusVoltage) stalenessCount++;
+        else resetStalenessCount();
+
+        previousBusVoltage = getBusVoltage();
     }
 
     private void configure() {

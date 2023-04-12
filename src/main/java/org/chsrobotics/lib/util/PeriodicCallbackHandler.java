@@ -28,7 +28,7 @@ import java.util.function.DoubleConsumer;
  *
  * <p>Don't use this as a replacement to {@code periodic()} in command-based Subsystems or {@code
  * execute()} in command-based Commands-- this is meant for coordinating tasks like differentiation
- * or updating logs.
+ * or updating logs at a component-level.
  */
 public class PeriodicCallbackHandler {
     private static class CallbackAndTimestamp {

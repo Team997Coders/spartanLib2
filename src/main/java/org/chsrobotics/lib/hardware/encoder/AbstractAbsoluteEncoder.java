@@ -16,114 +16,61 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.encoder;
 
-import edu.wpi.first.util.datalog.DataLog;
+import org.chsrobotics.lib.math.UtilityMath;
 import org.chsrobotics.lib.math.filters.DifferentiatingFilter;
-import org.chsrobotics.lib.telemetry.Logger;
-import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
 public abstract class AbstractAbsoluteEncoder extends AbstractEncoder {
-    public abstract double getOffset();
-
-    public abstract double getUnoffsetConvertedPosition();
-
-    public abstract double getUnoffsetRawPosition();
-
-    private final DifferentiatingFilter velocityFilter = new DifferentiatingFilter(true);
-    private final DifferentiatingFilter accelerationFilter = new DifferentiatingFilter();
-
-    private boolean logsConstructed = false;
-
-    private Logger<Double> rawPositionLogger;
-    private Logger<Double> rawVelocityLogger;
-    private Logger<Double> rawAccelerationLogger;
-
-    private Logger<Double> convertedPositionLogger;
-    private Logger<Double> convertedVelocityLogger;
-    private Logger<Double> convertedAccelerationLogger;
+    private final DifferentiatingFilter convVelocityFilter = new DifferentiatingFilter(true);
 
     public AbstractAbsoluteEncoder() {
         PeriodicCallbackHandler.registerCallback(this::periodic);
     }
 
-    public abstract double getUnitsPerCount();
+    public abstract double getOffset();
 
-    public abstract boolean getInverted();
-
-    public abstract double getRawCounts();
-
-    @Override
-    public void autoGenerateLogs(
-            DataLog log, String name, String subdirName, boolean publishToNT, boolean recordInLog) {
-        if (!logsConstructed) {
-            logsConstructed = true;
-
-            LoggerFactory<Double> factory =
-                    new LoggerFactory<>(log, subdirName, publishToNT, recordInLog);
-
-            rawPositionLogger = factory.getLogger(name + "/rawPosition_counts");
-            rawVelocityLogger = factory.getLogger(name + "/rawVelocity_counts_per_second");
-            rawAccelerationLogger =
-                    factory.getLogger(name + "/rawAcceleration_counts_per_second_squared");
-            convertedPositionLogger = factory.getLogger(name + "/convertedPosition_units");
-            convertedVelocityLogger =
-                    factory.getLogger(name + "/convertedVelocity_units_per_second");
-            convertedAccelerationLogger =
-                    factory.getLogger(name + "/convertedAcceleration_units_per_second_squared");
-
-            PeriodicCallbackHandler.registerCallback(this::updateLogs);
-        }
-    }
-
-    private void updateLogs() {
-        if (logsConstructed) {
-            rawPositionLogger.update(getRawPosition());
-            rawVelocityLogger.update(getRawVelocity());
-            rawAccelerationLogger.update(getRawAcceleration());
-
-            convertedPositionLogger.update(getConvertedPosition());
-            convertedVelocityLogger.update(getConvertedVelocity());
-            convertedAccelerationLogger.update(getConvertedAcceleration());
-        }
-    }
-
-    @Override
-    public double getRawPosition() {
-        return getRawCounts();
-    }
-
-    @Override
-    public double getRawVelocity() {
-        return velocityFilter.getCurrentOutput();
-    }
-
-    @Override
-    public double getRawAcceleration() {
-        return accelerationFilter.getCurrentOutput();
-    }
+    public abstract double getUnoffsetConvertedPosition();
 
     @Override
     public double getConvertedPosition() {
-        return unitConversion(getRawPosition());
+        return UtilityMath.normalizeAngleRadians(getUnoffsetConvertedPosition() + getOffset());
     }
 
+    /**
+     * Returns the converted velocity of the encoder.
+     *
+     * <p>Note that this is able to compensate for "angle wrap" in absolute encoders, by assuming
+     * that the shortest distance between two angles is the path taken.
+     *
+     * <p>{@code getRawVelocity()} does *not* compensate for angle wrap in this way.
+     *
+     * @return The velocity, in radians per second, of the encoder.
+     */
     @Override
     public double getConvertedVelocity() {
-        return unitConversion(getRawVelocity());
+        return convVelocityFilter.getCurrentOutput();
     }
 
+    /**
+     * Returns the unconverted velocity of the encoder.
+     *
+     * <p>Note that for absolute encoders, this number is much less useful, as it fails to account
+     * for "angle wrap" (e.g. going from 359 degrees to 1 degree counting as a delta of 358, not 2).
+     *
+     * <p>However, {@code getConvertedVelocity()} is able to account for angle wrap.
+     *
+     * @return The velocity, in sensor units per second, of the encoder.
+     */
     @Override
-    public double getConvertedAcceleration() {
-        return unitConversion(getRawAcceleration());
+    public double getRawVelocity() {
+        return super.getRawVelocity();
+    }
+
+    public double getOffsetToZeroCurrentPosition() {
+        return -getUnoffsetConvertedPosition();
     }
 
     private void periodic(double dtSeconds) {
-        velocityFilter.calculate(getRawPosition(), dtSeconds);
-
-        accelerationFilter.calculate(velocityFilter.getCurrentOutput(), dtSeconds);
-    }
-
-    private double unitConversion(double in) {
-        return in * getUnitsPerCount() * (getInverted() ? -1 : 1);
+        convVelocityFilter.calculate(getConvertedPosition(), dtSeconds);
     }
 }

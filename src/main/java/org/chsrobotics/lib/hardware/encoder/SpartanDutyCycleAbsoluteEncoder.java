@@ -16,36 +16,57 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.encoder;
 
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import org.chsrobotics.lib.math.UtilityMath;
+
 public class SpartanDutyCycleAbsoluteEncoder extends AbstractAbsoluteEncoder {
+    public static record DutyCycleAbsoluteEncoderConfig(
+            int channel, boolean inverted, double offset) {
+        public DutyCycleAbsoluteEncoderConfig setChannel(int channel) {
+            return new DutyCycleAbsoluteEncoderConfig(channel, inverted, offset);
+        }
+
+        public DutyCycleAbsoluteEncoderConfig setInverted(boolean inverted) {
+            return new DutyCycleAbsoluteEncoderConfig(channel, inverted, offset);
+        }
+
+        public DutyCycleAbsoluteEncoderConfig setOffset(double offset) {
+            return new DutyCycleAbsoluteEncoderConfig(channel, inverted, offset);
+        }
+    }
+
+    private final DutyCycleEncoder encoder;
+
+    private final DutyCycleAbsoluteEncoderConfig config;
+
+    public SpartanDutyCycleAbsoluteEncoder(DutyCycleAbsoluteEncoderConfig config) {
+        this.config = config;
+
+        encoder = new DutyCycleEncoder(config.channel);
+    }
+
+    public DutyCycleAbsoluteEncoderConfig getConfig() {
+        return config;
+    }
 
     @Override
     public double getOffset() {
-        throw new UnsupportedOperationException("Unimplemented method 'getOffset'");
+        return config.offset;
     }
 
     @Override
     public double getUnoffsetConvertedPosition() {
-        throw new UnsupportedOperationException(
-                "Unimplemented method 'getUnoffsetConvertedPosition'");
+        return UtilityMath.normalizeAngleRadians(getRawPosition() * 2 * Math.PI);
     }
 
     @Override
-    public double getUnoffsetRawPosition() {
-        throw new UnsupportedOperationException("Unimplemented method 'getUnoffsetRawPosition'");
+    public double getRawPosition() {
+        if (config.inverted) return -encoder.getAbsolutePosition();
+        else return encoder.getAbsolutePosition();
     }
 
     @Override
-    public double getUnitsPerCount() {
-        throw new UnsupportedOperationException("Unimplemented method 'getUnitsPerCount'");
-    }
-
-    @Override
-    public boolean getInverted() {
-        throw new UnsupportedOperationException("Unimplemented method 'getInverted'");
-    }
-
-    @Override
-    public double getRawCounts() {
-        throw new UnsupportedOperationException("Unimplemented method 'getRawCounts'");
+    public boolean isStale() {
+        return !encoder.isConnected();
     }
 }
