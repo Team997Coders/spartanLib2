@@ -48,6 +48,14 @@ public class DoubleJointedArmModel {
 
     private final double kG;
 
+    public static record DoubleJointedArmState(
+            double localAngleRad,
+            double localVelocityRadPerSecond,
+            double distalAngleRad,
+            double distalVelocityRadPerSecond) {}
+
+    public static record DoubleJointedArmInput(double localVoltage, double distalVoltage) {}
+
     /**
      * Constructs a new DoubleJointedArmModel.
      *
@@ -138,36 +146,31 @@ public class DoubleJointedArmModel {
     /**
      * Simulates the arm system by numerical integration.
      *
-     * @param state A Matrix of arm state, as
-     *     <p>[localAngle, localVelocity]
-     *     <p>[distalAngle, distalVelocity]
-     * @param voltages A Vector of input voltages, as [local, distal].
-     * @param dtSeconds The timestep of the simulated system, in seconds.
-     * @return A Matrix of arm state after the simulated timestep, as
-     *     <p>[localAngle, localVelocity]
-     *     <p>[distalAngle, distalVelocity]
+     * @param state The state of the arm before the timestep.
+     * @param input Voltage inputs to the arm.
+     * @param dtSeconds The timestep to simulate over
+     * @return The arm state after the timestep.
      */
-    public Matrix<N2, N2> simulate(Matrix<N2, N2> state, Vector<N2> voltages, double dtSeconds) {
+    public DoubleJointedArmState simulate(
+            DoubleJointedArmState state, DoubleJointedArmInput input, double dtSeconds) {
         Vector<N4> stateAsVector =
-                VecBuilder.fill(state.get(0, 0), state.get(0, 1), state.get(1, 0), state.get(1, 1));
+                VecBuilder.fill(
+                        state.localAngleRad,
+                        state.localVelocityRadPerSecond,
+                        state.distalAngleRad,
+                        state.distalVelocityRadPerSecond);
 
         Vector<N2> clampedVoltage =
                 VecBuilder.fill(
-                        UtilityMath.clamp(localDrive.nominalVoltageVolts, voltages.get(0, 0)),
-                        UtilityMath.clamp(distalDrive.nominalVoltageVolts, voltages.get(1, 0)));
+                        UtilityMath.clamp(localDrive.nominalVoltageVolts, input.localVoltage),
+                        UtilityMath.clamp(distalDrive.nominalVoltageVolts, input.distalVoltage));
 
-        Matrix<N4, N1> prelim =
+        Matrix<N4, N1> result =
                 NumericalIntegration.rkdp(
                         this::instDynamics, stateAsVector, clampedVoltage, dtSeconds);
 
-        Matrix<N2, N2> mat = new Matrix<>(N2.instance, N2.instance);
-
-        mat.set(0, 0, prelim.get(0, 0));
-        mat.set(0, 1, prelim.get(1, 0));
-        mat.set(1, 0, prelim.get(2, 0));
-        mat.set(1, 1, prelim.get(3, 0));
-
-        return mat;
+        return new DoubleJointedArmState(
+                result.get(0, 0), result.get(1, 0), result.get(2, 0), result.get(3, 0));
     }
 
     private Matrix<N4, N1> instDynamics(Matrix<N4, N1> x, Matrix<N2, N1> u) {
