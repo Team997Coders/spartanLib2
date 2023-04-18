@@ -27,12 +27,45 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import org.chsrobotics.lib.math.UtilityMath;
 import org.ejml.simple.SimpleMatrix;
 
+/**
+ * Simulation dynamics model of a coaxial swerve drivetrain.
+ *
+ * @param <N> A Num representing the number of swerve modules.
+ */
 public class CoaxialSwerveModel<N extends Num> {
-    // offsets from ROBOT to MODULE
+    /**
+     * Data class containing translations from robot frame for a number of swerve modules.
+     *
+     * @param xOffsets Vector containing translations in the x dimension, from robot to module, for
+     *     each module, in meters. Must be consistently-ordered with other arguments.
+     * @param yOffsets Vector containing translations in the y dimension, from robot to module, for
+     *     each module, in meters. Must be consistently-ordered with other arguments.
+     * @param <J> A Num representing the number of swerve modules.
+     */
     public static record CoaxialSwerveModuleOffsets<J extends Num>(
             Vector<J> xOffsets, Vector<J> yOffsets) {}
 
-    // module angles in robot frame
+    /**
+     * Data class representing the state of a coaxial swerve drive with J modules.
+     *
+     * <p>All vectors must be ordered in a consistent way.
+     *
+     * @param x World-frame X displacement of the robot, in meters.
+     * @param y World-frame Y displacement of the robot, in meters.
+     * @param vX World-frame X velocity of the robot, in meters per second.
+     * @param vY World-frame Y velocity of the robot, in meters per second.
+     * @param angle World-frame angle of the robot, in radians.
+     * @param angularVelocity World-frame angular velocity of the robot, in radians per second.
+     * @param steerAngle Vector holding each module's steer angle, in radians, relative to the
+     *     robot.
+     * @param steerAngularVelocity Vector holding each module's steer angular velocity, in radians
+     *     per second.
+     * @param driveAngularAccumulation Vector holding each module's drive angular accumulation (does
+     *     not wrap), in radians.
+     * @param driveAngularVelocity Vector holding each module's drive angular velocity, in radians
+     *     per second.
+     * @param <J> A Num representing the number of swerve modules.
+     */
     public static record CoaxialSwerveState<J extends Num>(
             double x,
             double y,
@@ -43,10 +76,114 @@ public class CoaxialSwerveModel<N extends Num> {
             Vector<J> steerAngle,
             Vector<J> steerAngularVelocity,
             Vector<J> driveAngularAccumulation,
-            Vector<J> driveAngularVelocity) {}
+            Vector<J> driveAngularVelocity) {
+        private static <K extends Num> CoaxialSwerveState<K> fromStateVec(
+                SimpleMatrix stateVec, int numModules) {
+            SimpleMatrix moduleSteerAngles = new SimpleMatrix(1, numModules);
+            SimpleMatrix moduleSteerAngularVelocities = new SimpleMatrix(1, numModules);
+            SimpleMatrix moduleDriveAngularAccumulation = new SimpleMatrix(1, numModules);
+            SimpleMatrix moduleDriveAngularVelocities = new SimpleMatrix(1, numModules);
 
+            // convert variable-size module data footer (everything after index 5) to their own
+            // vectors
+            int index = 6;
+            for (int i = 0; i < numModules; i++) {
+                moduleSteerAngles.set(
+                        0, i, UtilityMath.normalizeAngleRadians(stateVec.get(0, index)));
+                index++;
+
+                moduleSteerAngularVelocities.set(0, i, stateVec.get(0, index));
+                index++;
+
+                moduleDriveAngularAccumulation.set(0, i, stateVec.get(0, index));
+                index++;
+
+                moduleDriveAngularVelocities.set(0, i, stateVec.get(0, index));
+                index++;
+            }
+
+            return new CoaxialSwerveState<>(
+                    stateVec.get(0, 0), // x
+                    stateVec.get(0, 1), // y
+                    stateVec.get(0, 2), // vx
+                    stateVec.get(0, 3), // vy
+                    UtilityMath.normalizeAngleRadians(stateVec.get(0, 4)), // angle
+                    stateVec.get(0, 5), // angular velocity
+                    new Vector<>(moduleSteerAngles),
+                    new Vector<>(moduleSteerAngularVelocities),
+                    new Vector<>(moduleDriveAngularAccumulation),
+                    new Vector<>(moduleDriveAngularVelocities));
+        }
+
+        private SimpleMatrix toStateVec(int numStateVars) {
+            SimpleMatrix stateAsVector = new SimpleMatrix(1, numStateVars);
+
+            // converting our state object into the kind of Vector the numerical integration class
+            // likes
+
+            // set first values of state vector to global state variables
+            stateAsVector.set(0, 0, this.x);
+            stateAsVector.set(0, 1, this.y);
+            stateAsVector.set(0, 2, this.vX);
+            stateAsVector.set(0, 3, this.vY);
+            stateAsVector.set(0, 4, this.angle);
+            stateAsVector.set(0, 5, this.angularVelocity);
+
+            // add a variable-size data footer to the vector, so that we can support arbitrary
+            // numbers of modules
+            int index = 6;
+            for (int i = 0; i < this.steerAngle.getNumCols(); i++) {
+                stateAsVector.set(0, index, this.steerAngle.get(0, i));
+                index++;
+
+                stateAsVector.set(0, index, this.steerAngularVelocity.get(0, i));
+                index++;
+
+                stateAsVector.set(0, index, this.driveAngularAccumulation.get(0, i));
+                index++;
+
+                stateAsVector.set(0, index, this.driveAngularVelocity.get(0, i));
+                index++;
+            }
+            return stateAsVector;
+        }
+    }
+
+    /**
+     * Data class representing a control input to a coaxial swerve of J modules.
+     *
+     * <p>Vectors must be consistently ordered.
+     *
+     * @param driveInput A vector containing each module's drive input, in volts.
+     * @param steerInput A vector containing each module's steer input, in volts.
+     * @param <J> A Num representing the number of swerve modules.
+     */
     public static record CoaxialSwerveInput<J extends Num>(
             Vector<J> driveInput, Vector<J> steerInput) {
+        private SimpleMatrix toInputVec(int numInputVars) {
+            SimpleMatrix inputAsVector = new SimpleMatrix(1, numInputVars);
+            // loop through each module, changing all inputs to a single vector
+            int index = 0;
+            for (int i = 0; i < this.driveInput.getNumCols(); i++) {
+                inputAsVector.set(0, index, this.steerInput.get(0, i));
+                index++;
+
+                inputAsVector.set(0, index, this.driveInput.get(0, i));
+                index++;
+            }
+            return inputAsVector;
+        }
+
+        private static <K extends Num> CoaxialSwerveInput<K> fromInputVec(
+                SimpleMatrix inputVec, int numModules) {
+            Vector<K> steerInputs = new Vector<>(new SimpleMatrix(1, numModules));
+
+            Vector<K> driveInputs = new Vector<>(new SimpleMatrix(1, numModules));
+
+            // TODO implement
+            return new CoaxialSwerveInput<>(driveInputs, steerInputs);
+        }
+
         private CoaxialSwerveInput<J> clamp(double driveMaxAbs, double steerMaxAbs) {
             var clDriveInput = driveInput;
             var clSteerInput = steerInput;
@@ -80,6 +217,9 @@ public class CoaxialSwerveModel<N extends Num> {
 
     private final int numInputVars;
 
+    private final double kDriveFrictionTorque;
+    private final double kSteerFrictionTorque;
+
     private class NumInputs extends Num {
         @Override
         public int getNum() {
@@ -94,6 +234,40 @@ public class CoaxialSwerveModel<N extends Num> {
         }
     }
 
+    private class NumModules extends Num {
+        @Override
+        public int getNum() {
+            return numModules;
+        }
+    }
+
+    /**
+     * Constructs a CoaxialSwerveModel for simulation of a generic coaxial swerve drive base.
+     *
+     * <p>Note that the ordering of modules in the {@code modulePositions} vector becomes convention
+     * for this class's methods.
+     *
+     * @param robotMass The mass of the robot, in kg.
+     * @param robotMoment The moment of inertia of the robot about its z-axis (yaw), in kg m^2.
+     * @param wheelDriveMoment The moment of inertia of the driven part of the module and its
+     *     geartrain, in kg m^2.
+     * @param wheelSteerMoment The moment of inertia of the steered part of the module and its
+     *     geartrain, in kg m^2.
+     * @param driveMotor DCMotor model of the driving motor. Reductions should already be applied.
+     * @param steerMotor DCMotor model of the steering motor. Reductions should already be applied.
+     * @param driveWheelRadius Radius of the drive wheel, in meters.
+     * @param kDriveFrictionTorque "Fudge factor" frictional torque to apply to the drive action on
+     *     a per-module level, in newton meters.
+     *     <p>Note that this is intentionally not a coefficient of friction, as there is
+     *     robot-mass-independent friction in this system. Users should tune this so this model
+     *     behaves like their actual drivetrain, or just take a good guess.
+     * @param kSteerFrictionTorque "Fudge factor" frictional torque to apply to the steer action on
+     *     a per-module level, in newton meters.
+     *     <p>Note that this is intentionally not a coefficient of friction, as there is
+     *     robot-mass-independent friction in this system. Users should tune this so this model
+     *     behaves like their actual drivetrain, or just take a good guess.
+     * @param modulePositions Offsets of module positions relative to the robot frame, in meters.
+     */
     public CoaxialSwerveModel(
             double robotMass,
             double robotMoment,
@@ -102,6 +276,8 @@ public class CoaxialSwerveModel<N extends Num> {
             DCMotor driveMotor,
             DCMotor steerMotor,
             double driveWheelRadius,
+            double kDriveFrictionTorque,
+            double kSteerFrictionTorque,
             CoaxialSwerveModuleOffsets<N> modulePositions) {
         this.robotMass = robotMass;
         this.robotMoment = robotMoment;
@@ -113,6 +289,9 @@ public class CoaxialSwerveModel<N extends Num> {
         this.steerMotor = steerMotor;
 
         this.driveWheelRadius = driveWheelRadius;
+
+        this.kDriveFrictionTorque = kDriveFrictionTorque;
+        this.kSteerFrictionTorque = kSteerFrictionTorque;
 
         this.modulePositions = modulePositions;
 
@@ -129,146 +308,91 @@ public class CoaxialSwerveModel<N extends Num> {
         // drive angular accumulation, drive angular velocity
     }
 
+    /**
+     * Simulates the swerve drivetrain system by with a physics model and numerical integration.
+     *
+     * @param state The state of the drivetrain before the timestep.
+     * @param input Voltage inputs to the drivetrain.
+     * @param dtSeconds The timestep to simulate over
+     * @return The drivetrain state after the timestep.
+     */
     public CoaxialSwerveState<N> simulate(
             CoaxialSwerveState<N> state, CoaxialSwerveInput<N> input, double dtSeconds) {
 
-        var clInput = input.clamp(driveMotor.nominalVoltageVolts, steerMotor.nominalVoltageVolts);
+        SimpleMatrix inputAsVector =
+                input.clamp(driveMotor.nominalVoltageVolts, steerMotor.nominalVoltageVolts)
+                        .toInputVec(numInputVars);
 
-        SimpleMatrix stateAsVector = new SimpleMatrix(1, numStateVars);
-
-        // set initial 6 values of state vector to global state variables
-        stateAsVector.set(0, 0, state.x);
-        stateAsVector.set(0, 1, state.y);
-        stateAsVector.set(0, 2, state.vX);
-        stateAsVector.set(0, 3, state.vY);
-        stateAsVector.set(0, 4, state.angle);
-        stateAsVector.set(0, 5, state.angularVelocity);
-
-        // add a variable-size data footer to the vector, so that we can support arbitrary u_int
-        // numbers of modules
-        int index = 6;
-        for (int i = 0; i < state.steerAngle.getNumCols(); i++) {
-            stateAsVector.set(0, index, state.steerAngle.get(0, i));
-            index++;
-
-            stateAsVector.set(0, index, state.steerAngularVelocity.get(0, i));
-            index++;
-
-            stateAsVector.set(0, index, state.driveAngularAccumulation.get(0, i));
-
-            stateAsVector.set(0, index, state.driveAngularVelocity.get(0, i));
-            index++;
-        }
-
-        SimpleMatrix inputAsVector = new SimpleMatrix(1, numInputVars);
-
-        // loop through each module again, changing all inputs to a single vector
-        index = 0;
-        for (int i = 0; i < clInput.driveInput.getNumCols(); i++) {
-            inputAsVector.set(0, index, clInput.steerInput.get(0, i));
-            index++;
-
-            inputAsVector.set(0, index, clInput.driveInput.get(0, i));
-            index++;
-        }
-
-        // RK4 numerical integration to get a solution to the IVP of our system
+        // numerical integration to solve the IVP of our system
         Matrix<NumStates, N1> nextState =
                 NumericalIntegration.rkdp(
                         this::getStateDerivative,
-                        new Matrix<NumStates, N1>(stateAsVector),
-                        new Matrix<NumInputs, N1>(inputAsVector),
+                        new Matrix<>(state.toStateVec(numStateVars)),
+                        new Matrix<>(inputAsVector),
                         dtSeconds);
-        // being explicit on matrix dimensions out of an abundance of caution
 
-        SimpleMatrix moduleSteerAngles = new SimpleMatrix(1, numModules);
-        SimpleMatrix moduleSteerAngularVelocities = new SimpleMatrix(1, numModules);
-        SimpleMatrix moduleDriveAngularAccumulation = new SimpleMatrix(1, numModules);
-        SimpleMatrix moduleDriveAngularVelocities = new SimpleMatrix(1, numModules);
-
-        // convert variable-size module data footer (everything after index 5) to their own vectors
-        index = 6;
-        for (int i = 0; i < numModules; i++) {
-            moduleSteerAngles.set(0, i, nextState.get(0, index));
-            index++;
-
-            moduleSteerAngularVelocities.set(0, i, nextState.get(0, index));
-            index++;
-
-            moduleDriveAngularAccumulation.set(0, i, nextState.get(0, index));
-            index++;
-
-            moduleDriveAngularVelocities.set(0, i, nextState.get(0, index));
-            index++;
-        }
-
-        return new CoaxialSwerveState<>(
-                nextState.get(0, 0), // x
-                nextState.get(0, 1), // y
-                nextState.get(0, 2), // vx
-                nextState.get(0, 3), // vy
-                nextState.get(0, 4), // angle
-                nextState.get(0, 5), // angular velocity
-                new Vector<>(moduleSteerAngles),
-                new Vector<>(moduleSteerAngularVelocities),
-                new Vector<>(moduleDriveAngularAccumulation),
-                new Vector<>(moduleDriveAngularVelocities));
+        return CoaxialSwerveState.fromStateVec(nextState.getStorage(), numModules);
     }
 
-    // returns the derivative of the state, given current state and an input
+    // returns the derivative of the state with respect to time, given current state and an input
     private Matrix<NumStates, N1> getStateDerivative(
-            Matrix<NumStates, N1> x, Matrix<NumInputs, N1> u) {
-        SimpleMatrix derivState = new SimpleMatrix(1, numStateVars);
+            Matrix<NumStates, N1> xMatrix, Matrix<NumInputs, N1> uMatrix) {
 
-        derivState.set(0, 0, x.get(0, 2)); // move down vx
-        derivState.set(0, 1, x.get(0, 3)); // move down vy
+        CoaxialSwerveState<NumModules> state =
+                CoaxialSwerveState.fromStateVec(xMatrix.getStorage(), numModules);
 
-        derivState.set(0, 4, x.get(0, 5)); // move down angular vel
+        CoaxialSwerveInput<NumModules> input =
+                CoaxialSwerveInput.fromInputVec(uMatrix.getStorage(), numModules);
+
+        Vector<NumModules> steerAngularAcceleration = new Vector<>(new SimpleMatrix(1, numModules));
+        Vector<NumModules> driveAngularAcceleration = new Vector<>(new SimpleMatrix(1, numModules));
 
         Translation2d forceSum = new Translation2d();
 
         double torqueSum = 0;
 
-        // calculations on still-packed variable data footer
-        int stateVarIndex = 6;
-        int inputVarIndex = 0;
+        // iterate through modules
         for (int i = 0; i < numModules; i++) {
-            // input var = steer
-            double steerU = u.get(0, inputVarIndex);
-            inputVarIndex++;
-
-            // input var = drive
-            double driveU = u.get(0, inputVarIndex);
-            inputVarIndex++;
-
-            // state var = steer angle
-            double steerAngle = x.get(0, stateVarIndex);
-
-            derivState.set(
-                    0, stateVarIndex, x.get(0, stateVarIndex + 1)); // move down angular velocity
-            stateVarIndex++;
-
-            // state var = steer angular velocity
+            // calculate torque with an existing DC motor model
             double steerTorque =
-                    steerMotor.getTorque(steerMotor.getCurrent(x.get(0, stateVarIndex), steerU));
+                    steerMotor.getTorque(
+                            steerMotor.getCurrent(
+                                    state.steerAngularVelocity.get(0, i),
+                                    input.steerInput.get(0, i)));
 
-            derivState.set(0, i, steerTorque / wheelSteerMoment); // torque / moment = angular accel
-            stateVarIndex++;
+            // add the "fudge factor" frictional torque to the system
+            // reverse the direction of the angular velocity
+            // this is static friction, so it's clamped to not flip the direction of the torque
+            steerTorque +=
+                    UtilityMath.clamp(
+                            Math.abs(steerTorque),
+                            -Math.signum(
+                                    state.steerAngularVelocity.get(0, i) * kSteerFrictionTorque));
 
-            // state var = drive angle
-            derivState.set(0, i, x.get(0, stateVarIndex + 1)); // move down angular velocity
-            stateVarIndex++;
+            steerAngularAcceleration.set(0, i, steerTorque / wheelSteerMoment);
+            // torque / moment = angular accel
 
-            // state var = drive angular velocity
             double driveTorque =
-                    driveMotor.getTorque(driveMotor.getCurrent(x.get(0, stateVarIndex), driveU));
+                    driveMotor.getTorque(
+                            driveMotor.getCurrent(
+                                    state.driveAngularVelocity.get(0, i),
+                                    input.driveInput.get(0, i)));
+
+            // perform the same friction calculation as with steer
+            driveTorque +=
+                    UtilityMath.clamp(
+                            Math.abs(driveTorque),
+                            -Math.signum(
+                                    state.driveAngularVelocity.get(0, i) * kDriveFrictionTorque));
 
             double forceAlongWheelVec = driveTorque / driveWheelRadius;
 
             // module angles are in robot frame already, no need to transform our forces
             forceSum =
                     forceSum.plus(
-                            new Translation2d(forceAlongWheelVec, new Rotation2d(steerAngle)));
+                            new Translation2d(
+                                    forceAlongWheelVec,
+                                    new Rotation2d(state.steerAngle.get(0, i))));
 
             // torque = force vector X (cross product) radius vector
 
@@ -281,27 +405,38 @@ public class CoaxialSwerveModel<N extends Num> {
                             -modulePositions.yOffsets.get(0, i));
 
             double angleBetween =
-                    new Rotation2d(steerAngle).minus(radiusVector.getAngle()).getRadians();
+                    new Rotation2d(state.steerAngle.get(0, i))
+                            .minus(radiusVector.getAngle())
+                            .getRadians();
 
             torqueSum +=
                     radiusVector.getNorm() * Math.abs(forceAlongWheelVec) * Math.sin(angleBetween);
 
-            derivState.set(
-                    0,
-                    stateVarIndex,
-                    driveTorque / wheelDriveMoment); // torque / moment = angular accel
-            stateVarIndex++;
+            driveAngularAcceleration.set(0, i, driveTorque / wheelDriveMoment);
+            // torque / moment = angular accel
         }
 
         // rotate forces to world-relative
-        forceSum = forceSum.rotateBy(new Rotation2d(-x.get(0, 0)));
+        forceSum = forceSum.rotateBy(new Rotation2d(-state.angle));
 
         // set global state derivs to sum of forces/ torques from modules
-        derivState.set(0, 2, forceSum.getX() / robotMass); // force / mass = accel
-        derivState.set(0, 3, forceSum.getY() / robotMass);
+        double aX = forceSum.getX() / robotMass; // force / mass = accel
+        double aY = forceSum.getY() / robotMass;
 
-        derivState.set(0, 5, torqueSum / robotMoment); // torque / moment = angular accel
+        double angularAcceleration = torqueSum / robotMoment; // torque / moment = angular accel
 
-        return new Matrix<>(derivState);
+        return new Matrix<>(
+                new CoaxialSwerveState<>(
+                                state.vX,
+                                state.vY,
+                                aX,
+                                aY,
+                                state.angularVelocity,
+                                angularAcceleration,
+                                state.steerAngularVelocity,
+                                steerAngularAcceleration,
+                                state.driveAngularVelocity,
+                                driveAngularAcceleration)
+                        .toStateVec(numStateVars));
     }
 }
