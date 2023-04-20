@@ -63,7 +63,19 @@ public class SpartanQuadratureEncoder extends AbstractEncoder {
 
     @Override
     public double getConvertedPosition() {
-        return getRawPosition() * ((Math.PI * 2) / config.countsPerRotation);
+        return unitConversion(getRawPosition());
+    }
+
+    @Override
+    public double getRawVelocity() {
+        // FPGA can do differentiation better than us
+        if (config.inverted) return -encoder.getRate();
+        else return encoder.getRate();
+    }
+
+    @Override
+    public double getConvertedVelocity() {
+        return unitConversion(getRawVelocity());
     }
 
     @Override
@@ -82,5 +94,10 @@ public class SpartanQuadratureEncoder extends AbstractEncoder {
     private void periodic() {
         if (getRawVelocity() == 0) stalenessCount++;
         else resetStalenessCount();
+    }
+
+    // maps "ticks" to radians
+    private double unitConversion(double in) {
+        return in * ((Math.PI * 2) / config.countsPerRotation);
     }
 }

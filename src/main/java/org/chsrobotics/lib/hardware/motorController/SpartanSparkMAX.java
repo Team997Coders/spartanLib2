@@ -78,7 +78,23 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
 
         @Override
         public double getConvertedPosition() {
-            return getRawPosition() * ((2 * Math.PI) / config.countsPerRevolution);
+            return unitConversion(getRawPosition());
+        }
+
+        @Override
+        public double getRawVelocity() {
+            // native sparkmax differentiation is better than ours
+            return encoder.getVelocity() * (config.inverted ? -1 : 1) / 60;
+            // convert from RPM to RPS, for consistency
+        }
+
+        @Override
+        public double getConvertedVelocity() {
+            return unitConversion(getRawVelocity());
+        }
+
+        private double unitConversion(double in) {
+            return in * 2 * Math.PI / config.countsPerRevolution;
         }
 
         @Override
@@ -217,6 +233,16 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
             return encoder.getPosition() * (config.inverted ? -1 : 1);
         }
 
+        // we don't override the getUnconvertedVelocity method because sparkmax natively handles
+        // wrap,
+        // which is counter the spec of getUnconvertedVelocity()
+
+        @Override
+        public double getConvertedVelocity() {
+            // sparkmax native differentiation is better than ours
+            return encoder.getVelocity() * (config.inverted ? -1 : 1);
+        }
+
         @Override
         public boolean isStale() {
             return (stalenessCount >= stalenessThreshold);
@@ -242,12 +268,12 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
             boolean inverted,
             double currentLimitAmps,
             IdleMode initialIdleMode) {
-        public static SparkMaxConfig getDefaultBrushless() {
-            return new SparkMaxConfig(0, MotorType.kBrushless, false, 40, IdleMode.COAST);
+        public static SparkMaxConfig getDefaultBrushless(int canID) {
+            return new SparkMaxConfig(canID, MotorType.kBrushless, false, 40, IdleMode.COAST);
         }
 
-        public static SparkMaxConfig getDefaultBrushed() {
-            return new SparkMaxConfig(0, MotorType.kBrushed, false, 40, IdleMode.COAST);
+        public static SparkMaxConfig getDefaultBrushed(int canID) {
+            return new SparkMaxConfig(canID, MotorType.kBrushed, false, 40, IdleMode.COAST);
         }
 
         public SparkMaxConfig setCANID(int canID) {
@@ -406,8 +432,10 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
 
     @Override
     public void setVoltage(double volts) {
-        sparkMax.setVoltage(volts);
-        setVoltage = volts;
+        if (this.setVoltage != volts) {
+            sparkMax.setVoltage(volts);
+            setVoltage = volts;
+        }
     }
 
     @Override
@@ -417,8 +445,10 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
 
     @Override
     public void setIdleMode(IdleMode idleMode) {
-        sparkMax.setIdleMode(idleMode.asRev());
-        this.idleMode = idleMode;
+        if (idleMode != this.idleMode) {
+            sparkMax.setIdleMode(idleMode.asRev());
+            this.idleMode = idleMode;
+        }
     }
 
     @Override
