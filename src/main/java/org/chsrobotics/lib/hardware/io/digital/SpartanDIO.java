@@ -14,12 +14,20 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.hardware.misc;
+package org.chsrobotics.lib.hardware.io.digital;
 
+import edu.wpi.first.util.datalog.DataLog;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DigitalOutput;
+import org.chsrobotics.lib.telemetry.Logger;
+import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
-public class SpartanDigitalIO extends AbstractDigitalIO {
+public class SpartanDIO implements AbstractDigitalInput, AbstractDigitalOutput {
+    public static enum IOMode {
+        INPUT,
+        OUTPUT
+    }
+
     public static record DigitalIOConfig(int channel, boolean inputInverted, IOMode initialMode) {
         public DigitalIOConfig setChannel(int channel) {
             return new DigitalIOConfig(channel, inputInverted, initialMode);
@@ -42,9 +50,17 @@ public class SpartanDigitalIO extends AbstractDigitalIO {
 
     private IOMode ioMode;
 
-    private IOState currentOutput = IOState.NONE;
+    private DigitalOutputState currentOutput = DigitalOutputState.NONE;
 
-    public SpartanDigitalIO(DigitalIOConfig config) {
+    private Logger<DigitalInputState> inputLogger;
+
+    private Logger<DigitalOutputState> outputLogger;
+
+    private Logger<IOMode> ioModeLogger;
+
+    private boolean logsConstructed = false;
+
+    public SpartanDIO(DigitalIOConfig config) {
         this.config = config;
 
         ioMode = config.initialMode;
@@ -58,21 +74,20 @@ public class SpartanDigitalIO extends AbstractDigitalIO {
     }
 
     @Override
-    public IOState getInput() {
+    public DigitalInputState getInput() {
         if (ioMode == IOMode.INPUT) {
-            if (config.inputInverted) return IOState.fromBool(!input.get());
-            else return IOState.fromBool(input.get());
-        } else return IOState.NONE;
+            if (config.inputInverted) return DigitalInputState.fromBool(!input.get());
+            else return DigitalInputState.fromBool(input.get());
+        } else return DigitalInputState.NONE;
     }
 
-    @Override
     public void setMode(IOMode mode) {
         if (mode == IOMode.INPUT && ioMode != IOMode.INPUT) {
             output.close();
 
             input = new DigitalInput(config.channel);
 
-            currentOutput = IOState.NONE;
+            currentOutput = DigitalOutputState.NONE;
 
             ioMode = mode;
         } else if (mode == IOMode.OUTPUT && ioMode != IOMode.OUTPUT) {
@@ -84,22 +99,50 @@ public class SpartanDigitalIO extends AbstractDigitalIO {
         }
     }
 
-    @Override
     public IOMode getCurrentMode() {
         return ioMode;
     }
 
-    @Override
-    public void setOutput(IOState state) {
+    public boolean setOutput(DigitalOutputState state) {
         if (ioMode == IOMode.OUTPUT && state.asBool() != null) {
             output.set(state.asBool());
 
             currentOutput = state;
-        }
+
+            return true;
+        } else return false;
     }
 
     @Override
-    public IOState getCurrentOutput() {
+    public DigitalOutputState getCurrentOutput() {
         return currentOutput;
+    }
+
+    @Override
+    public void autoGenerateLogs(
+            DataLog log, String name, String subdirName, boolean publishToNT, boolean recordInLog) {
+        if (!logsConstructed) {
+            inputLogger =
+                    new Logger<>(log, name + "/inputState", subdirName, publishToNT, recordInLog);
+
+            outputLogger =
+                    new Logger<>(log, name + "/outputState", subdirName, publishToNT, recordInLog);
+
+            ioModeLogger = new Logger<>(log, name + "ioMode", subdirName, publishToNT, recordInLog);
+
+            logsConstructed = true;
+
+            PeriodicCallbackHandler.registerCallback(this::updateLogs);
+        }
+    }
+
+    private void updateLogs() {
+        if (logsConstructed) {
+            inputLogger.update(getInput());
+
+            outputLogger.update(getCurrentOutput());
+
+            ioModeLogger.update(getCurrentMode());
+        }
     }
 }

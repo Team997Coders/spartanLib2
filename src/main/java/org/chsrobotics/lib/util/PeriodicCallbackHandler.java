@@ -81,17 +81,41 @@ public class PeriodicCallbackHandler {
      *
      * <p>This method must be called regularly for many library functions to work. The author
      * suggests using your robot's {@code periodic()} method.
+     *
+     * @param suppressStackTraces Whether to print {@code NullPointerException}s for invalid
+     *     callbacks. This can be useful for debugging.
      */
-    public static void executeCallbacks() {
-        for (CallbackAndTimestamp entry : timeCallbacks.values()) {
-            double currentTime = System.currentTimeMillis() / 1000;
+    public static void executeCallbacks(boolean suppressStackTraces) {
+        ArrayList<CallbackAndTimestamp> outOfScopeTimeCallbacks = new ArrayList<>();
 
-            entry.callback.accept(currentTime - entry.timestamp);
-            entry.timestamp = currentTime;
+        for (CallbackAndTimestamp entry : timeCallbacks.values()) {
+            try {
+                double currentTime = System.currentTimeMillis() / 1000;
+
+                entry.callback.accept(currentTime - entry.timestamp);
+                entry.timestamp = currentTime;
+            } catch (NullPointerException e) {
+                outOfScopeTimeCallbacks.add(entry);
+
+                if (!suppressStackTraces) e.printStackTrace();
+            }
         }
+
+        for (CallbackAndTimestamp entry : outOfScopeTimeCallbacks)
+            deregisterCallback(entry.callback);
+
+        ArrayList<Runnable> outOfScopeVoidCallbacks = new ArrayList<>();
 
         for (Runnable runnable : voidCallbacks) {
-            runnable.run();
+            try {
+                runnable.run();
+            } catch (NullPointerException e) {
+                outOfScopeVoidCallbacks.add(runnable);
+
+                if (!suppressStackTraces) e.printStackTrace();
+            }
         }
+
+        for (Runnable runnable : outOfScopeVoidCallbacks) deregisterCallback(runnable);
     }
 }

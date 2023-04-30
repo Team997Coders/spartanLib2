@@ -22,6 +22,7 @@ import org.chsrobotics.lib.math.filters.DifferentiatingFilter;
 import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
 import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
+import org.chsrobotics.lib.util.GearRatioHelper;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
 public abstract class AbstractEncoder implements IntrinsicLoggable, StalenessWatchable {
@@ -65,6 +66,42 @@ public abstract class AbstractEncoder implements IntrinsicLoggable, StalenessWat
 
     public double getConvertedAcceleration() {
         return convAFilter.getCurrentOutput();
+    }
+
+    /**
+     * Returned encoder is no longer a true absolute encoder, so it uses the base object
+     *
+     * @param gearRatio
+     * @return
+     */
+    public AbstractEncoder withGearRatio(GearRatioHelper gearRatio) {
+        return new AbstractEncoder() {
+
+            @Override
+            public boolean isStale() {
+                return this.isStale();
+            }
+
+            @Override
+            public double getRawPosition() {
+                return this.getRawPosition();
+            }
+
+            @Override
+            public double getConvertedPosition() {
+                return gearRatio.outputFromInput(this.getConvertedPosition());
+            }
+
+            @Override
+            public double getConvertedVelocity() {
+                return gearRatio.outputFromInput(this.getConvertedVelocity());
+            }
+
+            @Override
+            public double getConvertedAcceleration() {
+                return gearRatio.outputFromInput(this.getConvertedAcceleration());
+            }
+        };
     }
 
     private void periodic(double dtSeconds) {
