@@ -16,8 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.drive.differential;
 
-import java.util.function.Supplier;
-import org.chsrobotics.lib.input.JoystickAxis;
+import java.util.function.DoubleSupplier;
 import org.chsrobotics.lib.math.filters.RateLimiter;
 
 /**
@@ -25,10 +24,10 @@ import org.chsrobotics.lib.math.filters.RateLimiter;
  * dependent on linear speeds.
  */
 public class CurvatureDrive implements DifferentialDriveMode {
-    private final Supplier<Double> linearAxis;
-    private final Supplier<Double> rotationalAxis;
-    private final Supplier<Double> turnModifier;
-    private final Supplier<Double> driveModifier;
+    private final DoubleSupplier linearAxis;
+    private final DoubleSupplier rotationalAxis;
+    private final DoubleSupplier turnModifier;
+    private final DoubleSupplier driveModifier;
     private final RateLimiter driveLimiter;
     private final RateLimiter turnLimiter;
     private final boolean invertReverseTurning;
@@ -36,8 +35,8 @@ public class CurvatureDrive implements DifferentialDriveMode {
     /**
      * Constructs a CurvatureDrive.
      *
-     * @param linearAxis The {@link JoystickAxis} to be used for linear movement.
-     * @param rotationalAxis The {@link JoystickAxis} to be used for rotational movement.
+     * @param linearAxis Linear input, in [-1,1].
+     * @param rotationalAxis Rotational input, in [-1,1].
      * @param driveModifier A scalar to multiply the linear input by.
      * @param turnModifier A scalar to multiply the rotational input by.
      * @param driveLimiter The maximum rate of change of the linear input, in units of input /
@@ -47,10 +46,10 @@ public class CurvatureDrive implements DifferentialDriveMode {
      * @param invertReverseTurning Whether turning in reverse should be inverted.
      */
     public CurvatureDrive(
-            Supplier<Double> linearAxis,
-            Supplier<Double> rotationalAxis,
-            Supplier<Double> driveModifier,
-            Supplier<Double> turnModifier,
+            DoubleSupplier linearAxis,
+            DoubleSupplier rotationalAxis,
+            DoubleSupplier driveModifier,
+            DoubleSupplier turnModifier,
             double driveLimiter,
             double turnLimiter,
             boolean invertReverseTurning) {
@@ -67,12 +66,17 @@ public class CurvatureDrive implements DifferentialDriveMode {
     @Override
     public DifferentialDrivetrainInput execute() {
         double rotationMultiplier =
-                invertReverseTurning ? Math.abs(linearAxis.get()) : linearAxis.get();
+                invertReverseTurning
+                        ? Math.abs(linearAxis.getAsDouble())
+                        : linearAxis.getAsDouble();
         // rotation = (linear * rotational input)
         double rotation =
                 turnLimiter.calculate(
-                        (rotationalAxis.get() * rotationMultiplier * turnModifier.get()));
-        double linear = driveLimiter.calculate(linearAxis.get() * driveModifier.get());
+                        (rotationalAxis.getAsDouble()
+                                * rotationMultiplier
+                                * turnModifier.getAsDouble()));
+        double linear =
+                driveLimiter.calculate(linearAxis.getAsDouble() * driveModifier.getAsDouble());
 
         double left = linear + rotation;
         double right = linear - rotation;

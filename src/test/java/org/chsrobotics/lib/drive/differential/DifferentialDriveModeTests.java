@@ -41,7 +41,7 @@ public class DifferentialDriveModeTests {
     public void tankDriveExecute() {
         JoystickAxis left = constructTestAxis(0.5);
         JoystickAxis right = constructTestAxis(0.25);
-        DifferentialDriveMode drive = new TankDrive(left::getValue, right::getValue, () -> 1.0, 0);
+        DifferentialDriveMode drive = new TankDrive(left, right, () -> 1.0, 0.0);
         assertEquals(drive.execute(), new DifferentialDrivetrainInput(0.5, 0.25));
     }
 
@@ -50,7 +50,7 @@ public class DifferentialDriveModeTests {
         JoystickAxis linear = constructTestAxis(0.5);
         JoystickAxis rotational = constructTestAxis(0.25);
         DifferentialDriveMode drive =
-                new ArcadeDrive(linear::getValue, rotational::getValue, () -> 1.0, () -> 1.0, 0, 0);
+                new ArcadeDrive(linear, rotational, () -> 1.0, () -> 1.0, 0, 0);
         assertEquals(drive.execute(), new DifferentialDrivetrainInput(0.75, 0.25));
     }
 
@@ -59,8 +59,7 @@ public class DifferentialDriveModeTests {
         JoystickAxis linear = constructTestAxis(0.5);
         JoystickAxis rotational = constructTestAxis(0.25);
         DifferentialDriveMode drive =
-                new CurvatureDrive(
-                        linear::getValue, rotational::getValue, () -> 1.0, () -> 1.0, 0, 0, false);
+                new CurvatureDrive(linear, rotational, () -> 1.0, () -> 1.0, 0, 0, false);
         assertEquals(drive.execute(), new DifferentialDrivetrainInput(0.625, 0.375));
     }
 
@@ -71,17 +70,11 @@ public class DifferentialDriveModeTests {
         DifferentialDriveMode drive =
                 new MixedDrive(
                         Map.of(
-                                new ArcadeDrive(
-                                                linear::getValue,
-                                                rotational::getValue,
-                                                () -> 1.0,
-                                                () -> 1.0,
-                                                0,
-                                                0),
+                                new ArcadeDrive(linear, rotational, () -> 1.0, () -> 1.0, 0, 0),
                                         0.5,
                                 new CurvatureDrive(
-                                                linear::getValue,
-                                                rotational::getValue,
+                                                linear,
+                                                rotational,
                                                 () -> 1.0,
                                                 () -> 1.0,
                                                 0,

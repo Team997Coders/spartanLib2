@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -44,10 +44,11 @@ public class VirtualJoystickButton extends JoystickButton {
                 pollingLoop,
                 () -> {
                     if (!inverse) {
-                        return (axis.getValue() >= minimumValue && axis.getValue() <= maximumValue);
+                        return (axis.getAsDouble() >= minimumValue
+                                && axis.getAsDouble() <= maximumValue);
                     } else {
-                        return !(axis.getValue() >= minimumValue
-                                && axis.getValue() <= maximumValue);
+                        return !(axis.getAsDouble() >= minimumValue
+                                && axis.getAsDouble() <= maximumValue);
                     }
                 },
                 ("virtual: " + axis.toString()),

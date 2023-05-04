@@ -16,25 +16,23 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.drive.differential;
 
-import java.util.function.Supplier;
-import org.chsrobotics.lib.input.JoystickAxis;
+import java.util.function.DoubleSupplier;
 import org.chsrobotics.lib.math.filters.RateLimiter;
 
 /** Moves the robot in teleop using separate inputs for linear and rotational motion. */
 public class ArcadeDrive implements DifferentialDriveMode {
-    // TODO Joystick Axis should implement supplier
-    private final Supplier<Double> linearAxis;
-    private final Supplier<Double> rotationalAxis;
-    private final Supplier<Double> driveModifier;
-    private final Supplier<Double> turnModifier;
+    private final DoubleSupplier linearAxis;
+    private final DoubleSupplier rotationalAxis;
+    private final DoubleSupplier driveModifier;
+    private final DoubleSupplier turnModifier;
     private final RateLimiter driveLimiter;
     private final RateLimiter turnLimiter;
 
     /**
      * Constructs an ArcadeDrive.
      *
-     * @param linearAxis The {@link JoystickAxis} to be used for linear movement.
-     * @param rotationalAxis The {@link JoystickAxis} to be used for rotational movement.
+     * @param linearAxis The linear input, in [-1,1].
+     * @param rotationalAxis The rotational input, in [-1,1].
      * @param driveModifier A scalar to multiply the linear input by.
      * @param turnModifier A scalar to multiply the rotational input by.
      * @param driveLimiter The maximum rate of change of the linear input, in units of input /
@@ -43,10 +41,10 @@ public class ArcadeDrive implements DifferentialDriveMode {
      *     second. If equal to 0, no rate limiting will be applied.
      */
     public ArcadeDrive(
-            Supplier<Double> linearAxis,
-            Supplier<Double> rotationalAxis,
-            Supplier<Double> driveModifier,
-            Supplier<Double> turnModifier,
+            DoubleSupplier linearAxis,
+            DoubleSupplier rotationalAxis,
+            DoubleSupplier driveModifier,
+            DoubleSupplier turnModifier,
             double driveLimiter,
             double turnLimiter) {
         this.linearAxis = linearAxis;
@@ -60,8 +58,10 @@ public class ArcadeDrive implements DifferentialDriveMode {
     /** {@inheritDoc} */
     @Override
     public DifferentialDrivetrainInput execute() {
-        double linear = driveLimiter.calculate(linearAxis.get() * driveModifier.get());
-        double rotation = turnLimiter.calculate(rotationalAxis.get() * turnModifier.get());
+        double linear =
+                driveLimiter.calculate(linearAxis.getAsDouble() * driveModifier.getAsDouble());
+        double rotation =
+                turnLimiter.calculate(rotationalAxis.getAsDouble() * turnModifier.getAsDouble());
 
         double left = linear + rotation;
         double right = linear - rotation;

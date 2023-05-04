@@ -16,31 +16,30 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.drive.differential;
 
-import java.util.function.Supplier;
-import org.chsrobotics.lib.input.JoystickAxis;
+import java.util.function.DoubleSupplier;
 import org.chsrobotics.lib.math.filters.RateLimiter;
 
 /** Moves the robot in teleoperated mode using one input directly mapped to each wheel. */
 public class TankDrive implements DifferentialDriveMode {
-    private final Supplier<Double> leftAxis;
-    private final Supplier<Double> rightAxis;
-    private final Supplier<Double> driveModifier;
+    private final DoubleSupplier leftAxis;
+    private final DoubleSupplier rightAxis;
+    private final DoubleSupplier driveModifier;
     private RateLimiter leftDriveLimiter;
     private RateLimiter rightDriveLimiter;
 
     /**
      * Constructs a TankDrive.
      *
-     * @param leftAxis The {@link JoystickAxis} to be used for the left side.
-     * @param rightAxis The {@link JoystickAxis} to be used for the right side.
+     * @param leftAxis Left-side input, in [-1,1].
+     * @param rightAxis Right-side input, in [-1,1].
      * @param driveModifier A scalar to multiply each input by.
      * @param driveLimiter The maximum rate of change for each input, in units of input / second. If
      *     equal to 0, no rate limiting will be applied.
      */
     public TankDrive(
-            Supplier<Double> leftAxis,
-            Supplier<Double> rightAxis,
-            Supplier<Double> driveModifier,
+            DoubleSupplier leftAxis,
+            DoubleSupplier rightAxis,
+            DoubleSupplier driveModifier,
             double driveLimiter) {
         this.leftAxis = leftAxis;
         this.rightAxis = rightAxis;
@@ -52,18 +51,18 @@ public class TankDrive implements DifferentialDriveMode {
     /**
      * Constructs a TankDrive with no rate limiting.
      *
-     * @param leftAxis The {@link JoystickAxis} to be used for the left side.
-     * @param rightAxis The {@link JoystickAxis} to be used for the right side.
+     * @param leftAxis Left side input, in [-1,1].
+     * @param rightAxis Right side input, in [-1,1].
      */
-    public TankDrive(Supplier<Double> leftAxis, Supplier<Double> rightAxis) {
+    public TankDrive(DoubleSupplier leftAxis, DoubleSupplier rightAxis) {
         this(leftAxis, rightAxis, () -> 1.0, 0);
     }
 
     /** {@inheritDoc} */
     @Override
     public DifferentialDrivetrainInput execute() {
-        double left = leftAxis.get() * driveModifier.get();
-        double right = rightAxis.get() * driveModifier.get();
+        double left = leftAxis.getAsDouble() * driveModifier.getAsDouble();
+        double right = rightAxis.getAsDouble() * driveModifier.getAsDouble();
 
         left = leftDriveLimiter.calculate(left);
         right = rightDriveLimiter.calculate(right);

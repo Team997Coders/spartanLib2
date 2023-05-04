@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -30,32 +30,32 @@ public class JoystickAxisTests {
     @Before
     public void reset() {
         value = 0;
-        axis.getValue();
+        axis.getAsDouble();
     }
 
     @Test
     public void JoystickAxisGetValueWorks() {
-        assertEquals(0, axis.getValue(), 0);
+        assertEquals(0, axis.getAsDouble(), 0);
 
         value = 0.2;
-        assertEquals(0.2, axis.getValue(), 0);
+        assertEquals(0.2, axis.getAsDouble(), 0);
 
         value = -0.8;
-        assertEquals(-0.8, axis.getValue(), 0);
+        assertEquals(-0.8, axis.getAsDouble(), 0);
     }
 
     @Test
     public void JoystickAxisDeadbandWorks() {
         axis.addDeadband(0.1);
         value = 0.05;
-        assertEquals(0, axis.getValue(), 0);
+        assertEquals(0, axis.getAsDouble(), 0);
         value = -0.1;
-        assertEquals(0, axis.getValue(), 0);
+        assertEquals(0, axis.getAsDouble(), 0);
 
         axis.addDeadband(-0.5);
         value = 0.45;
-        assertEquals(0, axis.getValue(), 0);
+        assertEquals(0, axis.getAsDouble(), 0);
         value = -0.55;
-        assertEquals(-0.55, axis.getValue(), 0);
+        assertEquals(-0.55, axis.getAsDouble(), 0);
     }
 }

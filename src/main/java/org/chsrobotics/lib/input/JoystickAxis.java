@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -16,10 +16,11 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.input;
 
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 /** Represents a hardware axis on an input device which has a value in [-1,1] (inclusive). */
-public class JoystickAxis {
+public class JoystickAxis implements DoubleSupplier {
     private final Supplier<Double> valueLambda;
     private double deadband = 0;
     private final String name;
@@ -45,7 +46,7 @@ public class JoystickAxis {
      *
      * @return Value of the axis, in [-1,1] (inclusive).
      */
-    public double getValue() {
+    public double getAsDouble() {
         return (Math.abs(valueLambda.get()) > deadband) ? valueLambda.get() * invert : 0;
     }
 
