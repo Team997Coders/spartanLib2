@@ -16,6 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math.filters;
 
+import java.util.ArrayList;
 import org.chsrobotics.lib.math.UtilityMath;
 import org.chsrobotics.lib.util.SizedStack;
 
@@ -51,18 +52,12 @@ public class MovingAverageFilter extends Filter {
     public double calculate(double value) {
         stack.push(value);
 
-        double[] asArray = new double[stack.size()];
-
-        for (int i = 0; i < stack.size(); i++) {
-            asArray[i] = stack.get(i);
-        }
-
         if (impl == MEAN_IMPLEMENTATION.GEOMETRIC) {
-            currentOutput = UtilityMath.geometricMean(asArray);
+            currentOutput = UtilityMath.geometricMean(new ArrayList<>(stack));
         } else if (impl == MEAN_IMPLEMENTATION.HARMONIC) {
-            currentOutput = UtilityMath.harmonicMean(asArray);
+            currentOutput = UtilityMath.harmonicMean(new ArrayList<>(stack));
         } else {
-            currentOutput = UtilityMath.arithmeticMean(asArray);
+            currentOutput = UtilityMath.arithmeticMean(new ArrayList<>(stack));
         }
 
         return currentOutput;
