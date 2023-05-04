@@ -26,6 +26,7 @@ import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
+// TODO: docs (ugh)
 public abstract class AbstractIMU implements IntrinsicLoggable, StalenessWatchable {
     private boolean logsConstructed = false;
 

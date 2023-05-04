@@ -18,6 +18,7 @@ package org.chsrobotics.lib.hardware.io.analog;
 
 import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
 
+// TODO docs
 public interface AbstractAnalogInput extends IntrinsicLoggable {
     public double getInputVoltage();
 }

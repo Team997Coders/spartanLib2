@@ -22,8 +22,16 @@ import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
+/** Abstract class for "smart" motor controllers, such as SparkMAX and TalonFX. */
 public abstract class AbstractSmartMotorController extends AbstractMotorController
         implements StalenessWatchable {
+
+    /**
+     * Possible idle modes for a smart motor controller.
+     *
+     * <p>Coast mode simply cuts all current through the motor, while brake mode shorts together
+     * motor leads, imparting signficant stopping force.
+     */
     public static enum IdleMode {
         COAST,
         BRAKE;
@@ -38,6 +46,8 @@ public abstract class AbstractSmartMotorController extends AbstractMotorControll
 
     private Logger<String> idleModeLogger;
 
+    private Logger<Double> appliedVoltageLogger;
+
     private Logger<Double> currentLogger;
 
     private Logger<Double> busVoltageLogger;
@@ -46,14 +56,49 @@ public abstract class AbstractSmartMotorController extends AbstractMotorControll
 
     private Logger<Boolean> stalenessWatchdogTriggeredLogger;
 
+    /**
+     * Returns the voltage actually applied by the motor controller.
+     *
+     * <p>This can differ from {@code getSetVoltage()}, as that returns what the user most recently
+     * requested.
+     *
+     * @return Voltage applied by the controller.
+     */
+    public abstract double getAppliedVoltage();
+
+    /**
+     * Sets the idle behavior of this motor controller.
+     *
+     * @param idleMode Idle mode to now use.
+     */
     public abstract void setIdleMode(IdleMode idleMode);
 
+    /**
+     * Returns the currently used idle behavior of the motor controller.
+     *
+     * @return How the motor reacts when given an input of 0.
+     */
     public abstract IdleMode getIdleMode();
 
+    /**
+     * Returns the main voltage observed by this motor controller.
+     *
+     * @return Input voltage to this motor controller.
+     */
     public abstract double getBusVoltage();
 
+    /**
+     * Current, in amps, drawn by this motor controller.
+     *
+     * @return Combined current draw of motor controller and motor.
+     */
     public abstract double getCurrent();
 
+    /**
+     * Returns the temperature of the motor, in celsius.
+     *
+     * @return Motor temperature as measured by the controller.
+     */
     public abstract double getMotorTemperature();
 
     @Override
@@ -64,6 +109,8 @@ public abstract class AbstractSmartMotorController extends AbstractMotorControll
 
             LoggerFactory<Double> factory =
                     new LoggerFactory<>(log, subdirName, publishToNT, recordInLog);
+
+            appliedVoltageLogger = factory.getLogger(name + "/appliedVoltage_v");
 
             currentLogger = factory.getLogger(name + "/current_A");
             busVoltageLogger = factory.getLogger(name + "/busVoltage_v");
@@ -83,6 +130,8 @@ public abstract class AbstractSmartMotorController extends AbstractMotorControll
 
     private void updateLogs() {
         if (logsConstructed) {
+            appliedVoltageLogger.update(getAppliedVoltage());
+
             currentLogger.update(getCurrent());
             busVoltageLogger.update(getBusVoltage());
             motorTemperatureLogger.update(getMotorTemperature());

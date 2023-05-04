@@ -21,13 +21,28 @@ import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
 import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
+/** Abstract class for all motor controllers. */
 public abstract class AbstractMotorController implements IntrinsicLoggable {
     private Logger<Double> setVoltageLogger;
 
     private boolean logsConstructed = false;
 
+    /**
+     * Desired voltage output to this motor controller.
+     *
+     * <p>For devices where direct voltage control is not exposed, this instead divides by the
+     * current bus voltage (or 12) to determine what duty cycle to command.
+     *
+     * @param volts
+     */
     public abstract void setVoltage(double volts);
 
+    /**
+     * Returns the most recent set voltage output.
+     *
+     * @return The most recently commanded voltage. May not match actual motor controller output
+     *     voltage, especially if a remote control loop is running.
+     */
     public abstract double getSetVoltage();
 
     @Override

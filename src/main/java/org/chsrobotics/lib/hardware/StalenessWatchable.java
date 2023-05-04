@@ -16,6 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware;
 
+/** Interface for hardware which can self-check if it might be disconnected. */
 public interface StalenessWatchable {
     public final int defaultStalenessThresholdCycles = 10;
 

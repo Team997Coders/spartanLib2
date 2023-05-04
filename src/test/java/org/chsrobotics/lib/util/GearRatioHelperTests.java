@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -40,5 +40,23 @@ public class GearRatioHelperTests {
     public void GearRatioHelperInputToOutput() {
         GearRatioHelper helper = new GearRatioHelper(7, 1);
         assertEquals(5, helper.inputFromOutput(35), epsilon);
+    }
+
+    @Test
+    public void GearRatioHelperAddReduction() {
+        GearRatioHelper helper = new GearRatioHelper(1, 5);
+
+        GearRatioHelper reductionStage = new GearRatioHelper(1, 2);
+
+        assertEquals(12.5, helper.addStage(reductionStage).outputFromInput(125), epsilon);
+    }
+
+    @Test
+    public void GearRatioHelperAddStepUp() {
+        GearRatioHelper helper = new GearRatioHelper(2, 1);
+
+        GearRatioHelper stepUpStage = new GearRatioHelper(3, 2);
+
+        assertEquals(27, helper.addStage(stepUpStage).outputFromInput(9), epsilon);
     }
 }

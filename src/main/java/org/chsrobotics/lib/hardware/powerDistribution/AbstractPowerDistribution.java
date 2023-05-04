@@ -20,6 +20,7 @@ import java.util.function.DoubleSupplier;
 import org.chsrobotics.lib.hardware.StalenessWatchable;
 import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
 
+// TODO: finish docs
 public abstract class AbstractPowerDistribution implements IntrinsicLoggable, StalenessWatchable {
     /** Object representing a single non-switchable channel on either the PDH or PDP. */
     public class PowerDistributionChannel {

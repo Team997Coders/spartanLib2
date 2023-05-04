@@ -19,6 +19,7 @@ package org.chsrobotics.lib.hardware.encoder;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import org.chsrobotics.lib.math.UtilityMath;
 
+// TODO docs
 public class SpartanDutyCycleAbsoluteEncoder extends AbstractAbsoluteEncoder {
     public static record DutyCycleAbsoluteEncoderConfig(
             int channel, boolean inverted, double offset) {

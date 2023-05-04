@@ -25,6 +25,7 @@ import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
 import org.chsrobotics.lib.util.GearRatioHelper;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
+// TODO docs
 public abstract class AbstractEncoder implements IntrinsicLoggable, StalenessWatchable {
     private final DifferentiatingFilter rawVFilter = new DifferentiatingFilter();
     private final DifferentiatingFilter rawAFilter = new DifferentiatingFilter();

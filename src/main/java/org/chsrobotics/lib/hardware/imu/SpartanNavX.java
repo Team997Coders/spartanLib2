@@ -24,6 +24,7 @@ import edu.wpi.first.util.datalog.DataLog;
 import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
+// TODO: docs
 public class SpartanNavX extends AbstractIMU {
     public static record NavXConfig(Rotation3d offset, boolean isReal) {
         public NavXConfig setOffset(Rotation3d offset) {

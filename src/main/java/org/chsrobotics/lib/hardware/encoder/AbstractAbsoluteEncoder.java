@@ -20,6 +20,8 @@ import org.chsrobotics.lib.math.UtilityMath;
 import org.chsrobotics.lib.math.filters.DifferentiatingFilter;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
+// TODO finish docs
+
 public abstract class AbstractAbsoluteEncoder extends AbstractEncoder {
     private final DifferentiatingFilter convVelocityFilter = new DifferentiatingFilter(true);
 

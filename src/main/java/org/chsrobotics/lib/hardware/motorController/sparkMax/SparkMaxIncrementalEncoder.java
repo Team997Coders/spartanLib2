@@ -14,52 +14,45 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.hardware.encoder;
+package org.chsrobotics.lib.hardware.motorController.sparkMax;
 
-import edu.wpi.first.wpilibj.Encoder;
+import com.revrobotics.MotorFeedbackSensor;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxRelativeEncoder.Type;
 import org.chsrobotics.lib.hardware.StalenessWatchable;
+import org.chsrobotics.lib.hardware.encoder.AbstractEncoder;
+import org.chsrobotics.lib.hardware.motorController.sparkMax.SpartanSparkMAX.SparkMaxRemoteFeedbackDevice;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
 // TODO docs
-public class SpartanQuadratureEncoder extends AbstractEncoder {
-    public static record QuadratureConfig(
-            int channelA, int channelB, boolean inverted, double countsPerRotation) {
+public class SparkMaxIncrementalEncoder extends AbstractEncoder
+        implements SparkMaxRemoteFeedbackDevice {
+    public static record SparkMaxIncrementalEncoderConfig(
+            Type type, boolean inverted, double countsPerRevolution) {}
 
-        public QuadratureConfig setChannels(int channelA, int channelB) {
-            return new QuadratureConfig(channelA, channelB, inverted, countsPerRotation);
-        }
+    private final SparkMaxIncrementalEncoderConfig config;
 
-        public QuadratureConfig setInverted(boolean inverted) {
-            return new QuadratureConfig(channelA, channelB, inverted, countsPerRotation);
-        }
-
-        public QuadratureConfig setCountsPerRotation(int countsPerRotation) {
-            return new QuadratureConfig(channelA, channelB, inverted, countsPerRotation);
-        }
-    }
-
-    private final QuadratureConfig config;
-    private final Encoder encoder;
+    private final RelativeEncoder encoder;
 
     private int stalenessCount = 0;
     private int stalenessThreshold = StalenessWatchable.defaultStalenessThresholdCycles;
 
-    public SpartanQuadratureEncoder(QuadratureConfig config) {
+    protected SparkMaxIncrementalEncoder(
+            SparkMaxIncrementalEncoderConfig config, RelativeEncoder encoder) {
         this.config = config;
 
-        this.encoder = new Encoder(config.channelA, config.channelB);
+        this.encoder = encoder;
 
         PeriodicCallbackHandler.registerCallback(this::periodic);
     }
 
-    public QuadratureConfig getConfig() {
+    public SparkMaxIncrementalEncoderConfig getConfig() {
         return config;
     }
 
     @Override
     public double getRawPosition() {
-        if (config.inverted) return -encoder.get();
-        else return encoder.get();
+        return encoder.getPosition() * (config.inverted ? -1 : 1);
     }
 
     @Override
@@ -69,14 +62,18 @@ public class SpartanQuadratureEncoder extends AbstractEncoder {
 
     @Override
     public double getRawVelocity() {
-        // FPGA can do differentiation better than us
-        if (config.inverted) return -encoder.getRate();
-        else return encoder.getRate();
+        // native sparkmax differentiation is better than ours
+        return encoder.getVelocity() * (config.inverted ? -1 : 1) / 60;
+        // convert from RPM to RPS, for consistency
     }
 
     @Override
     public double getConvertedVelocity() {
         return unitConversion(getRawVelocity());
+    }
+
+    private double unitConversion(double in) {
+        return in * 2 * Math.PI / config.countsPerRevolution;
     }
 
     @Override
@@ -97,8 +94,8 @@ public class SpartanQuadratureEncoder extends AbstractEncoder {
         else resetStalenessCount();
     }
 
-    // maps "ticks" to radians
-    private double unitConversion(double in) {
-        return in * ((Math.PI * 2) / config.countsPerRotation);
+    @Override
+    public MotorFeedbackSensor getRevSensor() {
+        return encoder;
     }
 }

@@ -27,6 +27,7 @@ import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
+// TODO: docs
 public class SpartanPDP extends AbstractPowerDistribution {
     public static record PDPConfig(int canID) {
         public static PDPConfig getAutoCanID() {

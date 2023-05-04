@@ -14,45 +14,38 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with SpartanLib2. 
 If not, see <https://www.gnu.org/licenses/>.
 */
-package org.chsrobotics.lib.hardware.encoder;
+package org.chsrobotics.lib.hardware.motorController.sparkMax;
 
-import edu.wpi.first.wpilibj.AnalogEncoder;
+import com.revrobotics.MotorFeedbackSensor;
+import com.revrobotics.SparkMaxAbsoluteEncoder;
 import org.chsrobotics.lib.hardware.StalenessWatchable;
+import org.chsrobotics.lib.hardware.encoder.AbstractAbsoluteEncoder;
+import org.chsrobotics.lib.hardware.motorController.sparkMax.SpartanSparkMAX.SparkMaxRemoteFeedbackDevice;
 import org.chsrobotics.lib.math.UtilityMath;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
 // TODO docs
-public class SpartanAnalogAbsoluteEncoder extends AbstractAbsoluteEncoder {
-    public static record AnalogAbsoluteEncoderConfig(int channel, boolean inverted, double offset) {
-        public AnalogAbsoluteEncoderConfig setChannel(int channel) {
-            return new AnalogAbsoluteEncoderConfig(channel, inverted, offset);
-        }
+public class SparkMaxDutyCycleAbsoluteEncoder extends AbstractAbsoluteEncoder
+        implements SparkMaxRemoteFeedbackDevice {
+    public static record SparkMaxDutyCycleAbsoluteEncoderConfig(boolean inverted, double offset) {}
 
-        public AnalogAbsoluteEncoderConfig setInverted(boolean inverted) {
-            return new AnalogAbsoluteEncoderConfig(channel, inverted, offset);
-        }
+    private final SparkMaxAbsoluteEncoder encoder;
 
-        public AnalogAbsoluteEncoderConfig setOffset(double offset) {
-            return new AnalogAbsoluteEncoderConfig(channel, inverted, offset);
-        }
-    }
-
-    private final AnalogAbsoluteEncoderConfig config;
-
-    private final AnalogEncoder encoder;
+    private final SparkMaxDutyCycleAbsoluteEncoderConfig config;
 
     private int stalenessCount = 0;
     private int stalenessThreshold = StalenessWatchable.defaultStalenessThresholdCycles;
 
-    public SpartanAnalogAbsoluteEncoder(AnalogAbsoluteEncoderConfig config) {
-        this.config = config;
+    protected SparkMaxDutyCycleAbsoluteEncoder(
+            SparkMaxAbsoluteEncoder encoder, SparkMaxDutyCycleAbsoluteEncoderConfig config) {
+        this.encoder = encoder;
 
-        this.encoder = new AnalogEncoder(config.channel);
+        this.config = config;
 
         PeriodicCallbackHandler.registerCallback(this::periodic);
     }
 
-    public AnalogAbsoluteEncoderConfig getConfig() {
+    public SparkMaxDutyCycleAbsoluteEncoderConfig getConfig() {
         return config;
     }
 
@@ -68,8 +61,17 @@ public class SpartanAnalogAbsoluteEncoder extends AbstractAbsoluteEncoder {
 
     @Override
     public double getRawPosition() {
-        if (config.inverted) return -encoder.getAbsolutePosition();
-        else return encoder.getAbsolutePosition();
+        return encoder.getPosition() * (config.inverted ? -1 : 1);
+    }
+
+    // we don't override the getUnconvertedVelocity method because sparkmax natively handles
+    // wrap,
+    // which is counter the spec of getUnconvertedVelocity()
+
+    @Override
+    public double getConvertedVelocity() {
+        // sparkmax native differentiation is better than ours
+        return encoder.getVelocity() * (config.inverted ? -1 : 1);
     }
 
     @Override
@@ -88,5 +90,10 @@ public class SpartanAnalogAbsoluteEncoder extends AbstractAbsoluteEncoder {
     private void periodic() {
         if (getRawVelocity() == 0) stalenessCount++;
         else resetStalenessCount();
+    }
+
+    @Override
+    public MotorFeedbackSensor getRevSensor() {
+        return encoder;
     }
 }

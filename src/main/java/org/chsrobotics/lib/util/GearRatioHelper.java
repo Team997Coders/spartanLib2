@@ -100,7 +100,12 @@ public class GearRatioHelper {
         return (outputSide * outputRatio) / inputRatio;
     }
 
-    // TODO make sure I get this math right
+    /**
+     * Returns a new GearRatioHelper combining this and another stage.
+     *
+     * @param other Another GearRatioHelper.
+     * @return The combined result.
+     */
     public GearRatioHelper addStage(GearRatioHelper other) {
         return new GearRatioHelper(inputRatio, outputRatio * other.toDoubleRatioOutputToInput());
     }

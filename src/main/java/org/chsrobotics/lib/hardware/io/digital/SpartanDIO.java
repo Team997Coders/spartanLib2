@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.DigitalOutput;
 import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
+// TODO docs
 public class SpartanDIO implements AbstractDigitalInput, AbstractDigitalOutput {
     public static enum IOMode {
         INPUT,

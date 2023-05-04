@@ -18,6 +18,7 @@ package org.chsrobotics.lib.hardware.io.digital;
 
 import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
 
+// TODO docs
 public interface AbstractDigitalInput extends IntrinsicLoggable {
     public static enum DigitalInputState {
         HIGH,
