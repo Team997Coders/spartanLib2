@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -16,12 +16,15 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math.filters;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A filter composed of multiple filters, such that the output of a filter is the input of another,
  * etc.
  */
 public class ComposedFilter extends Filter {
-    private final Filter[] filters;
+    private final ArrayList<Filter> filters;
 
     private double currentOuput = 0;
 
@@ -32,8 +35,8 @@ public class ComposedFilter extends Filter {
      *     innermost (first) in evaluation, and filters at the end are the outermost (last) in
      *     evaluation.
      */
-    public ComposedFilter(Filter... filters) {
-        this.filters = filters;
+    public ComposedFilter(List<Filter> filters) {
+        this.filters = new ArrayList<>(filters);
     }
 
     @Override
