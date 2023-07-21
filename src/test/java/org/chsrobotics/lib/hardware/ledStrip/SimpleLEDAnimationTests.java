@@ -18,6 +18,7 @@ package org.chsrobotics.lib.hardware.ledStrip;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
 import org.junit.Test;
 
 public class SimpleLEDAnimationTests {
@@ -70,9 +71,10 @@ public class SimpleLEDAnimationTests {
     public void SimpleLEDAnimationInternalIterationWorks() {
         SimpleLEDAnimation anim =
                 new SimpleLEDAnimation(
-                        new LEDAnimationFrame(RGBColor.GREEN),
-                        new LEDAnimationFrame(RGBColor.BLUE),
-                        new LEDAnimationFrame(RGBColor.RED));
+                        List.of(
+                                new LEDAnimationFrame(RGBColor.GREEN),
+                                new LEDAnimationFrame(RGBColor.BLUE),
+                                new LEDAnimationFrame(RGBColor.RED)));
 
         assertEquals(new LEDAnimationFrame(RGBColor.GREEN), anim.getNextFrame());
         assertEquals(new LEDAnimationFrame(RGBColor.BLUE), anim.getNextFrame());
