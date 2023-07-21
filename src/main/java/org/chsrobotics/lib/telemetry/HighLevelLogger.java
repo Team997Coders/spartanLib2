@@ -21,7 +21,6 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -31,14 +30,13 @@ import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
 
 /**
  * Convenience wrapper class for telemetry/ logging with built-in logging for robot-agnostic data
- * like environment metadata, RoboRio status, and scheduled commands.
+ * like environment metadata and scheduled commands.
  *
  * <p>For the internally included loggers of system status to function, the method {@code
- * logPeriodic()} needs to be called once per robot loop cycle.
+ * updateLogs()} needs to be called once per robot loop cycle.
  */
 public class HighLevelLogger implements IntrinsicLoggable {
     private static HighLevelLogger instance = new HighLevelLogger();
@@ -48,21 +46,8 @@ public class HighLevelLogger implements IntrinsicLoggable {
     private final String branchDataFilename = "branch.txt";
 
     private final HashMap<Command, Timer> commandTimeMap = new HashMap<>();
-    private int brownoutCounter = 0;
 
     private Logger<String[]> scheduledCommandsLogger;
-
-    private Logger<Boolean> isBrownedOutLogger;
-
-    private Logger<Double> canUtilizationLogger;
-
-    private Logger<Double> batteryVoltageLogger;
-
-    private Logger<Double> logger3_3vCurrent;
-
-    private Logger<Double> logger5vCurrent;
-
-    private Logger<Integer> brownoutCountLogger;
 
     private boolean loggersConstructed = false;
 
@@ -175,22 +160,7 @@ public class HighLevelLogger implements IntrinsicLoggable {
     public void autoGenerateLogs(
             DataLog log, String name, String subdirName, boolean publishToNT, boolean recordInLog) {
         if (!loggersConstructed) {
-            LoggerFactory<Double> doubleLogFactory =
-                    new LoggerFactory<>(log, "system", publishToNT, recordInLog);
-
             scheduledCommandsLogger = new Logger<>("scheduledCommands", "commandScheduler");
-
-            isBrownedOutLogger = new Logger<>("isBrownedOut", "system");
-
-            canUtilizationLogger = doubleLogFactory.getLogger("canUtilitzation_percent");
-
-            batteryVoltageLogger = doubleLogFactory.getLogger("batteryVoltage_volts");
-
-            logger3_3vCurrent = doubleLogFactory.getLogger("3.3vCurrent_amps");
-
-            logger5vCurrent = doubleLogFactory.getLogger("5vCurrent_amps");
-
-            brownoutCountLogger = new Logger<>("brownoutCount", "system");
 
             loggersConstructed = true;
         }
@@ -199,11 +169,7 @@ public class HighLevelLogger implements IntrinsicLoggable {
     @Override
     /** {@inheritDoc} */
     public void updateLogs() {
-        if (!loggersConstructed) {
-            if (RobotController.getBatteryVoltage() < RobotController.getBrownoutVoltage()) {
-                brownoutCounter++;
-            }
-        } else {
+        if (loggersConstructed) {
             ArrayList<String> commands = new ArrayList<>();
 
             for (Command command : commandTimeMap.keySet()) {
@@ -211,22 +177,6 @@ public class HighLevelLogger implements IntrinsicLoggable {
             }
 
             scheduledCommandsLogger.update(commands.toArray(new String[] {}));
-
-            if (RobotController.getBatteryVoltage() < RobotController.getBrownoutVoltage()) {
-                brownoutCounter++;
-                isBrownedOutLogger.update(true);
-            } else {
-                isBrownedOutLogger.update(false);
-            }
-
-            brownoutCountLogger.update(brownoutCounter);
-
-            canUtilizationLogger.update(RobotController.getCANStatus().percentBusUtilization);
-
-            batteryVoltageLogger.update(RobotController.getBatteryVoltage());
-
-            logger3_3vCurrent.update(RobotController.getCurrent3V3());
-            logger5vCurrent.update(RobotController.getCurrent5V());
         }
     }
 
