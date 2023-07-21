@@ -16,18 +16,13 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.telemetry;
 
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.util.datalog.DataLog;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SendableBuilderImpl;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import java.io.File;
@@ -36,7 +31,6 @@ import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
 
 /**
@@ -71,10 +65,6 @@ public class HighLevelLogger implements IntrinsicLoggable {
     private Logger<Integer> brownoutCountLogger;
 
     private boolean loggersConstructed = false;
-
-    private final NetworkTable sendables = NetworkTableInstance.getDefault().getTable("sendables");
-
-    private final Map<String, Sendable> tablesToData = new HashMap<>();
 
     private HighLevelLogger() {}
 
@@ -178,25 +168,6 @@ public class HighLevelLogger implements IntrinsicLoggable {
     public void logError(String message) {
         logMessage("ERROR " + message);
         DriverStation.reportError(message, false);
-    }
-
-    /**
-     * Publishes a Sendable object to NetworkTables.
-     *
-     * @param key String key to associate with the object.
-     * @param data Sendable object.
-     */
-    public synchronized void publishSendable(String key, Sendable data) {
-        Sendable sddata = tablesToData.get(key);
-        if (sddata == null || sddata != data) {
-            tablesToData.put(key, data);
-            NetworkTable dataTable = sendables.getSubTable(key);
-            SendableBuilderImpl builder = new SendableBuilderImpl();
-            builder.setTable(dataTable);
-            SendableRegistry.publish(data, builder);
-            builder.startListeners();
-            dataTable.getEntry(".name").setString(key);
-        }
     }
 
     @Override
