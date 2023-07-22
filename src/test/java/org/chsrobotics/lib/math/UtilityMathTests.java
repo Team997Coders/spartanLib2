@@ -16,10 +16,10 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import edu.wpi.first.math.VecBuilder;
+import java.util.List;
 import org.junit.Test;
 
 /** Tests for the various small math functions in the UtilityMath class. */
@@ -108,26 +108,15 @@ public class UtilityMathTests {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @Test
     public void UtilityMathScaleToSetWorksProperly() {
-        assertArrayEquals(new double[] {1}, UtilityMath.scaleToSum(new double[] {5}, 1), epsilon);
+        assertEquals(List.of(1.0), UtilityMath.scaleToSum(List.of(5.0), 1));
 
-        assertArrayEquals(
-                new double[] {5, 5, 5, 5, 5},
-                UtilityMath.scaleToSum(new double[] {17, 17, 17, 17, 17}, 25),
-                epsilon);
+        assertEquals(
+                List.of(5.0, 5.0, 5.0, 5.0, 5.0),
+                UtilityMath.scaleToSum(List.of(17.0, 17.0, 17.0, 17.0, 17.0), 25));
 
-        assertArrayEquals(new double[2], UtilityMath.scaleToSum(new double[] {2, 4}, 0), epsilon);
+        assertEquals(List.of(0.2, 0.8, 1.0), UtilityMath.scaleToSum(List.of(4.0, 16.0, 20.0), 2));
 
-        assertArrayEquals(new double[0], UtilityMath.scaleToSum(new double[0], 17), epsilon);
-
-        assertArrayEquals(
-                new double[] {0.2, 0.8, 1},
-                UtilityMath.scaleToSum(new double[] {4, 16, 20}, 2),
-                epsilon);
-
-        assertArrayEquals(
-                new double[] {-0.5, 5},
-                UtilityMath.scaleToSum(new double[] {1, -10}, 4.5),
-                epsilon);
+        assertEquals(List.of(-0.5, 5.0), UtilityMath.scaleToSum(List.of(1.0, -10.0), 4.5));
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -136,36 +125,37 @@ public class UtilityMathTests {
 
     @Test
     public void UtilityMathNormalizeSetReturnsZeroCorrectly() throws Exception {
-        double[] zeroArray = {0.0};
-        double[] actualOutput = UtilityMath.normalizeSet(zeroArray, 1.0);
-        assertArrayEquals(zeroArray, actualOutput, epsilon);
+        List<Double> actualOutput = UtilityMath.normalizeSet(List.of(0.0), 1.0);
+
+        assertEquals(List.of(0.0), actualOutput);
     }
 
     @Test
     public void UtilityMathNormalizeSetAppliesCapProperly() throws Exception {
-        double[] inputArray = {1.0};
-        double[] expectedOutput = {0.5};
-        double[] actualOutput = UtilityMath.normalizeSet(inputArray, 0.5);
+        List<Double> input = List.of(1.0);
+        List<Double> expectedOutput = List.of(0.5);
 
-        assertArrayEquals(expectedOutput, actualOutput, epsilon);
+        List<Double> actualOutput = UtilityMath.normalizeSet(input, 0.5);
+
+        assertEquals(expectedOutput, actualOutput);
     }
 
     @Test
     public void UtilityMathNormalizeSetWorksWithMultipleMembers() throws Exception {
-        double[] inputArray = {0.5, 1.5, 3.0};
-        double[] expectedOuput = {0.25, 0.75, 1.5};
-        double[] actualOutput = UtilityMath.normalizeSet(inputArray, 1.5);
+        List<Double> input = List.of(0.5, 1.5, 3.0);
+        List<Double> expectedOuput = List.of(0.25, 0.75, 1.5);
+        List<Double> actualOutput = UtilityMath.normalizeSet(input, 1.5);
 
-        assertArrayEquals(expectedOuput, actualOutput, epsilon);
+        assertEquals(expectedOuput, actualOutput);
     }
 
     @Test
     public void UtilityMathNormalizeSetWorksWithNegatives() throws Exception {
-        double[] inputArray = {-1.0, -2.0};
-        double[] expectedOuput = {-0.25, -0.5};
-        double[] actualOutput = UtilityMath.normalizeSet(inputArray, 0.5);
+        List<Double> input = List.of(-1.0, -2.0);
+        List<Double> expectedOuput = List.of(-0.25, -0.5);
+        List<Double> actualOutput = UtilityMath.normalizeSet(input, 0.5);
 
-        assertArrayEquals(expectedOuput, actualOutput, epsilon);
+        assertEquals(expectedOuput, actualOutput);
     }
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

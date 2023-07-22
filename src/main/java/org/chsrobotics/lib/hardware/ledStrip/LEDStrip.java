@@ -18,6 +18,7 @@ package org.chsrobotics.lib.hardware.ledStrip;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import java.util.List;
 
 /** Convenience wrapper around an addressable LED strip (WS2812 or 2811). */
 public class LEDStrip {
@@ -27,7 +28,7 @@ public class LEDStrip {
 
     private final int length;
 
-    private LEDAnimation animation = new SimpleLEDAnimation();
+    private LEDAnimation animation = new SimpleLEDAnimation(List.of());
 
     /**
      * Constructs a new LEDStrip.
@@ -59,7 +60,7 @@ public class LEDStrip {
      * @param frame The LEDAnimationFrame to display.
      */
     public void setFrame(LEDAnimationFrame frame) {
-        this.animation = new SimpleLEDAnimation(frame);
+        this.animation = new SimpleLEDAnimation(List.of(frame));
     }
 
     /** Advances to the next step of the animation. */
