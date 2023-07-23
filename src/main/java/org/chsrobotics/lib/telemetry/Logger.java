@@ -323,33 +323,55 @@ public class Logger<T> {
                     logHandle = log.start(logEntryIdentifier, dataType.getValueStr());
                 }
 
-                long timestamp = System.currentTimeMillis();
-
                 switch (dataType) {
                     case kBoolean:
-                        log.appendBoolean(logHandle, (boolean) value, timestamp);
+                        log.appendBoolean(logHandle, (boolean) value, 0);
                         break;
                     case kDouble:
-                        log.appendDouble(logHandle, (double) value, timestamp);
+                        log.appendDouble(logHandle, (double) value, 0);
                         break;
                     case kString:
-                        log.appendString(logHandle, (String) value, timestamp);
+                        log.appendString(logHandle, (String) value, 0);
                         break;
                     case kRaw:
-                        log.appendRaw(logHandle, (byte[]) value, timestamp);
+                        Byte[] valueAsBytes = (Byte[]) value;
+
+                        byte[] primitiveByteArray = new byte[valueAsBytes.length];
+
+                        for (int i = 0; i < valueAsBytes.length; i++)
+                            primitiveByteArray[i] = valueAsBytes[i];
+
+                        log.appendRaw(logHandle, (byte[]) value, 0);
+
                         break;
                     case kBooleanArray:
-                        log.appendBooleanArray(logHandle, (boolean[]) value, timestamp);
+                        Boolean[] valueAsBools = (Boolean[]) value;
+
+                        boolean[] primitiveBoolArray = new boolean[valueAsBools.length];
+
+                        for (int i = 0; i < valueAsBools.length; i++)
+                            primitiveBoolArray[i] = valueAsBools[i];
+
+                        log.appendBooleanArray(logHandle, primitiveBoolArray, 0);
+
                         break;
                     case kDoubleArray:
-                        log.appendDoubleArray(logHandle, (double[]) value, timestamp);
+                        Double[] valueAsDoubles = (Double[]) value;
+
+                        double[] primitiveDoubleArray = new double[valueAsDoubles.length];
+
+                        for (int i = 0; i < valueAsDoubles.length; i++)
+                            primitiveDoubleArray[i] = valueAsDoubles[i];
+
+                        log.appendDoubleArray(logHandle, primitiveDoubleArray, 0);
+
                         break;
                     case kStringArray:
-                        log.appendStringArray(logHandle, (String[]) value, timestamp);
+                        log.appendStringArray(logHandle, (String[]) value, 0);
                         break;
                         // won't have non-double numerical types
                     default:
-                        log.appendString(logHandle, value.toString(), timestamp);
+                        log.appendString(logHandle, value.toString(), 0);
                         break;
                 }
             }
