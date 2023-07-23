@@ -164,11 +164,11 @@ public class CoaxialSwerveModel<N extends Num> {
             SimpleMatrix inputAsVector = new SimpleMatrix(1, numInputVars);
             // loop through each module, changing all inputs to a single vector
             int index = 0;
-            for (int i = 0; i < this.driveInput.getNumCols(); i++) {
-                inputAsVector.set(0, index, this.steerInput.get(0, i));
+            for (int i = 0; i < this.driveInput.getNumRows(); i++) {
+                inputAsVector.set(0, index, this.steerInput.get(i, 0));
                 index++;
 
-                inputAsVector.set(0, index, this.driveInput.get(0, i));
+                inputAsVector.set(0, index, this.driveInput.get(i, 0));
                 index++;
             }
             return inputAsVector;
@@ -180,7 +180,15 @@ public class CoaxialSwerveModel<N extends Num> {
 
             Vector<K> driveInputs = new Vector<>(new SimpleMatrix(1, numModules));
 
-            // TODO implement
+            int index = 0;
+            for (int i = 0; i < numModules; i++) {
+                steerInputs.set(0, i, inputVec.get(0, index));
+                index++;
+
+                driveInputs.set(0, i, inputVec.get(0, index));
+                index++;
+            }
+
             return new CoaxialSwerveInput<>(driveInputs, steerInputs);
         }
 
@@ -216,9 +224,6 @@ public class CoaxialSwerveModel<N extends Num> {
     private final int numStateVars;
 
     private final int numInputVars;
-
-    private final double kDriveFrictionTorque;
-    private final double kSteerFrictionTorque;
 
     private class NumInputs extends Num {
         @Override
@@ -256,16 +261,6 @@ public class CoaxialSwerveModel<N extends Num> {
      * @param driveMotor DCMotor model of the driving motor. Reductions should already be applied.
      * @param steerMotor DCMotor model of the steering motor. Reductions should already be applied.
      * @param driveWheelRadius Radius of the drive wheel, in meters.
-     * @param kDriveFrictionTorque "Fudge factor" frictional torque to apply to the drive action on
-     *     a per-module level, in newton meters.
-     *     <p>Note that this is intentionally not a coefficient of friction, as there is
-     *     robot-mass-independent friction in this system. Users should tune this so this model
-     *     behaves like their actual drivetrain, or just take a good guess.
-     * @param kSteerFrictionTorque "Fudge factor" frictional torque to apply to the steer action on
-     *     a per-module level, in newton meters.
-     *     <p>Note that this is intentionally not a coefficient of friction, as there is
-     *     robot-mass-independent friction in this system. Users should tune this so this model
-     *     behaves like their actual drivetrain, or just take a good guess.
      * @param modulePositions Offsets of module positions relative to the robot frame, in meters.
      */
     public CoaxialSwerveModel(
@@ -276,8 +271,6 @@ public class CoaxialSwerveModel<N extends Num> {
             DCMotor driveMotor,
             DCMotor steerMotor,
             double driveWheelRadius,
-            double kDriveFrictionTorque,
-            double kSteerFrictionTorque,
             CoaxialSwerveModuleOffsets<N> modulePositions) {
         this.robotMass = robotMass;
         this.robotMoment = robotMoment;
@@ -289,9 +282,6 @@ public class CoaxialSwerveModel<N extends Num> {
         this.steerMotor = steerMotor;
 
         this.driveWheelRadius = driveWheelRadius;
-
-        this.kDriveFrictionTorque = kDriveFrictionTorque;
-        this.kSteerFrictionTorque = kSteerFrictionTorque;
 
         this.modulePositions = modulePositions;
 
@@ -360,15 +350,6 @@ public class CoaxialSwerveModel<N extends Num> {
                                     state.steerAngularVelocity.get(0, i),
                                     input.steerInput.get(0, i)));
 
-            // add the "fudge factor" frictional torque to the system
-            // reverse the direction of the angular velocity
-            // this is static friction, so it's clamped to not flip the direction of the torque
-            steerTorque +=
-                    UtilityMath.clamp(
-                            Math.abs(steerTorque),
-                            -Math.signum(
-                                    state.steerAngularVelocity.get(0, i) * kSteerFrictionTorque));
-
             steerAngularAcceleration.set(0, i, steerTorque / wheelSteerMoment);
             // torque / moment = angular accel
 
@@ -378,12 +359,8 @@ public class CoaxialSwerveModel<N extends Num> {
                                     state.driveAngularVelocity.get(0, i),
                                     input.driveInput.get(0, i)));
 
-            // perform the same friction calculation as with steer
-            driveTorque +=
-                    UtilityMath.clamp(
-                            Math.abs(driveTorque),
-                            -Math.signum(
-                                    state.driveAngularVelocity.get(0, i) * kDriveFrictionTorque));
+            driveAngularAcceleration.set(0, i, driveTorque / wheelDriveMoment);
+            // torque / moment = angular accel
 
             double forceAlongWheelVec = driveTorque / driveWheelRadius;
 
@@ -399,25 +376,25 @@ public class CoaxialSwerveModel<N extends Num> {
             // A X B = |A||B|sin(theta) where theta is angle between vectors
             // this definition isn't TECHNICALLY correct but good enough for us
 
+            // we also fudge the above a little bit in not taking the absolute value of the force
+            // vector-- practically, this is the same as adding pi radians to the steer angle to
+            // reflect the actual direction of travel when the velocity is "negative"
+
             Translation2d radiusVector =
                     new Translation2d(
-                            -modulePositions.xOffsets.get(0, i),
-                            -modulePositions.yOffsets.get(0, i));
+                            -modulePositions.xOffsets.get(i, 0),
+                            -modulePositions.yOffsets.get(i, 0));
 
             double angleBetween =
                     new Rotation2d(state.steerAngle.get(0, i))
                             .minus(radiusVector.getAngle())
                             .getRadians();
 
-            torqueSum +=
-                    radiusVector.getNorm() * Math.abs(forceAlongWheelVec) * Math.sin(angleBetween);
-
-            driveAngularAcceleration.set(0, i, driveTorque / wheelDriveMoment);
-            // torque / moment = angular accel
+            torqueSum += forceAlongWheelVec * radiusVector.getNorm() * Math.sin(angleBetween);
         }
 
         // rotate forces to world-relative
-        forceSum = forceSum.rotateBy(new Rotation2d(-state.angle));
+        forceSum = forceSum.rotateBy(new Rotation2d(state.angle));
 
         // set global state derivs to sum of forces/ torques from modules
         double aX = forceSum.getX() / robotMass; // force / mass = accel
