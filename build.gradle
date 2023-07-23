@@ -6,7 +6,7 @@ plugins {
 	id 'signing'
 }
 
-def VERSION = "1.4.0"
+def VERSION = "1.4.1"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
