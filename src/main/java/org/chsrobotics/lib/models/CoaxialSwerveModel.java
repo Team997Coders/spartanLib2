@@ -443,15 +443,6 @@ public class CoaxialSwerveModel<N extends Num> {
                                                                                 + (Math.PI
                                                                                         / 2))))));
 
-        System.out.println(
-                new Translation2d(
-                        -state.angularVelocity
-                                * ((state.vX * Math.sin(state.angle))
-                                        + (state.vY * Math.sin(state.angle + (Math.PI / 2)))),
-                        state.angularVelocity
-                                * ((state.vX * Math.cos(state.angle))
-                                        + (state.vY * Math.cos(state.angle + (Math.PI / 2))))));
-
         return new Matrix<>(
                 new CoaxialSwerveState<>(
                                 state.vX,
