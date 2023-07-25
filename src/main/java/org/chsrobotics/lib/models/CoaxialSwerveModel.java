@@ -386,15 +386,13 @@ public class CoaxialSwerveModel<N extends Num> {
                             -modulePositions.yOffsets.get(i, 0));
 
             double angleBetween =
-                    new Rotation2d(state.steerAngle.get(0, i))
-                            .minus(radiusVector.getAngle())
+                    radiusVector
+                            .getAngle()
+                            .minus(new Rotation2d(state.steerAngle.get(0, i)))
                             .getRadians();
 
             torqueSum += forceAlongWheelVec * radiusVector.getNorm() * Math.sin(angleBetween);
         }
-
-        // rotate forces to world-relative
-        forceSum = forceSum.rotateBy(new Rotation2d(state.angle));
 
         // set global state derivs to sum of forces/ torques from modules
         double aX = forceSum.getX() / robotMass; // force / mass = accel
@@ -402,12 +400,64 @@ public class CoaxialSwerveModel<N extends Num> {
 
         double angularAcceleration = torqueSum / robotMoment; // torque / moment = angular accel
 
+        // when the robot has a constant velocity in its local frame, it does not have a constant
+        // world-frame velocity if its angular velocity is not zero, meaning we have to add a
+        // correction to our accelerations, given as:
+        // [ a_(w,x) ] = [ -ω (v_(r,x) sin(θ) + v_(r,y) sin(θ + π / 2)) ]
+        // [ a_(w,y) ]   [ ω (v_(r,x) cos(θ) + v_(r,y) cos(θ + π / 2)) ]
+        //
+        // Justification:
+        //
+        // For a robot with local velocities (v_(r,x), v_(r,y)), angle to world θ, world velocities
+        // (v_(w,x), v_(w,y)) are:
+        // v_(w,x) = v_(r,x) cos(θ) + v_(r,y) cos(θ + π / 2)
+        // v_(w,y) = v_(r,x) sin(θ) + v_(r,y) sin(θ + π / 2)
+        //
+        // Derivatives of v_(w,x) and v_(w,y) are:
+        // d v_(w,x) / dθ = -v_(r,x) sin(θ) - v_(r,y) sin(θ + π / 2)
+        // d v_(w,y) / dθ = v_(r,x) cos(θ) + v_(r,y) cos(θ + π / 2)
+        //
+        // If ω = dθ / dt and x is some function:
+        // dx / dθ = dx/(dθ dt / dt) = dx / ω dt
+        //
+        // -v_(r,x) sin(θ) - v_(r,y) sin(θ + π / 2) = d v_(w,y) / ω dt
+        // ω ( -v_(r,x) sin(θ) - v_(r,y) sin(θ + π / 2) ) = d v_(w,y) / dt = a_(w,y)
+        // same for a_(w,x)
+
+        Translation2d rotatedAccelerationVector =
+                new Translation2d(aX, aY)
+                        .rotateBy(new Rotation2d(-state.angle))
+                        .plus(
+                                new Translation2d(
+                                        -state.angularVelocity
+                                                * ((state.vX * Math.sin(state.angle))
+                                                        + (state.vY
+                                                                * Math.sin(
+                                                                        state.angle
+                                                                                + (Math.PI / 2)))),
+                                        state.angularVelocity
+                                                * ((state.vX * Math.cos(state.angle))
+                                                        + (state.vY
+                                                                * Math.cos(
+                                                                        state.angle
+                                                                                + (Math.PI
+                                                                                        / 2))))));
+
+        System.out.println(
+                new Translation2d(
+                        -state.angularVelocity
+                                * ((state.vX * Math.sin(state.angle))
+                                        + (state.vY * Math.sin(state.angle + (Math.PI / 2)))),
+                        state.angularVelocity
+                                * ((state.vX * Math.cos(state.angle))
+                                        + (state.vY * Math.cos(state.angle + (Math.PI / 2))))));
+
         return new Matrix<>(
                 new CoaxialSwerveState<>(
                                 state.vX,
                                 state.vY,
-                                aX,
-                                aY,
+                                rotatedAccelerationVector.getX(),
+                                rotatedAccelerationVector.getY(),
                                 state.angularVelocity,
                                 angularAcceleration,
                                 state.steerAngularVelocity,
