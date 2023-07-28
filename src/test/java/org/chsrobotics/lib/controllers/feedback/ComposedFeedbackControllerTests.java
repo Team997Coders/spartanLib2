@@ -24,10 +24,10 @@ import org.chsrobotics.lib.math.filters.NullFilter;
 import org.junit.Test;
 
 public class ComposedFeedbackControllerTests {
-    private final double epsilon = 0.0001;
+    private static final double epsilon = 0.0001;
 
     @Test
-    public void PControllerWorks() {
+    public void pControllerWorks() {
         ComposedFeedbackController controller =
                 new ComposedFeedbackController(Map.of(new NullFilter(), 1.0));
 
@@ -39,7 +39,7 @@ public class ComposedFeedbackControllerTests {
     }
 
     @Test
-    public void MultipleFilterControllerWorks() {
+    public void multipleFilterControllerWorks() {
         ComposedFeedbackController controller =
                 new ComposedFeedbackController(
                         Map.of(new NullFilter(), 1.0, new DifferentiatingFilter(), 1.0));

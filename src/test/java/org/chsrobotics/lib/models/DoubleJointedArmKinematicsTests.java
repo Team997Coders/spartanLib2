@@ -23,7 +23,7 @@ import org.junit.Test;
 
 public class DoubleJointedArmKinematicsTests {
     @Test
-    public void DoubleJointedInverseKinematicsRejectsImpossible() {
+    public void doubleJointedInverseKinematicsRejectsImpossible() {
         DoubleJointedArmKinematics kinematics = new DoubleJointedArmKinematics(1, 1);
 
         assertEquals(null, kinematics.inverseKinematics(3, 0).firstValue());
@@ -36,7 +36,7 @@ public class DoubleJointedArmKinematicsTests {
     }
 
     @Test
-    public void DoubleJointedInverseKinematicsWorks() {
+    public void doubleJointedInverseKinematicsWorks() {
         DoubleJointedArmKinematics kinematics = new DoubleJointedArmKinematics(2, 1);
 
         assertEquals(
@@ -60,7 +60,7 @@ public class DoubleJointedArmKinematicsTests {
     }
 
     @Test
-    public void DoubleJointedForwardKinematicsWorks() {
+    public void doubleJointedForwardKinematicsWorks() {
         DoubleJointedArmKinematics kinematics = new DoubleJointedArmKinematics(1, 1);
 
         assertEquals(

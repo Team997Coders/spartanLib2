@@ -31,18 +31,18 @@ public class UtilityMathTests {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @Test
-    public void UtilityMathNormalizeAngleRadiansReturnsZeroCorrectly() {
+    public void utilityMathNormalizeAngleRadiansReturnsZeroCorrectly() {
         assertEquals(0, UtilityMath.normalizeAngleRadians(0), epsilon);
     }
 
     @Test
-    public void UtilityMathNormalizeAngleRadiansReturnsPositiveCoterminalsCorrectly() {
+    public void utilityMathNormalizeAngleRadiansReturnsPositiveCoterminalsCorrectly() {
         assertEquals(0, UtilityMath.normalizeAngleRadians(2 * Math.PI), epsilon);
         assertEquals(0.5 * Math.PI, UtilityMath.normalizeAngleRadians(2.5 * Math.PI), epsilon);
     }
 
     @Test
-    public void UtilityMathNormalizeAngleRadiansReturnsNegativeCoterminalsCorrectly() {
+    public void utilityMathNormalizeAngleRadiansReturnsNegativeCoterminalsCorrectly() {
         assertEquals(0, UtilityMath.normalizeAngleRadians(-2 * Math.PI), epsilon);
         assertEquals(0.5 * Math.PI, UtilityMath.normalizeAngleRadians(-1.5 * Math.PI), epsilon);
     }
@@ -52,18 +52,18 @@ public class UtilityMathTests {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @Test
-    public void UtilityMathNormalizeAngleDegreesReturnsZeroCorrectly() {
+    public void utilityMathNormalizeAngleDegreesReturnsZeroCorrectly() {
         assertEquals(0, UtilityMath.normalizeAngleDegrees(0), epsilon);
     }
 
     @Test
-    public void UtilityMathNormalizeAngleDegreesReturnsPositiveCoterminalsCorrectly() {
+    public void utilityMathNormalizeAngleDegreesReturnsPositiveCoterminalsCorrectly() {
         assertEquals(0, UtilityMath.normalizeAngleDegrees(360), epsilon);
         assertEquals(90, UtilityMath.normalizeAngleDegrees(450), epsilon);
     }
 
     @Test
-    public void UtilityMathNormalizeAngleDegreesReturnsNegativeCoterminalsCorrectly() {
+    public void utilityMathNormalizeAngleDegreesReturnsNegativeCoterminalsCorrectly() {
         assertEquals(0, UtilityMath.normalizeAngleDegrees(-360), epsilon);
         assertEquals(90, UtilityMath.normalizeAngleDegrees(-270), epsilon);
     }
@@ -72,7 +72,7 @@ public class UtilityMathTests {
     // smallestAngleRadiansBetween
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @Test
-    public void UtilityMathSmallestAngleRadiansBetweenWorksProperly() {
+    public void utilityMathSmallestAngleRadiansBetweenWorksProperly() {
         assertEquals(0, UtilityMath.smallestAngleRadiansBetween(2 * Math.PI, 0), epsilon);
         assertEquals(
                 -0.5 * Math.PI,
@@ -94,7 +94,7 @@ public class UtilityMathTests {
     // smallestAngleDegreesBetween
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @Test
-    public void UtilityMathSmallestAngleDegreesBetweenWorksProperly() {
+    public void utilityMathSmallestAngleDegreesBetweenWorksProperly() {
         assertEquals(0, UtilityMath.smallestAngleDegreesBetween(360, 0), epsilon);
         assertEquals(-90, UtilityMath.smallestAngleDegreesBetween(270, 180), epsilon);
         assertEquals(45, UtilityMath.smallestAngleDegreesBetween(315, 360), epsilon);
@@ -107,7 +107,7 @@ public class UtilityMathTests {
     // scaleToSum
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @Test
-    public void UtilityMathScaleToSetWorksProperly() {
+    public void utilityMathScaleToSetWorksProperly() {
         assertEquals(List.of(1.0), UtilityMath.scaleToSum(List.of(5.0), 1));
 
         assertEquals(
@@ -124,14 +124,14 @@ public class UtilityMathTests {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     @Test
-    public void UtilityMathNormalizeSetReturnsZeroCorrectly() throws Exception {
+    public void utilityMathNormalizeSetReturnsZeroCorrectly() throws Exception {
         List<Double> actualOutput = UtilityMath.normalizeSet(List.of(0.0), 1.0);
 
         assertEquals(List.of(0.0), actualOutput);
     }
 
     @Test
-    public void UtilityMathNormalizeSetAppliesCapProperly() throws Exception {
+    public void utilityMathNormalizeSetAppliesCapProperly() throws Exception {
         List<Double> input = List.of(1.0);
         List<Double> expectedOutput = List.of(0.5);
 
@@ -141,7 +141,7 @@ public class UtilityMathTests {
     }
 
     @Test
-    public void UtilityMathNormalizeSetWorksWithMultipleMembers() throws Exception {
+    public void utilityMathNormalizeSetWorksWithMultipleMembers() throws Exception {
         List<Double> input = List.of(0.5, 1.5, 3.0);
         List<Double> expectedOuput = List.of(0.25, 0.75, 1.5);
         List<Double> actualOutput = UtilityMath.normalizeSet(input, 1.5);
@@ -150,7 +150,7 @@ public class UtilityMathTests {
     }
 
     @Test
-    public void UtilityMathNormalizeSetWorksWithNegatives() throws Exception {
+    public void utilityMathNormalizeSetWorksWithNegatives() throws Exception {
         List<Double> input = List.of(-1.0, -2.0);
         List<Double> expectedOuput = List.of(-0.25, -0.5);
         List<Double> actualOutput = UtilityMath.normalizeSet(input, 0.5);
@@ -162,7 +162,7 @@ public class UtilityMathTests {
     // rotation matrices
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     @Test
-    public void UtilityMath2DRotationMatrixWorks() {
+    public void utilityMath2DRotationMatrixWorks() {
         var inp = VecBuilder.fill(2, 1);
 
         var mat = UtilityMath.get2DRotationMatrix(0);

@@ -23,38 +23,38 @@ import org.junit.Test;
 
 /** Tests for the MotionProfile. */
 public class MotionProfileTests {
-    private final double epsilon = 0.0001;
+    private static final double epsilon = 0.0001;
 
     @Test
-    public void MotionProfileStateEqualityWorks() {
+    public void motionProfileStateEqualityWorks() {
         State state1 = new State(5, -2);
         State state2 = new State(5.0001, -1.9999);
         assertEquals(true, (state1.equals(state2)));
     }
 
     @Test
-    public void MotionProfileHandlesProfileWithNoPhases() {
+    public void motionProfileHandlesProfileWithNoPhases() {
         MotionProfile profile = new MotionProfile(new State(0, 0));
 
         assertEquals(new State(0, 0), profile.sample(5));
     }
 
     @Test
-    public void MotionProfileHandlesSampleTimeLessThanZero() {
+    public void motionProfileHandlesSampleTimeLessThanZero() {
         MotionProfile profile = new MotionProfile(new ProfilePhase(1, 1, 1));
 
         assertEquals(new State(0, 0), profile.sample(-10));
     }
 
     @Test
-    public void MotionProfileHandlesSampleTimeGreaterThanRuntime() {
+    public void motionProfileHandlesSampleTimeGreaterThanRuntime() {
         MotionProfile profile = new MotionProfile(new ProfilePhase(10, 10, 2));
 
         assertEquals(new State(40, 0), profile.sample(5));
     }
 
     @Test
-    public void MotionProfileProperlyAggregatesPhases() {
+    public void motionProfileProperlyAggregatesPhases() {
         ProfilePhase phase1 = new ProfilePhase(0, 5, 2);
         ProfilePhase phase2 = new ProfilePhase(-1, 5, 2);
         ProfilePhase phase3 = new ProfilePhase(0, 0, 3);
@@ -65,7 +65,7 @@ public class MotionProfileTests {
     }
 
     @Test
-    public void MotionProfileHandlesSamplingInMidpointOfPhase() {
+    public void motionProfileHandlesSamplingInMidpointOfPhase() {
         MotionProfile profile = new MotionProfile(new ProfilePhase(1, 0, 5));
 
         assertEquals(new State(8, 4), profile.sample(4));

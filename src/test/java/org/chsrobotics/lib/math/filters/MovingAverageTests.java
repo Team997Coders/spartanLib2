@@ -22,10 +22,10 @@ import org.chsrobotics.lib.math.filters.MovingAverageFilter.MEAN_IMPLEMENTATION;
 import org.junit.Test;
 
 public class MovingAverageTests {
-    private final double epsilon = 0.0001;
+    private static final double epsilon = 0.0001;
 
     @Test
-    public void MovingAverageFilterWorksInfiniteWindow() {
+    public void movingAverageFilterWorksInfiniteWindow() {
         MovingAverageFilter filter = new MovingAverageFilter(0, MEAN_IMPLEMENTATION.ARITHMETIC);
 
         assertEquals(1, filter.calculate(1), epsilon);
@@ -35,7 +35,7 @@ public class MovingAverageTests {
     }
 
     @Test
-    public void MovingAverageFilterWorksFiniteWindow() {
+    public void movingAverageFilterWorksFiniteWindow() {
         MovingAverageFilter filter = new MovingAverageFilter(3, MEAN_IMPLEMENTATION.ARITHMETIC);
 
         assertEquals(3, filter.calculate(3), epsilon);

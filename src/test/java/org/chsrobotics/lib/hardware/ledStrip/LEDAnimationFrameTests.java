@@ -22,7 +22,7 @@ import org.junit.Test;
 
 public class LEDAnimationFrameTests {
     @Test
-    public void LEDAnimationFrameToNewSizeWorks() {
+    public void ledAnimationFrameToNewSizeWorks() {
         LEDAnimationFrame frame =
                 new LEDAnimationFrame(RGBColor.WHITE, RGBColor.RED, RGBColor.GREEN);
 
@@ -39,7 +39,7 @@ public class LEDAnimationFrameTests {
     }
 
     @Test
-    public void LEDAnimationFrameOffsetWorks() {
+    public void ledAnimationFrameOffsetWorks() {
         LEDAnimationFrame frame =
                 new LEDAnimationFrame(RGBColor.BLACK, RGBColor.BLUE, RGBColor.WHITE);
 
@@ -66,7 +66,7 @@ public class LEDAnimationFrameTests {
     }
 
     @Test
-    public void LEDAnimationFrameAlternatingWorks() {
+    public void ledAnimationFrameAlternatingWorks() {
         LEDAnimationFrame frame =
                 LEDAnimationFrame.alternating(1, 1, RGBColor.WHITE, RGBColor.BLUE);
 

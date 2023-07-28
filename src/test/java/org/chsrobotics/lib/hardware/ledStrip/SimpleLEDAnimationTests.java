@@ -23,7 +23,7 @@ import org.junit.Test;
 
 public class SimpleLEDAnimationTests {
     @Test
-    public void SimpleLEDAnimationGradientCascadeWorks() {
+    public void simpleLEDAnimationGradientCascadeWorks() {
         SimpleLEDAnimation gCascade =
                 SimpleLEDAnimation.gradientCascade(5, RGBColor.BLACK, RGBColor.WHITE);
 
@@ -43,7 +43,7 @@ public class SimpleLEDAnimationTests {
     }
 
     @Test
-    public void SimpleLEDAnimationCascadeWorks() {
+    public void simpleLEDAnimationCascadeWorks() {
         SimpleLEDAnimation cascade =
                 SimpleLEDAnimation.cascading(
                         new LEDAnimationFrame(RGBColor.WHITE, RGBColor.BLUE, RGBColor.BLACK));
@@ -54,7 +54,7 @@ public class SimpleLEDAnimationTests {
     }
 
     @Test
-    public void SimpleLEDAnimationFlashingWorks() {
+    public void simpleLEDAnimationFlashingWorks() {
         LEDAnimationFrame a = new LEDAnimationFrame(RGBColor.BLUE, RGBColor.WHITE);
         LEDAnimationFrame b = new LEDAnimationFrame(RGBColor.RED, RGBColor.GREEN);
 
@@ -68,7 +68,7 @@ public class SimpleLEDAnimationTests {
     }
 
     @Test
-    public void SimpleLEDAnimationInternalIterationWorks() {
+    public void simpleLEDAnimationInternalIterationWorks() {
         SimpleLEDAnimation anim =
                 new SimpleLEDAnimation(
                         List.of(
