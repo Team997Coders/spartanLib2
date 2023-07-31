@@ -16,17 +16,17 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.telemetry;
 
-import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.networktables.GenericPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.util.datalog.BooleanArrayLogEntry;
-import edu.wpi.first.util.datalog.BooleanLogEntry;
+import edu.wpi.first.networktables.NetworkTableType;
+import edu.wpi.first.networktables.Topic;
 import edu.wpi.first.util.datalog.DataLog;
-import edu.wpi.first.util.datalog.DoubleArrayLogEntry;
-import edu.wpi.first.util.datalog.DoubleLogEntry;
-import edu.wpi.first.util.datalog.StringArrayLogEntry;
-import edu.wpi.first.util.datalog.StringLogEntry;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * Utility to streamline publishing data to NetworkTables and saving it to an on-robot log file.
@@ -35,6 +35,11 @@ import java.util.List;
  *
  * <p>If the data isn't numerical (Double, Int, Long, etc), Boolean, String, or an Array of one of
  * those types, this will instead publish and log the result of its {@code .toString()} method.
+ *
+ * <p>This can generally be used in two ways: construction with a lambda of the logged value, or
+ * passing the new value with every call of {@code update()}.
+ *
+ * <p>Values are only flushed to NetworkTables and built-in logs when {@code update()} is called.
  *
  * @param <T> The data type of the log entry.
  */
@@ -57,7 +62,7 @@ public class Logger<T> {
          * <p>All Loggers constructed with this factory will share these settings.
          *
          * @param log The DataLog to log values inside of, most likely from {@code
-         *     HighLevelLogger.getLog()} or whatever log is being used program-wide.
+         *     HighLevelLogger.getInstance().getLog()} or whatever log is being used program-wide.
          * @param subdirName The string name of the existing or new NetworkTables sub-table to write
          *     to.
          * @param publishToNT Whether this should push logged values to NetworkTables.
@@ -84,12 +89,22 @@ public class Logger<T> {
         /**
          * Constructs and returns a new logger with the parameters given above.
          *
-         * @param key A string identifier to associate with and describe the data on the dashboard.
-         *     In the log, the string identifier will be "{@code [subdirName]_[key]}".
+         * @param key A string identifier for the logged field.
          * @return A new Logger.
          */
         public Logger<U> getLogger(String key) {
             return new Logger<>(log, key, subdirName, publishToNT, recordInLog);
+        }
+
+        /**
+         * Constructs and returns a new logger with the parameters given above.
+         *
+         * @param key A string identifier for the logged field.
+         * @param lambda
+         * @return
+         */
+        public Logger<U> getLogger(String key, Supplier<U> lambda) {
+            return new Logger<>(lambda, log, key, key, publishToNT, recordInLog);
         }
     }
 
@@ -99,178 +114,290 @@ public class Logger<T> {
 
     private final String logEntryIdentifier;
 
-    private BooleanLogEntry boolLogEntry;
-    private DoubleLogEntry doubleLogEntry;
-    private StringLogEntry stringLogEntry;
+    private final Topic ntTopic;
 
-    private BooleanArrayLogEntry boolArrayLogEntry;
-    private DoubleArrayLogEntry doubleArrayLogEntry;
-    private StringArrayLogEntry stringArrayLogEntry;
+    private GenericPublisher publisher = null;
 
-    private final NetworkTableEntry ntEntry;
+    private int logHandle = 0; // not a valid handle
 
-    private boolean logEntryExists = false;
+    private Object prevVal = null;
 
-    private T previousValue = null;
+    private Supplier<T> lambda;
 
     /**
      * Constructs a Logger using a provided DataLog, with the option of whether to publish to NT and
      * the log.
      *
+     * @param lambda Lambda (of logged type) to use as initial data source.
      * @param log The DataLog to log values inside of, most likely from {@code
-     *     HighLevelLogger.getLog()} or whatever log is being used program-wide.
-     * @param key A string identifier to associate with and describe the data on the dashboard. In
-     *     the log, the string identifier will be "{@code [subdirName]_[key]}".
+     *     HighLevelLogger.getInstance.getLog()} or whatever log is being used program-wide.
+     * @param key A string identifier for the logged field.
      * @param subdirName The string name of the existing or new NetworkTables sub-table to write to.
      * @param publishToNT Whether this should push logged values to NetworkTables.
      * @param recordInLog Whether this should store logged values in an on-robot log file.
      */
     public Logger(
-            DataLog log, String key, String subdirName, boolean publishToNT, boolean recordInLog) {
+            Supplier<T> lambda,
+            DataLog log,
+            String key,
+            String subdirName,
+            boolean publishToNT,
+            boolean recordInLog) {
         this.log = log;
         this.publishToNT = publishToNT;
         this.recordInLog = recordInLog;
 
         logEntryIdentifier = subdirName + "_" + key;
 
-        ntEntry = NetworkTableInstance.getDefault().getTable(subdirName).getEntry(key);
+        ntTopic = NetworkTableInstance.getDefault().getTable(subdirName).getTopic(key);
+
+        this.lambda = lambda;
+    }
+
+    /**
+     * Constructs a Logger using a provided DataLog, with the option of whether to publish to NT and
+     * the log.
+     *
+     * @param log The DataLog to log values inside of, most likely from {@code
+     *     HighLevelLogger.getInstance.getLog()} or whatever log is being used program-wide.
+     * @param key A string identifier for the logged field.
+     * @param subdirName The string name of the existing or new NetworkTables sub-table to write to.
+     * @param publishToNT Whether this should push logged values to NetworkTables.
+     * @param recordInLog Whether this should store logged values in an on-robot log file.
+     */
+    public Logger(
+            DataLog log, String key, String subdirName, boolean publishToNT, boolean recordInLog) {
+        this(() -> null, log, key, subdirName, publishToNT, recordInLog);
     }
 
     /**
      * Constructs a Logger using {@code HighLevelLogger.getLog()}, publishing to NT and logging.
      *
-     * @param key A string identifier to associate with and describe the data on the dashboard. In
-     *     the log, the string identifier will be "{@code [subdirName]_[key]}".
+     * @param lambda Lambda (of logged type) to use as initial data source.
+     * @param key A string identifier for the logged field.
+     * @param subdirName The string name of the existing or new NetworkTables sub-table to write to.
+     */
+    public Logger(Supplier<T> lambda, String key, String subdirName) {
+        this(HighLevelLogger.getInstance().getLog(), key, subdirName, true, true);
+    }
+
+    /**
+     * Constructs a Logger using {@code HighLevelLogger.getLog()}, publishing to NT and logging.
+     *
+     * @param key A string identifier for the logged field.
      * @param subdirName The string name of the existing or new NetworkTables sub-table to write to.
      */
     public Logger(String key, String subdirName) {
-        this(HighLevelLogger.getInstance().getLog(), key, subdirName, true, true);
+        this(() -> null, key, subdirName);
     }
 
     /**
      * Returns whether this is publishing values to NetworkTables.
      *
-     * @return True if new values sent to {@code update()} will be pushed to the dashboard.
+     * @return True new values are pushed to NetworkTables.
      */
     public boolean isPublishingToNT() {
         return publishToNT;
     }
 
-    /** New values sent to {@code update()} will be pushed to NetworkTables. */
-    public void startPublishingToDashboard() {
+    /** Values will be pushed to NetworkTables. */
+    public void startPublishingToNT() {
         publishToNT = true;
     }
 
-    /** New values sent to {@code update()} will not be pushed to NetworkTables. */
-    public void stopPublishingToDashboard() {
+    /** Values will not be pushed to NetworkTables. */
+    public void stopPublishingToNT() {
         publishToNT = false;
     }
 
     /**
      * Returns whether this is recording values to the on-robot log.
      *
-     * @return True if new values sent to {@code update()} will be recorded to the log.
+     * @return True if values are being recorded to the on board data log.
      */
     public boolean isRecordingToLog() {
         return recordInLog;
     }
 
-    /** New values sent to {@code update()} will be recorded to the log. */
+    /** Values will be recorded to the on board data log. */
     public void startRecordingToLog() {
         recordInLog = true;
     }
 
-    /** New values sent to {@code update()} will not be recorded to the log. */
+    /** Values will not be recorded to the on board data log. */
     public void stopRecordingToLog() {
         recordInLog = false;
     }
 
     /**
-     * Feeds a new value to the Logger, which may be sent to NetworkTables, an on-robot log, both,
-     * or neither, depending on how this class is configured.
+     * Updates data sinks with the current internal value.
      *
-     * @param value An instance of T (whatever this class was parameterized with).
+     * <p>If this was not constructed with a lambda and other {@code update()} methods have not been
+     * invoked, is a non-op.
      */
-    public void update(T value) {
-        // this looks *terrible* but it's just the same code repeated over and over for various
-        // types
-        if (value == null) { // don't care, just catch it
-        } else if (value instanceof Number) {
+    public void update() {
+        Object value = lambda.get();
 
-            if (!logEntryExists) {
-                doubleLogEntry = new DoubleLogEntry(log, logEntryIdentifier);
-                logEntryExists = true;
-            }
-            if (recordInLog && !value.equals(previousValue))
-                doubleLogEntry.append(((Number) value).doubleValue());
-            if (publishToNT && !value.equals(previousValue))
-                ntEntry.setDouble(((Number) value).doubleValue());
+        if (!Objects.equals(value, prevVal)) {
+            NetworkTableType dataType =
+                    NetworkTableType.getFromString(NetworkTableType.getStringFromObject(value));
 
-        } else if (value instanceof Number[]) {
+            if (value != null) {
+                // special-case logging to match AdvantageScope expected formats
+                if (value instanceof Pose2d) {
+                    Pose2d castValue = (Pose2d) value;
 
-            List<Number> list = Arrays.asList((Number[]) value);
+                    value =
+                            new Double[] {
+                                castValue.getX(),
+                                castValue.getY(),
+                                castValue.getRotation().getRadians()
+                            };
 
-            double[] castArray = list.stream().mapToDouble(Number::doubleValue).toArray();
+                    dataType = NetworkTableType.kDoubleArray;
+                }
 
-            if (!logEntryExists) {
-                doubleArrayLogEntry = new DoubleArrayLogEntry(log, logEntryIdentifier);
-                logEntryExists = true;
-            }
-            if (recordInLog && !value.equals(previousValue)) doubleArrayLogEntry.append(castArray);
-            if (publishToNT && !value.equals(previousValue)) ntEntry.setDoubleArray(castArray);
+                if (value instanceof Pose3d) {
+                    Pose3d castValue = (Pose3d) value;
 
-        } else if (value instanceof Boolean) {
+                    value =
+                            new Double[] {
+                                castValue.getX(),
+                                castValue.getY(),
+                                castValue.getZ(),
+                                castValue.getRotation().getAngle(), // w
+                                castValue.getRotation().getX(),
+                                castValue.getRotation().getY(),
+                                castValue.getRotation().getZ()
+                            };
 
-            if (!logEntryExists) {
-                boolLogEntry = new BooleanLogEntry(log, logEntryIdentifier);
-                logEntryExists = true;
-            }
-            if (recordInLog && !value.equals(previousValue)) boolLogEntry.append((boolean) value);
-            if (publishToNT && !value.equals(previousValue)) ntEntry.setBoolean((boolean) value);
+                    dataType = NetworkTableType.kDoubleArray;
+                }
 
-        } else if (value instanceof Boolean[]) {
+                if (value instanceof Rotation2d) {
+                    Rotation2d castValue = (Rotation2d) value;
 
-            if (!logEntryExists) {
-                boolArrayLogEntry = new BooleanArrayLogEntry(log, logEntryIdentifier);
-                logEntryExists = true;
-            }
-            if (recordInLog && !value.equals(previousValue))
-                boolArrayLogEntry.append((boolean[]) value);
-            if (publishToNT && !value.equals(previousValue))
-                ntEntry.setBooleanArray((boolean[]) value);
+                    value = castValue.getRadians();
 
-        } else if (value instanceof String) {
+                    dataType = NetworkTableType.kDouble;
+                }
 
-            if (!logEntryExists) {
-                stringLogEntry = new StringLogEntry(log, logEntryIdentifier);
-                logEntryExists = true;
-            }
-            if (recordInLog && !value.equals(previousValue)) stringLogEntry.append((String) value);
-            if (publishToNT && !value.equals(previousValue)) ntEntry.setString((String) value);
+                if (value instanceof Rotation3d) {
+                    Rotation3d castValue = (Rotation3d) value;
 
-        } else if (value instanceof String[]) {
+                    value =
+                            new Double[] {
+                                castValue.getAngle(), // w
+                                castValue.getX(),
+                                castValue.getY(),
+                                castValue.getZ()
+                            };
 
-            if (!logEntryExists) {
-                stringArrayLogEntry = new StringArrayLogEntry(log, logEntryIdentifier);
-                logEntryExists = true;
-            }
-            if (recordInLog && !value.equals(previousValue))
-                stringArrayLogEntry.append((String[]) value);
-            if (publishToNT && !value.equals(previousValue))
-                ntEntry.setStringArray((String[]) value);
+                    dataType = NetworkTableType.kDoubleArray;
+                }
 
-        } else {
+                if (dataType == NetworkTableType.kUnassigned) {
+                    value = value.toString();
+                }
 
-            if (!logEntryExists) {
-                stringLogEntry = new StringLogEntry(log, logEntryIdentifier);
-                logEntryExists = true;
-            }
-            if (recordInLog && !value.equals(previousValue))
-                stringLogEntry.append(value.toString());
-            if (publishToNT && !value.equals(previousValue)) {
-                ntEntry.setString(value.toString());
+                // don't want to accidentially lock ourselves out of
+                // floating-point numbers if first logged value is integer,
+                // so just cast all numerical types to double
+                if (dataType == NetworkTableType.kFloat || dataType == NetworkTableType.kInteger) {
+                    value = (double) value;
+                    dataType = NetworkTableType.kDouble;
+                }
+                if (dataType == NetworkTableType.kFloatArray
+                        || dataType == NetworkTableType.kIntegerArray) {
+                    value = (double[]) value;
+                    dataType = NetworkTableType.kDoubleArray;
+                }
+
+                if (publisher == null) {
+                    publisher = ntTopic.genericPublish(NetworkTableType.getStringFromObject(value));
+                }
+
+                publisher.setValue(value);
+
+                if (logHandle == 0) {
+                    logHandle = log.start(logEntryIdentifier, dataType.getValueStr());
+                }
+
+                switch (dataType) {
+                    case kBoolean:
+                        log.appendBoolean(logHandle, (boolean) value, 0);
+                        break;
+                    case kDouble:
+                        log.appendDouble(logHandle, (double) value, 0);
+                        break;
+                    case kString:
+                        log.appendString(logHandle, (String) value, 0);
+                        break;
+                    case kRaw:
+                        Byte[] valueAsBytes = (Byte[]) value;
+
+                        byte[] primitiveByteArray = new byte[valueAsBytes.length];
+
+                        for (int i = 0; i < valueAsBytes.length; i++)
+                            primitiveByteArray[i] = valueAsBytes[i];
+
+                        log.appendRaw(logHandle, (byte[]) value, 0);
+
+                        break;
+                    case kBooleanArray:
+                        Boolean[] valueAsBools = (Boolean[]) value;
+
+                        boolean[] primitiveBoolArray = new boolean[valueAsBools.length];
+
+                        for (int i = 0; i < valueAsBools.length; i++)
+                            primitiveBoolArray[i] = valueAsBools[i];
+
+                        log.appendBooleanArray(logHandle, primitiveBoolArray, 0);
+
+                        break;
+                    case kDoubleArray:
+                        Double[] valueAsDoubles = (Double[]) value;
+
+                        double[] primitiveDoubleArray = new double[valueAsDoubles.length];
+
+                        for (int i = 0; i < valueAsDoubles.length; i++)
+                            primitiveDoubleArray[i] = valueAsDoubles[i];
+
+                        log.appendDoubleArray(logHandle, primitiveDoubleArray, 0);
+
+                        break;
+                    case kStringArray:
+                        log.appendStringArray(logHandle, (String[]) value, 0);
+                        break;
+                        // won't have non-double numerical types
+                    default:
+                        log.appendString(logHandle, value.toString(), 0);
+                        break;
+                }
             }
         }
-        previousValue = value;
+        prevVal = value;
+    }
+
+    /**
+     * Updates data sinks with the given value.
+     *
+     * @param value Instance of type T to store internally and send to data sinks.
+     */
+    public void update(T value) {
+        lambda = () -> value;
+
+        update();
+    }
+
+    /**
+     * Updates data sinks with the given value.
+     *
+     * @param lambda Lambda of type T to store internally and send to data sinks.
+     */
+    public void update(Supplier<T> lambda) {
+        this.lambda = lambda;
+
+        update();
     }
 }

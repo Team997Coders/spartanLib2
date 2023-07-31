@@ -6,6 +6,8 @@ plugins {
 	id 'signing'
 }
 
+def VERSION = "1.4.1"
+
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
@@ -90,17 +92,8 @@ tasks.register('sourceJar', Jar) {
 	from sourceSets.main.allJava
 }
 
-tasks.register('prePublish') {
-	doLast {
-		if (!(project.hasProperty('ossrhUsername') && project.hasProperty('ossrhPassword'))) {
-			throw new GradleException("gradle.properties must be configured with a valid ossrhUsername and ossrhPassword to publish to Sonatype!")
-		}
-	}
-}
-
 publishToMavenLocal.dependsOn build
 publish.dependsOn build
-publish.dependsOn prePublish
 
 repositories {
 	mavenLocal()
@@ -120,7 +113,7 @@ publishing {
 		maven(MavenPublication) {
 			groupId 'org.chsrobotics.lib'
 			artifactId 'spartanLib2'
-			version '1.4.0'
+			version VERSION
 
 			from components.java
 

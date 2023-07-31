@@ -20,7 +20,8 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.numbers.N2;
-import org.chsrobotics.lib.math.geometry.Vector3D;
+import java.util.ArrayList;
+import java.util.List;
 import org.chsrobotics.lib.util.Tuple2;
 
 /** Various useful small math functions. */
@@ -87,34 +88,18 @@ public class UtilityMath {
     }
 
     /**
-     * Finds a midpoint between two other points in up to three-dimensional space.
-     *
-     * @param startpoint A vector with endpoint representing the starting point.
-     * @param endpoint A vector with endpoint representing the ending point.
-     * @param reference The place, in [0,1] (inclusive), to sample to find the midpoint.
-     * @return A new vector with endpoint representing the interpolated midpoint.
-     */
-    public static Vector3D linearInterpolation(
-            Vector3D startpoint, Vector3D endpoint, double reference) {
-        return new Vector3D(
-                startpoint.getX() + ((endpoint.getX() - startpoint.getX()) * reference),
-                startpoint.getY() + ((endpoint.getY() - startpoint.getY()) * reference),
-                startpoint.getZ() + ((endpoint.getZ() - startpoint.getZ()) * reference));
-    }
-
-    /**
      * Scales a set of doubles symmetrically such that they sum to a desired number, while
      * maintaining the same ratio.
      *
-     * @param inputs An array of doubles. If empty, this will return an empty array. If this sums to
-     *     zero, this will return this.
+     * @param inputs A list of doubles. If empty, this will return an empty list. If this sums to
+     *     zero, this will be returned.
      * @param desiredSum The desired sum, positive or negative, of the outputs. If equal to zero,
-     *     this will return an array of zeros of length equal to the input's length.
-     * @return An array of doubles with the same ratios between each other as the inputs.
+     *     this will return a list of zeros of length equal to the input's length.
+     * @return A list of doubles with the same ratios between each other as the inputs.
      */
-    public static double[] scaleToSum(double[] inputs, double desiredSum) {
-        if (inputs.length == 0) return inputs;
-        if (desiredSum == 0) return new double[inputs.length];
+    public static List<Double> scaleToSum(List<Double> inputs, double desiredSum) {
+        if (inputs.size() == 0) return List.of();
+        if (desiredSum == 0) return new ArrayList<>(inputs.size());
 
         double sum = 0;
         for (double value : inputs) {
@@ -123,12 +108,12 @@ public class UtilityMath {
 
         if (sum == 0) return inputs;
 
-        double[] outputs = new double[inputs.length];
+        ArrayList<Double> outputs = new ArrayList<>();
 
         double scalingFactor = desiredSum / sum;
 
-        for (int i = 0; i < inputs.length; i++) {
-            outputs[i] = inputs[i] * (scalingFactor);
+        for (int i = 0; i < inputs.size(); i++) {
+            outputs.add(inputs.get(i) * scalingFactor);
         }
 
         return outputs;
@@ -138,27 +123,26 @@ public class UtilityMath {
      * Scales a set of doubles symmetrically to ensure that none of them exceed a maximum absolute
      * value, while still maintaining the same ratio.
      *
-     * @param inputs An array of the input values. If empty, this will return an empty array.
+     * @param inputs A list of the input values. If empty, this will return an empty array.
      * @param maxAbsoluteValue The maximum absolute value allowed for an output.
-     * @return An array of the scaled values, in the same order as they were input.
+     * @return A list of the scaled values, in the same order as they were input.
      */
-    public static double[] normalizeSet(double[] inputs, double maxAbsoluteValue) {
-        if (inputs.length == 0) return inputs;
+    public static List<Double> normalizeSet(List<Double> inputs, double maxAbsoluteValue) {
+        if (inputs.size() == 0) return inputs;
         int highestIndex = 0; // find the largest absolute value element in the list
-        for (int i = 0; i < inputs.length; i++) {
-            if (Math.abs(inputs[highestIndex]) < Math.abs(inputs[i])) {
+        for (int i = 0; i < inputs.size(); i++) {
+            if (Math.abs(inputs.get(highestIndex)) < Math.abs(inputs.get(i))) {
                 highestIndex = i;
             }
         }
-        if (Math.abs(inputs[highestIndex]) <= maxAbsoluteValue) {
+        if (Math.abs(inputs.get(highestIndex)) <= maxAbsoluteValue) {
             return inputs; // if it's <= the max absolute value, just return the inputs
         } else {
-            double[] outputs = new double[inputs.length];
-            double scalingFactor = maxAbsoluteValue / Math.abs(inputs[highestIndex]);
-            for (int i = 0;
-                    i < inputs.length;
-                    i++) { // get the scaling factor and apply it to each element
-                outputs[i] = inputs[i] * scalingFactor;
+            ArrayList<Double> outputs = new ArrayList<>();
+            double scalingFactor = maxAbsoluteValue / Math.abs(inputs.get(highestIndex));
+            for (int i = 0; i < inputs.size(); i++) {
+                // get the scaling factor and apply it to each element
+                outputs.add(inputs.get(i) * scalingFactor);
             }
             return outputs;
         }
@@ -446,8 +430,8 @@ public class UtilityMath {
      *     0}.
      * @return The arithmetic mean.
      */
-    public static double arithmeticMean(double[] values) {
-        if (values.length == 0) return 0;
+    public static double arithmeticMean(List<Double> values) {
+        if (values.size() == 0) return 0;
 
         double sum = 0;
 
@@ -455,7 +439,7 @@ public class UtilityMath {
             sum += entry;
         }
 
-        return (sum / values.length);
+        return (sum / values.size());
     }
 
     /**
@@ -465,8 +449,8 @@ public class UtilityMath {
      *     0}.
      * @return The geometric mean.
      */
-    public static double geometricMean(double[] values) {
-        if (values.length == 0) return 0;
+    public static double geometricMean(List<Double> values) {
+        if (values.size() == 0) return 0;
 
         double product = 1;
 
@@ -474,7 +458,7 @@ public class UtilityMath {
             product = product * entry;
         }
 
-        return Math.pow(product, 1 / values.length);
+        return Math.pow(product, 1 / values.size());
     }
 
     /**
@@ -486,12 +470,12 @@ public class UtilityMath {
      * @param values The numbers to find the harmonic mean of. If empty, this will return {@code 0}.
      * @return The geometric mean.
      */
-    public static double harmonicMean(double[] values) {
-        double[] reciprocals = new double[values.length];
+    public static double harmonicMean(List<Double> values) {
+        ArrayList<Double> reciprocals = new ArrayList<>();
 
-        for (int i = 0; i < values.length; i++) {
-            if (values[i] == 0) reciprocals[i] = 0;
-            else reciprocals[i] = (1 / values[i]);
+        for (int i = 0; i < values.size(); i++) {
+            if (values.get(i) == 0) reciprocals.add(0.0);
+            else reciprocals.add(1 / values.get(i));
         }
 
         double aMean = arithmeticMean(reciprocals);

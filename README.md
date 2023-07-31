@@ -18,13 +18,11 @@ Reusable robot code for FIRST Robotics Competition Team 997.
 </div>
 
 ## Contents:
-Currently, the library contains 9 sub-packages:
+Currently, the library contains 7 sub-packages:
 
 - `commands`: Command framework abstractions
 - `controllers`: Feedback controllers
-- `drive`: Differential drive modes
 - `hardware`: Wrappers and abstractions for common FRC hardware
-- `input`: Joystick wrappers
 - `math`: Filters, utility operations
 - `models`: System models and kinematics
 - `telemetry`: Logging
