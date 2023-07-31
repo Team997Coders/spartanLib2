@@ -19,6 +19,9 @@ package org.chsrobotics.lib.hardware.ledStrip;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
+import org.chsrobotics.lib.hardware.base.ledStrip.LEDAnimationFrame;
+import org.chsrobotics.lib.hardware.base.ledStrip.RGBColor;
+import org.chsrobotics.lib.hardware.base.ledStrip.SimpleLEDAnimation;
 import org.junit.Test;
 
 public class SimpleLEDAnimationTests {
