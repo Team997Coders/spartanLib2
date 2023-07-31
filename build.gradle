@@ -10,29 +10,15 @@ sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
 
-sourceSets {
-	revLibSupport {
-		java {
-			srcDir("src/revLibSupport/java")
-		}
-	}
-
-	kauaiLabsSupport {
-		java {
-			srcDir("src/kauaiLabsSupport/java")
-		}
-	}
-}
-
 java {
 	withJavadocJar()
 
 	registerFeature('revLibSupport') {
-		usingSourceSet(sourceSets.revLibSupport)
+		usingSourceSet(sourceSets.main)
 	}
 
 	registerFeature('kauaiLabsSupport') {
-		usingSourceSet(sourceSets.kauaiLabsSupport)
+		usingSourceSet(sourceSets.main)
 	}
 }
 

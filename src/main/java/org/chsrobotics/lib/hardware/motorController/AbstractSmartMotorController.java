@@ -35,6 +35,11 @@ public abstract class AbstractSmartMotorController extends AbstractMotorControll
     public static enum IdleMode {
         COAST,
         BRAKE;
+
+        public com.revrobotics.CANSparkMax.IdleMode asRev() {
+            if (this == IdleMode.BRAKE) return com.revrobotics.CANSparkMax.IdleMode.kBrake;
+            else return com.revrobotics.CANSparkMax.IdleMode.kCoast;
+        }
     }
 
     private boolean logsConstructed = false;
