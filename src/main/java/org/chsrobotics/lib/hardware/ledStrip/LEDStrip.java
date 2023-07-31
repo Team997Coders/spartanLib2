@@ -70,7 +70,7 @@ public class LEDStrip {
         for (int i = 0; i < frame.numberOfPixels(); i++) {
             if (i < length) {
                 RGBColor pixel = frame.getPixel(i);
-                buffer.setRGB(i, pixel.r, pixel.g, pixel.b);
+                buffer.setRGB(i, pixel.r(), pixel.g(), pixel.b());
             }
         }
     }

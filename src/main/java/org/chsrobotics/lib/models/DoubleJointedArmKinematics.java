@@ -26,86 +26,25 @@ import org.chsrobotics.lib.util.Tuple2;
  */
 public class DoubleJointedArmKinematics {
 
-    /** Data class holding information about the state of a double revolute-jointed arm. */
-    public static class RRConfiguration {
-        /**
-         * Angle of the local joint (the joint connected to the root), in radians, from
-         * (counterclockwise) the horizontal (or the positive x-axis in non-vertically oriented
-         * setups).
-         */
-        public final double localAngle;
-
-        /**
-         * Angle of the distal joint (the joint between arm segments), in radians, from
-         * (counterclockwise) parallel with joint A.
-         */
-        public final double distalAngle;
-
-        /**
-         * Angle of the end effector, in radians, from (counterclockwise) the horizontal (or the
-         * positive x-axis in non-vertically oriented setups).
-         */
-        public final double endEffectorAngle;
-
-        /** The x-position of the end effector in Cartesian space. */
-        public final double endEffectorX;
-
-        /** The y-position of the end effector in Cartesian space. */
-        public final double endEffectorY;
-
-        /**
-         * Constructs an RRConfiguration.
-         *
-         * @param localAngle Angle of the local joint (the joint connected to the root), in radians,
-         *     from (counterclockwise) the horizontal (or the positive x-axis in non-vertically
-         *     oriented setups).
-         * @param distalAngle Angle of the distal joint (the joint between arm segments), in
-         *     radians, from (counterclockwise) parallel with the local joint.
-         * @param endEffectorAngle Angle of the end effector, in radians, from (counterclockwise)
-         *     the horizontal (or the positive x-axis in non-vertically oriented setups).
-         * @param endEffectorX The x-position of the end effector in Cartesian space.
-         * @param endEffectorY The y-position of the end effector in Cartesian space.
-         */
-        public RRConfiguration(
-                double localAngle,
-                double distalAngle,
-                double endEffectorAngle,
-                double endEffectorX,
-                double endEffectorY) {
-            this.localAngle = localAngle;
-            this.distalAngle = distalAngle;
-            this.endEffectorAngle = endEffectorAngle;
-            this.endEffectorX = endEffectorX;
-            this.endEffectorY = endEffectorY;
-        }
-
-        @Override
-        public String toString() {
-            return ("Double Jointed Arm Configuration: localAngle: "
-                    + localAngle
-                    + ", distalAngle: "
-                    + distalAngle
-                    + ", endEffectorAngle: "
-                    + endEffectorAngle
-                    + ", endEffectorX: "
-                    + endEffectorX
-                    + ", endEffectorY: "
-                    + endEffectorY);
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (other instanceof RRConfiguration) {
-                RRConfiguration rhs = (RRConfiguration) other;
-
-                return (rhs.localAngle == this.localAngle
-                        && rhs.distalAngle == this.distalAngle
-                        && rhs.endEffectorAngle == this.endEffectorAngle
-                        && rhs.endEffectorX == this.endEffectorX
-                        && rhs.endEffectorY == this.endEffectorY);
-            } else return false;
-        }
-    }
+    /**
+     * Data class holding information about the state of a double revolute-jointed arm.
+     *
+     * @param localAngle Angle of the local joint (the joint connected to the root), in radians,
+     *     from (counterclockwise) the horizontal (or the positive x-axis in non-vertically oriented
+     *     setups).
+     * @param distalAngle Angle of the distal joint (the joint between arm segments), in radians,
+     *     from (counterclockwise) parallel with the local joint.
+     * @param endEffectorAngle Angle of the end effector, in radians, from (counterclockwise) the
+     *     horizontal (or the positive x-axis in non-vertically oriented setups).
+     * @param endEffectorX The x-position of the end effector in Cartesian space.
+     * @param endEffectorY The y-position of the end effector in Cartesian space.
+     */
+    public static record RRConfiguration(
+            double localAngle,
+            double distalAngle,
+            double endEffectorAngle,
+            double endEffectorX,
+            double endEffectorY) {}
 
     /** Length of the local segment (the segment closest to the root). */
     public final double localLength;

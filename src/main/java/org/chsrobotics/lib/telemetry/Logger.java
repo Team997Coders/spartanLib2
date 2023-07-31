@@ -100,8 +100,8 @@ public class Logger<T> {
          * Constructs and returns a new logger with the parameters given above.
          *
          * @param key A string identifier for the logged field.
-         * @param lambda
-         * @return
+         * @param lambda Lambda (of logged type) to use as initial data source.
+         * @return A new Logger.
          */
         public Logger<U> getLogger(String key, Supplier<U> lambda) {
             return new Logger<>(lambda, log, key, key, publishToNT, recordInLog);

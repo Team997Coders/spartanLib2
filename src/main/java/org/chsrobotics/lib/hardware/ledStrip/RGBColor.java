@@ -16,36 +16,14 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.ledStrip;
 
-/** Represents a color in Red-Green-Blue space, with methods for manipulating said color. */
-public class RGBColor {
-    public final int r;
-    public final int g;
-    public final int b;
-
-    /**
-     * Constructs an RGBColor.
-     *
-     * @param r Red value of the color, in the interval [0,255] (inclusive). If too big or small,
-     *     changed to the closest valid value.
-     * @param g Green value of the color, in the interval [0,255] (inclusive). If too big or small,
-     *     changed to the closest valid value.
-     * @param b Blue value of the color, in the interval [0,255] (inclusive). If too big or small,
-     *     changed to the closest value value.
-     */
-    public RGBColor(int r, int g, int b) {
-        if (r > 255) this.r = 255;
-        else if (r < 0) this.r = 0;
-        else this.r = r;
-
-        if (g > 255) this.g = 255;
-        else if (g < 0) this.g = 0;
-        else this.g = g;
-
-        if (b > 255) this.b = 255;
-        else if (b < 0) this.b = 0;
-        else this.b = b;
-    }
-
+/**
+ * Represents a color in Red-Green-Blue space, with methods for manipulating said color.
+ *
+ * @param r Red channel value, as a byte [0,255].
+ * @param g Green channel value, as a byte [0,255].
+ * @param b Blue channel value, as a byte [0,255].
+ */
+public record RGBColor(int r, int g, int b) {
     /**
      * Interpolates a new color somewhere between this color and another.
      *
@@ -80,30 +58,30 @@ public class RGBColor {
                 (int) (this.b * proportion));
     }
 
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof RGBColor) {
-            RGBColor rhs = (RGBColor) other;
-            return (this.r == rhs.r && this.g == rhs.g && this.b == rhs.b);
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public String toString() {
-        return "RGBColor (" + r + "," + g + "," + b + ")";
-    }
-
+    /** Default red RGBColor (255,0,0). */
     public static final RGBColor RED = new RGBColor(255, 0, 0);
+
+    /** Default green RGBColor (0,255,0). */
     public static final RGBColor GREEN = new RGBColor(0, 255, 0);
+
+    /** Default blue RGBColor (0,0,255). */
     public static final RGBColor BLUE = new RGBColor(0, 0, 255);
 
+    /** Default orange RGBColor (204,136,0). */
     public static final RGBColor ORANGE = new RGBColor(204, 136, 0);
+
+    /** Default yellow RGBColor (255,255,0). */
     public static final RGBColor YELLOW = new RGBColor(255, 255, 0);
+
+    /** Default indigo RGBColor (111,0,255). */
     public static final RGBColor INDIGO = new RGBColor(111, 0, 255);
+
+    /** Default violet RGBColor (217,25,255). */
     public static final RGBColor VIOLET = new RGBColor(217, 25, 255);
 
+    /** Default white RGBColor (255,255,255). */
     public static final RGBColor WHITE = new RGBColor(255, 255, 255);
+
+    /** Default black RGBColor (0,0,0). */
     public static final RGBColor BLACK = new RGBColor(0, 0, 0);
 }

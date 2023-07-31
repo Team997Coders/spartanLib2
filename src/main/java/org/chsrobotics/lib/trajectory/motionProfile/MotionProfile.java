@@ -40,7 +40,10 @@ public class MotionProfile {
 
     /** Holds the velocity and position states of a MotionProfile at a time in its span. */
     public static class State {
+        /** Position of the profile at this state. */
         public final double position;
+
+        /** Velocity of the profile at this state. */
         public final double velocity;
 
         /**
@@ -152,6 +155,11 @@ public class MotionProfile {
         return new State(position, 0);
     }
 
+    /**
+     * Returns the total time needed for the trajectory to finish.
+     *
+     * @return Total trajectory time.
+     */
     public double totalTime() {
         double time = 0;
 

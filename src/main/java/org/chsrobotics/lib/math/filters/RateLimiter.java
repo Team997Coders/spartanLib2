@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -36,12 +36,6 @@ public class RateLimiter extends Filter {
      */
     public RateLimiter(double rateLimit) {
         this.rateLimit = rateLimit;
-    }
-
-    @Override
-    /** {@inheritDoc} */
-    public double calculate(double value) {
-        return calculate(value, 0.02);
     }
 
     @Override

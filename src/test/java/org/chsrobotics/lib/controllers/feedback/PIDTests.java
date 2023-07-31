@@ -45,9 +45,9 @@ public class PIDTests {
         assertEquals(0, controller.getIntegralAccumulation(), 0);
 
         controller.setkI(2.5);
-        assertEquals(0.5, controller.calculate(0), epsilon);
-        assertEquals(0.75, controller.calculate(5), epsilon);
-        assertEquals(0.5, controller.calculate(15), epsilon);
+        assertEquals(0.5, controller.calculate(0, 0.02), epsilon);
+        assertEquals(0.75, controller.calculate(5, 0.02), epsilon);
+        assertEquals(0.5, controller.calculate(15, 0.02), epsilon);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class PIDTests {
 
         controller.resetPreviousMeasurement();
         controller.setkD(2);
-        assertEquals(-100, controller.calculate(1), epsilon);
+        assertEquals(-100, controller.calculate(1, 0.02), epsilon);
         assertEquals(0, controller.calculate(1), epsilon);
     }
 

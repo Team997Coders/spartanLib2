@@ -42,8 +42,9 @@ public class HighLevelLogger implements IntrinsicLoggable {
     private static HighLevelLogger instance = new HighLevelLogger();
 
     private boolean hasStarted = false;
-    private final String commitDataFilename = "commit.txt";
-    private final String branchDataFilename = "branch.txt";
+    private static final String commitDataFilename =
+            "commit.txt"; // not running in place so this is needed
+    private static final String branchDataFilename = "branch.txt";
 
     private final HashMap<Command, Timer> commandTimeMap = new HashMap<>();
 
@@ -53,6 +54,11 @@ public class HighLevelLogger implements IntrinsicLoggable {
 
     private HighLevelLogger() {}
 
+    /**
+     * Returns the singleton instance of the HighLevelLogger.
+     *
+     * @return The HighLevelLogger.
+     */
     public static HighLevelLogger getInstance() {
         return instance;
     }
