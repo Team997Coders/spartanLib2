@@ -270,7 +270,10 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
     @Override
     public void setIdleMode(IdleMode idleMode) {
         if (idleMode != this.idleMode) {
-            sparkMax.setIdleMode(idleMode.asRev());
+            sparkMax.setIdleMode(
+                    (idleMode == IdleMode.BRAKE)
+                            ? com.revrobotics.CANSparkMax.IdleMode.kBrake
+                            : com.revrobotics.CANSparkMax.IdleMode.kCoast);
             this.idleMode = idleMode;
         }
     }
@@ -366,7 +369,10 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
 
         sparkMax.setSecondaryCurrentLimit(config.currentLimitAmps * hardCurrentLimitModifier);
 
-        sparkMax.setIdleMode(idleMode.asRev());
+        sparkMax.setIdleMode(
+                (idleMode == IdleMode.BRAKE)
+                        ? com.revrobotics.CANSparkMax.IdleMode.kBrake
+                        : com.revrobotics.CANSparkMax.IdleMode.kCoast);
 
         sparkMax.setPeriodicFramePeriod(faultsFrame, inUsePeriodMS);
 
