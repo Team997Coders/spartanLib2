@@ -82,7 +82,7 @@ public record LEDAnimationFrame(List<RGBColor> pixelColors) {
     public LEDAnimationFrame offset(int step) {
         int modStep = step % numberOfPixels();
 
-        ArrayList<RGBColor> output = new ArrayList<>();
+        ArrayList<RGBColor> output = new ArrayList<>(pixelColors);
 
         for (int i = 0; i < numberOfPixels(); i++) {
             int newIndex = i + modStep;
@@ -90,7 +90,7 @@ public record LEDAnimationFrame(List<RGBColor> pixelColors) {
             if (newIndex >= numberOfPixels()) newIndex = newIndex - numberOfPixels();
             else if (newIndex < 0) newIndex = newIndex + numberOfPixels();
 
-            output.add(newIndex, pixelColors.get(i));
+            output.set(newIndex, pixelColors.get(i));
         }
 
         return new LEDAnimationFrame(output);

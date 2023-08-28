@@ -50,12 +50,12 @@ public class DoubleJointedArmKinematicsTests {
 
         assertEquals(
                 Math.PI - Math.acos(0.25),
-                kinematics.inverseKinematics(2, 0).firstValue().localAngle(),
+                kinematics.inverseKinematics(2, 0).firstValue().distalAngle(),
                 UtilityMath.defaultAbsoluteEpsilon);
 
         assertEquals(
                 Math.acos(0.25) - Math.PI,
-                kinematics.inverseKinematics(2, 0).secondValue().localAngle(),
+                kinematics.inverseKinematics(2, 0).secondValue().distalAngle(),
                 UtilityMath.defaultAbsoluteEpsilon);
     }
 
