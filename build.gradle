@@ -29,7 +29,6 @@ sourceSets {
 
 java {
 	withJavadocJar()
-	withSourcesJar()
 
 	registerFeature('vendorHardwareSupport') {
 		usingSourceSet(sourceSets.vendorHardwareSupport)
