@@ -18,14 +18,23 @@ package org.chsrobotics.lib.hardware.ledStrip;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Wraps around an array of RGBColors (or individual pixel color values), intended for combination
  * into full animations.
- *
- * @param pixelColors Individual pixel colors to form the frame.
  */
-public record LEDAnimationFrame(List<RGBColor> pixelColors) {
+public class LEDAnimationFrame {
+    private final List<RGBColor> pixelColors;
+
+    /**
+     * Constructs an LEDAnimationFrame.
+     *
+     * @param pixelColors Individual pixel colors to form the frame.
+     */
+    public LEDAnimationFrame(List<RGBColor> pixelColors) {
+        this.pixelColors = List.copyOf(pixelColors);
+    }
 
     /** Constructor for an empty LEDAnimationFrame. */
     public LEDAnimationFrame() {
@@ -156,5 +165,10 @@ public record LEDAnimationFrame(List<RGBColor> pixelColors) {
             } else return false;
 
         } else return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(pixelColors);
     }
 }

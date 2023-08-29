@@ -35,7 +35,7 @@ public class PolynomialInterval {
      *     should not be part of the allowable values if there are negative exponents).
      */
     public PolynomialInterval(Map<Integer, Double> terms) {
-        this.terms = terms;
+        this.terms = Map.copyOf(terms);
     }
 
     /**

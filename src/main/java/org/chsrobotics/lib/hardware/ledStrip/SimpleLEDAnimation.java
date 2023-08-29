@@ -18,6 +18,7 @@ package org.chsrobotics.lib.hardware.ledStrip;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /** Wraps around an array of LEDAnimationFrames, intended for playing back in sequence. */
 public class SimpleLEDAnimation implements LEDAnimation {
@@ -185,5 +186,10 @@ public class SimpleLEDAnimation implements LEDAnimation {
             } else return false;
 
         } else return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(frames);
     }
 }

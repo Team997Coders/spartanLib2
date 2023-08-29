@@ -461,7 +461,7 @@ public class UtilityMath {
             product = product * entry;
         }
 
-        return Math.pow(product, 1 / values.size());
+        return Math.pow(product, 1.0 / values.size());
     }
 
     /**

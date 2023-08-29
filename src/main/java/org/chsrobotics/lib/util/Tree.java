@@ -35,8 +35,11 @@ public class Tree<T> {
      * @param <U> Data type held by this node.
      */
     public static class ParentChildNode<U> {
-        private final ParentChildNode<U> parent;
-        private final boolean isRoot;
+        /** The parent of this node. If this node does not have a parent, is {@code null}. */
+        public final ParentChildNode<U> parent;
+
+        /** Whether this node is root of the tree structure. */
+        public final boolean isRoot;
 
         private U data;
 
@@ -98,25 +101,7 @@ public class Tree<T> {
          * @return A list containing all children of this node.
          */
         public List<ParentChildNode<U>> getChildren() {
-            return children;
-        }
-
-        /**
-         * Returns the parent of this node.
-         *
-         * @return The parent of this node. If this node is the root, will return {@code null}.
-         */
-        public ParentChildNode<U> getParent() {
-            return parent;
-        }
-
-        /**
-         * Returns whether this node is the root of a tree.
-         *
-         * @return Whether this node is the root.
-         */
-        public boolean isRoot() {
-            return isRoot;
+            return List.copyOf(children);
         }
     }
 
