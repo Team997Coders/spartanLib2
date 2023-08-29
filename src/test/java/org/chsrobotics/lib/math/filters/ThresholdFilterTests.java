@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -23,7 +23,7 @@ import org.junit.Test;
 /** Tests for the ThresholdFilter. */
 public class ThresholdFilterTests {
     @Test
-    public void ThresholdFilterWorksForwards() {
+    public void thresholdFilterWorksForwards() {
         ThresholdFilter filterA = new ThresholdFilter(0, false);
         assertEquals(-1, filterA.calculate(-1), 0);
         assertEquals(0, filterA.calculate(1), 0);
@@ -36,7 +36,7 @@ public class ThresholdFilterTests {
     }
 
     @Test
-    public void ThresholdFilterWorksBackwards() {
+    public void thresholdFilterWorksBackwards() {
         ThresholdFilter filterA = new ThresholdFilter(0, true);
         assertEquals(0, filterA.calculate(-1), 0);
         assertEquals(1, filterA.calculate(1), 0);

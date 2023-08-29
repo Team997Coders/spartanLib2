@@ -18,45 +18,50 @@ package org.chsrobotics.lib.hardware.ledStrip;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.List;
 import org.junit.Test;
 
 public class LEDAnimationFrameTests {
     @Test
-    public void LEDAnimationFrameToNewSizeWorks() {
+    public void ledAnimationFrameToNewSizeWorks() {
         LEDAnimationFrame frame =
-                new LEDAnimationFrame(RGBColor.WHITE, RGBColor.RED, RGBColor.GREEN);
+                new LEDAnimationFrame(List.of(RGBColor.WHITE, RGBColor.RED, RGBColor.GREEN));
 
-        assertEquals(new LEDAnimationFrame(RGBColor.WHITE), frame.toNewSize(1));
-        assertEquals(new LEDAnimationFrame(RGBColor.WHITE, RGBColor.RED), frame.toNewSize(2));
+        assertEquals(new LEDAnimationFrame(List.of(RGBColor.WHITE)), frame.toNewSize(1));
+        assertEquals(
+                new LEDAnimationFrame(List.of(RGBColor.WHITE, RGBColor.RED)), frame.toNewSize(2));
         assertEquals(frame, frame.toNewSize(3));
 
-        assertEquals(frame.add(new LEDAnimationFrame(RGBColor.WHITE)), frame.toNewSize(4));
+        assertEquals(frame.add(new LEDAnimationFrame(List.of(RGBColor.WHITE))), frame.toNewSize(4));
 
         assertEquals(
                 frame.add(
-                        frame.add(frame.add(new LEDAnimationFrame(RGBColor.WHITE, RGBColor.RED)))),
+                        frame.add(
+                                frame.add(
+                                        new LEDAnimationFrame(
+                                                List.of(RGBColor.WHITE, RGBColor.RED))))),
                 frame.toNewSize(11));
     }
 
     @Test
-    public void LEDAnimationFrameOffsetWorks() {
+    public void ledAnimationFrameOffsetWorks() {
         LEDAnimationFrame frame =
-                new LEDAnimationFrame(RGBColor.BLACK, RGBColor.BLUE, RGBColor.WHITE);
+                new LEDAnimationFrame(List.of(RGBColor.BLACK, RGBColor.BLUE, RGBColor.WHITE));
 
         assertEquals(
-                new LEDAnimationFrame(RGBColor.WHITE, RGBColor.BLACK, RGBColor.BLUE),
+                new LEDAnimationFrame(List.of(RGBColor.WHITE, RGBColor.BLACK, RGBColor.BLUE)),
                 frame.offset(1));
 
         assertEquals(
-                new LEDAnimationFrame(RGBColor.BLUE, RGBColor.WHITE, RGBColor.BLACK),
+                new LEDAnimationFrame(List.of(RGBColor.BLUE, RGBColor.WHITE, RGBColor.BLACK)),
                 frame.offset(-1));
 
         assertEquals(
-                new LEDAnimationFrame(RGBColor.BLUE, RGBColor.WHITE, RGBColor.BLACK),
+                new LEDAnimationFrame(List.of(RGBColor.BLUE, RGBColor.WHITE, RGBColor.BLACK)),
                 frame.offset(2));
 
         assertEquals(
-                new LEDAnimationFrame(RGBColor.WHITE, RGBColor.BLACK, RGBColor.BLUE),
+                new LEDAnimationFrame(List.of(RGBColor.WHITE, RGBColor.BLACK, RGBColor.BLUE)),
                 frame.offset(-2));
 
         assertEquals(frame.offset(1), frame.offset(4));
@@ -66,18 +71,18 @@ public class LEDAnimationFrameTests {
     }
 
     @Test
-    public void LEDAnimationFrameAlternatingWorks() {
+    public void ledAnimationFrameAlternatingWorks() {
         LEDAnimationFrame frame =
                 LEDAnimationFrame.alternating(1, 1, RGBColor.WHITE, RGBColor.BLUE);
 
-        assertEquals(new LEDAnimationFrame(RGBColor.WHITE, RGBColor.BLUE), frame);
+        assertEquals(new LEDAnimationFrame(List.of(RGBColor.WHITE, RGBColor.BLUE)), frame);
 
         frame = LEDAnimationFrame.alternating(5, 1, RGBColor.BLUE, RGBColor.WHITE);
 
         assertEquals(
-                new LEDAnimationFrame(RGBColor.BLUE)
+                new LEDAnimationFrame(List.of(RGBColor.BLUE))
                         .toNewSize(5)
-                        .add(new LEDAnimationFrame(RGBColor.WHITE)),
+                        .add(new LEDAnimationFrame(List.of(RGBColor.WHITE))),
                 frame);
     }
 }

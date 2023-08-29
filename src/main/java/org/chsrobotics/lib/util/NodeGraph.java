@@ -27,6 +27,8 @@ import java.util.List;
  * @param <T> Data type that can be held by the nodes.
  */
 public class NodeGraph<T> {
+
+    /** Class forming a part of the node graph structure. Can hold a single value of type T. */
     public class Node {
         private final int id;
 
@@ -37,6 +39,11 @@ public class NodeGraph<T> {
             this.id = id;
         }
 
+        /**
+         * Returns the data stored by this node.
+         *
+         * @return An instance of T.
+         */
         public T getData() {
             return data;
         }
@@ -55,7 +62,7 @@ public class NodeGraph<T> {
      * Creates a new Node as part of this NodeGraph with the given data.
      *
      * @param data The data to initialize the node with.
-     * @return
+     * @return A new Node.
      */
     public Node createNode(T data) {
         Node ret = new Node(data, idIndex);

@@ -19,10 +19,13 @@ jobs:
         run: chmod +x gradlew
       
       - name: Compile
-        run: ./gradlew build -x test -x spotlessApply -x spotlessCheck
+        run: ./gradlew build -x test -x spotlessApply -x spotlessCheck -x spotbugsMain -x spotbugsTest
 
       - name: Test
         run: ./gradlew test -x spotlessApply -x spotlessCheck
+
+      - name: SpotBugs
+        run: ./gradlew spotbugsMain spotbugsTest -x spotlessApply -x spotlessCheck
 
       - name: Build Javadocs
         run: ./gradlew javadoc -x spotlessApply -x spotlessCheck

@@ -29,7 +29,7 @@ import org.junit.Test;
  */
 public class TrapezoidProfileTests {
     @Test
-    public void TrapezoidProfileConstraintsEqualityWorks() {
+    public void trapezoidProfileConstraintsEqualityWorks() {
         Constraints constraints1 = new Constraints(1, 5);
         Constraints constraints2 = new Constraints(1.00001, 4.99999);
 
@@ -37,7 +37,7 @@ public class TrapezoidProfileTests {
     }
 
     @Test
-    public void TrapezoidProfileAgreesWithAsymmetricTrapezoidProfile() {
+    public void trapezoidProfileAgreesWithAsymmetricTrapezoidProfile() {
         TrapezoidProfile symmetrical =
                 new TrapezoidProfile(new Constraints(5, 3), new State(0, 5), new State(40, 2));
         AsymmetricTrapezoidProfile asymmetrical =

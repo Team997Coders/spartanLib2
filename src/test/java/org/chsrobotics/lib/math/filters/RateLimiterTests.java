@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -21,10 +21,10 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class RateLimiterTests {
-    private final double epsilon = 0.0001;
+    private static final double epsilon = 0.0001;
 
     @Test
-    public void RateLimiterFunctional() {
+    public void rateLimiterFunctional() {
         RateLimiter limiter = new RateLimiter(5);
 
         assertEquals(2, limiter.calculate(2, 1), epsilon);

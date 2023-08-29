@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -16,16 +16,24 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.math.filters;
 
+import org.chsrobotics.lib.util.DeltaTimeUtil;
+
 /** Common superclass for this library's filters. */
 public abstract class Filter {
+    private final DeltaTimeUtil dtUtil = new DeltaTimeUtil();
+
     /**
-     * Adds the value to the window and calculates the current output of the filter. If dt would be
-     * a required parameter for the filter, uses 20 milliseconds (the robot loop period).
+     * Adds the value to the window and calculates the current output of the filter.
+     *
+     * <p>Uses the time elapsed since last calling this method as a parameter. If this method is
+     * being called for the first time, uses the time since construction.
      *
      * @param value The value to input to the filter.
      * @return The current output of the filter.
      */
-    public abstract double calculate(double value);
+    public double calculate(double value) {
+        return calculate(value, dtUtil.getTimeSecondsSinceLastCall());
+    }
 
     /**
      * Adds the value to the window and calculates the current output of the filter, with a change
