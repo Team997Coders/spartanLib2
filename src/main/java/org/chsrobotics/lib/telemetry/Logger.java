@@ -150,7 +150,7 @@ public class Logger<T> {
         this.publishToNT = publishToNT;
         this.recordInLog = recordInLog;
 
-        logEntryIdentifier = subdirName + "_" + key;
+        logEntryIdentifier = subdirName + "/" + key;
 
         ntTopic = NetworkTableInstance.getDefault().getTable(subdirName).getTopic(key);
 
