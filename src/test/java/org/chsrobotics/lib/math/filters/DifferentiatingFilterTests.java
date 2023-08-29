@@ -25,29 +25,29 @@ public class DifferentiatingFilterTests {
     private static final double epsilon = 0.0001;
 
     @Test
-    public void DifferentiatingFilterReturnsZeroForDtOfZero() {
+    public void differentiatingFilterReturnsZeroForDtOfZero() {
         assertEquals(0, new DifferentiatingFilter().calculate(1, 0), epsilon);
     }
 
     @Test
-    public void DifferentiatingFilterDerivOfFirstInputIsCorrect() {
+    public void differentiatingFilterDerivOfFirstInputIsCorrect() {
         assertEquals(5, new DifferentiatingFilter().calculate(5, 1), epsilon);
 
-        assertEquals(200, new DifferentiatingFilter().calculate(4), epsilon);
+        assertEquals(200, new DifferentiatingFilter().calculate(4, 0.02), epsilon);
     }
 
     @Test
-    public void DifferentiatingFilterDerivIsCorrectForFixedDt() {
+    public void differentiatingFilterDerivIsCorrectForFixedDt() {
         DifferentiatingFilter filter = new DifferentiatingFilter();
 
-        filter.calculate(6);
-        assertEquals(-200, filter.calculate(2), epsilon);
-        assertEquals(0, filter.calculate(2), epsilon);
-        assertEquals(400, filter.calculate(10), epsilon);
+        assertEquals(300, filter.calculate(6, 0.02), epsilon);
+        assertEquals(-200, filter.calculate(2, 0.02), epsilon);
+        assertEquals(0, filter.calculate(2, 0.02), epsilon);
+        assertEquals(400, filter.calculate(10, 0.02), epsilon);
     }
 
     @Test
-    public void DifferentiatingFilterDerivIsCorrectForChangingDt() {
+    public void differentiatingFilterDerivIsCorrectForChangingDt() {
         DifferentiatingFilter filter = new DifferentiatingFilter();
 
         assertEquals(1, filter.calculate(2, 2), epsilon);

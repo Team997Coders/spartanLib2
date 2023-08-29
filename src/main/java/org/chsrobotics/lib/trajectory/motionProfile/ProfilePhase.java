@@ -20,9 +20,16 @@ import java.util.Objects;
 
 /** Holds constant-acceleration kinematic rates and time. */
 public class ProfilePhase {
+    /** Time to complete the phase. */
     public final double time;
+
+    /** Change in position through the phase. */
     public final double position;
+
+    /** Acceleration through the phase. */
     public final double acceleration;
+
+    /** Velocity of the phase at its start. */
     public final double initialVelocity;
 
     /**

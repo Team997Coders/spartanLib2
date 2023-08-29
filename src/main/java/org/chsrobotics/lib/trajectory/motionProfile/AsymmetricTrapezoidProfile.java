@@ -47,8 +47,20 @@ public class AsymmetricTrapezoidProfile extends MotionProfile {
      * phase of motion, and deceleration constraint for the final phase of motion.
      */
     public static class Constraints {
+
+        /** Maximum absolute velocity the profile can achieve. */
         public final double maxVelocity;
+
+        /**
+         * Maximum "acceleration" the profile can achieve. Note that this does not coorespond to
+         * "positive" acceleration, just the acceleration at the initial part of the profile.
+         */
         public final double maxAcceleration;
+
+        /**
+         * Maximum "deceleration" the profile can achieve. Note that this does not coorespond to
+         * "negative" acceleration, just the acceleration at the final part of the profile.
+         */
         public final double maxDeceleration;
 
         /**

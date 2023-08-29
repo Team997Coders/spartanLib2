@@ -42,18 +42,6 @@ public class IntegratingFilter extends Filter {
 
     @Override
     /**
-     * Adds the value to the filter, and calculates the integral, using the default robot timestep
-     * of 20 milliseconds for dt.
-     *
-     * @param value Value to add to the window of the filter.
-     * @return Value of the (approximated) integral.
-     */
-    public double calculate(double value) {
-        return calculate(value, 0.02);
-    }
-
-    @Override
-    /**
      * Adds the value to the filter and calculates the integral, using a provided dt.
      *
      * @param value Value to add to the window of the filter.

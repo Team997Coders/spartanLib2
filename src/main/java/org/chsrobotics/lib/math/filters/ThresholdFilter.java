@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -39,19 +39,13 @@ public class ThresholdFilter extends Filter {
 
     @Override
     /** {@inheritDoc} */
-    public double calculate(double value) {
+    public double calculate(double value, double dtSeconds) {
         if (!invert) {
             currentValue = (value <= threshold) ? value : 0;
         } else {
             currentValue = (value >= threshold) ? value : 0;
         }
         return currentValue;
-    }
-
-    @Override
-    /** {@inheritDoc} */
-    public double calculate(double value, double dtSeconds) {
-        return calculate(value);
     }
 
     @Override

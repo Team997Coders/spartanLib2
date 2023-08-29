@@ -21,10 +21,10 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class IntegratingFilterTests {
-    private final double epsilon = 0.0001;
+    private static final double epsilon = 0.0001;
 
     @Test
-    public void IntegratingFilterWorksInfiniteWindow() {
+    public void integratingFilterWorksInfiniteWindow() {
         IntegratingFilter filter = new IntegratingFilter(0);
 
         assertEquals(0, filter.calculate(0, 1), epsilon);
@@ -33,7 +33,7 @@ public class IntegratingFilterTests {
     }
 
     @Test
-    public void IntegratingFilterWorksFiniteWindow() {
+    public void integratingFilterWorksFiniteWindow() {
         IntegratingFilter filter = new IntegratingFilter(3);
 
         assertEquals(2, filter.calculate(2, 2), epsilon);

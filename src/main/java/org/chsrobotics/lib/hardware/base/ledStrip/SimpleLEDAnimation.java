@@ -18,10 +18,11 @@ package org.chsrobotics.lib.hardware.base.ledStrip;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /** Wraps around an array of LEDAnimationFrames, intended for playing back in sequence. */
 public class SimpleLEDAnimation implements LEDAnimation {
-    private final LEDAnimationFrame[] frames;
+    private final List<LEDAnimationFrame> frames;
 
     private final int expectedLength;
 
@@ -34,14 +35,14 @@ public class SimpleLEDAnimation implements LEDAnimation {
      *     will be reshaped to match it in length.
      */
     public SimpleLEDAnimation(List<LEDAnimationFrame> frames) {
-        this.frames = new LEDAnimationFrame[frames.size()];
+        this.frames = new ArrayList<>();
 
         if (frames.size() > 0) {
 
             int expectedLength = frames.get(0).numberOfPixels();
 
             for (int i = 0; i < frames.size(); i++)
-                this.frames[i] = frames.get(i).toNewSize(expectedLength);
+                this.frames.add(frames.get(i).toNewSize(expectedLength));
 
             this.expectedLength = expectedLength;
         } else expectedLength = 0;
@@ -53,7 +54,7 @@ public class SimpleLEDAnimation implements LEDAnimation {
      * @return The number of frames present.
      */
     public int numberOfFrames() {
-        return frames.length;
+        return frames.size();
     }
 
     @Override
@@ -83,14 +84,14 @@ public class SimpleLEDAnimation implements LEDAnimation {
      * @return The LEDAnimationFrame at that index.
      */
     public LEDAnimationFrame getFrame(int index) {
-        if (frames.length == 0) return new LEDAnimationFrame();
+        if (frames.size() == 0) return new LEDAnimationFrame();
 
         int pIndex;
-        if (index >= frames.length) pIndex = frames.length - 1;
+        if (index >= frames.size()) pIndex = frames.size() - 1;
         else if (index < 0) pIndex = 0;
         else pIndex = index;
 
-        return frames[pIndex];
+        return frames.get(pIndex);
     }
 
     /**
@@ -105,13 +106,13 @@ public class SimpleLEDAnimation implements LEDAnimation {
     public static SimpleLEDAnimation gradientCascade(int size, RGBColor colorA, RGBColor colorB) {
         if (size <= 0) return new SimpleLEDAnimation(List.of());
 
-        RGBColor[] root = new RGBColor[size];
+        ArrayList<RGBColor> root = new ArrayList<>();
 
         for (int i = 0; i < size - 1; i++) {
-            root[i] = colorA.smear(((double) i) / (size - 1), colorB);
+            root.add(colorA.smear(((double) i) / (size - 1), colorB));
         }
 
-        root[size - 1] = colorB;
+        root.add(colorB);
 
         return cascading(new LEDAnimationFrame(root));
     }
@@ -185,5 +186,10 @@ public class SimpleLEDAnimation implements LEDAnimation {
             } else return false;
 
         } else return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(frames);
     }
 }

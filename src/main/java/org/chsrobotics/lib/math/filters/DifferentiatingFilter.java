@@ -24,7 +24,6 @@ import org.chsrobotics.lib.math.UtilityMath;
  * <p>Approximated with finite timesteps.
  */
 public class DifferentiatingFilter extends Filter {
-    private final double defaultRobotPeriodSeconds = 0.02;
     private double lastValue = 0;
     private double currentDeriv = 0;
 
@@ -74,21 +73,6 @@ public class DifferentiatingFilter extends Filter {
         currentDeriv = delta / dtSeconds;
         lastValue = value;
         return currentDeriv;
-    }
-
-    /**
-     * Calculates the rate of change (derivative) of a value relative to the filter's previous
-     * input, using the default loop time of the robot.
-     *
-     * <p>The initial previous value is 0.
-     *
-     * @param value The double value to input to the filter.
-     * @return The rate of change, in units/second, between the current {@code value} and the
-     *     previous {@code value}.
-     */
-    @Override
-    public double calculate(double value) {
-        return calculate(value, defaultRobotPeriodSeconds);
     }
 
     /** {@inheritDoc} */

@@ -26,7 +26,7 @@ import org.junit.Test;
 
 public class SimpleLEDAnimationTests {
     @Test
-    public void SimpleLEDAnimationGradientCascadeWorks() {
+    public void simpleLEDAnimationGradientCascadeWorks() {
         SimpleLEDAnimation gCascade =
                 SimpleLEDAnimation.gradientCascade(5, RGBColor.BLACK, RGBColor.WHITE);
 
@@ -36,30 +36,31 @@ public class SimpleLEDAnimationTests {
 
         assertEquals(
                 new LEDAnimationFrame(
-                        RGBColor.BLACK, lightGrey, midGrey, darkerGrey, RGBColor.WHITE),
+                        List.of(RGBColor.BLACK, lightGrey, midGrey, darkerGrey, RGBColor.WHITE)),
                 gCascade.getFrame(0));
 
         assertEquals(
                 new LEDAnimationFrame(
-                        RGBColor.WHITE, RGBColor.BLACK, lightGrey, midGrey, darkerGrey),
+                        List.of(RGBColor.WHITE, RGBColor.BLACK, lightGrey, midGrey, darkerGrey)),
                 gCascade.getFrame(1));
     }
 
     @Test
-    public void SimpleLEDAnimationCascadeWorks() {
+    public void simpleLEDAnimationCascadeWorks() {
         SimpleLEDAnimation cascade =
                 SimpleLEDAnimation.cascading(
-                        new LEDAnimationFrame(RGBColor.WHITE, RGBColor.BLUE, RGBColor.BLACK));
+                        new LEDAnimationFrame(
+                                List.of(RGBColor.WHITE, RGBColor.BLUE, RGBColor.BLACK)));
 
         assertEquals(
-                new LEDAnimationFrame(RGBColor.BLACK, RGBColor.WHITE, RGBColor.BLUE),
+                new LEDAnimationFrame(List.of(RGBColor.BLACK, RGBColor.WHITE, RGBColor.BLUE)),
                 cascade.getFrame(1));
     }
 
     @Test
-    public void SimpleLEDAnimationFlashingWorks() {
-        LEDAnimationFrame a = new LEDAnimationFrame(RGBColor.BLUE, RGBColor.WHITE);
-        LEDAnimationFrame b = new LEDAnimationFrame(RGBColor.RED, RGBColor.GREEN);
+    public void simpleLEDAnimationFlashingWorks() {
+        LEDAnimationFrame a = new LEDAnimationFrame(List.of(RGBColor.BLUE, RGBColor.WHITE));
+        LEDAnimationFrame b = new LEDAnimationFrame(List.of(RGBColor.RED, RGBColor.GREEN));
 
         SimpleLEDAnimation flashing = SimpleLEDAnimation.flashing(3, 2, a, b);
 
@@ -71,17 +72,17 @@ public class SimpleLEDAnimationTests {
     }
 
     @Test
-    public void SimpleLEDAnimationInternalIterationWorks() {
+    public void simpleLEDAnimationInternalIterationWorks() {
         SimpleLEDAnimation anim =
                 new SimpleLEDAnimation(
                         List.of(
-                                new LEDAnimationFrame(RGBColor.GREEN),
-                                new LEDAnimationFrame(RGBColor.BLUE),
-                                new LEDAnimationFrame(RGBColor.RED)));
+                                new LEDAnimationFrame(List.of(RGBColor.GREEN)),
+                                new LEDAnimationFrame(List.of(RGBColor.BLUE)),
+                                new LEDAnimationFrame(List.of(RGBColor.RED))));
 
-        assertEquals(new LEDAnimationFrame(RGBColor.GREEN), anim.getNextFrame());
-        assertEquals(new LEDAnimationFrame(RGBColor.BLUE), anim.getNextFrame());
-        assertEquals(new LEDAnimationFrame(RGBColor.RED), anim.getNextFrame());
-        assertEquals(new LEDAnimationFrame(RGBColor.GREEN), anim.getNextFrame());
+        assertEquals(new LEDAnimationFrame(List.of(RGBColor.GREEN)), anim.getNextFrame());
+        assertEquals(new LEDAnimationFrame(List.of(RGBColor.BLUE)), anim.getNextFrame());
+        assertEquals(new LEDAnimationFrame(List.of(RGBColor.RED)), anim.getNextFrame());
+        assertEquals(new LEDAnimationFrame(List.of(RGBColor.GREEN)), anim.getNextFrame());
     }
 }

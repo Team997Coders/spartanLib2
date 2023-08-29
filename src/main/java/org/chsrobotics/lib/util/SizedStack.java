@@ -26,6 +26,7 @@ import java.util.Stack;
  */
 public class SizedStack<T> extends Stack<T> {
 
+    /** I have no clue why but javadoc thinks this is public and therefore needs docs */
     private final int maxSize;
 
     /**
@@ -48,5 +49,15 @@ public class SizedStack<T> extends Stack<T> {
         }
 
         return item;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return super.equals(other);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

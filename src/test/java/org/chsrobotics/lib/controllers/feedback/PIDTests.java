@@ -22,10 +22,10 @@ import org.junit.Test;
 
 /** Tests for the SpartanLib PID controller. */
 public class PIDTests {
-    private final double epsilon = 0.0001;
+    private static final double epsilon = 0.0001;
 
     @Test
-    public void PIDProportionalControllerWorks() {
+    public void pidProportionalControllerWorks() {
         PID controller = new PID(1, 0, 0, 0, 0);
         controller.setSetpoint(5);
         assertEquals(5, controller.calculate(0), epsilon);
@@ -35,7 +35,7 @@ public class PIDTests {
     }
 
     @Test
-    public void PIDIntegralControllerWorks() {
+    public void pidIntegralControllerWorks() {
         PID controller = new PID(0, 0.1, 0, 0, 10);
         assertEquals(1, controller.calculate(0, 1), epsilon);
         assertEquals(1.9, controller.calculate(1, 1), epsilon);
@@ -45,13 +45,13 @@ public class PIDTests {
         assertEquals(0, controller.getIntegralAccumulation(), 0);
 
         controller.setkI(2.5);
-        assertEquals(0.5, controller.calculate(0), epsilon);
-        assertEquals(0.75, controller.calculate(5), epsilon);
-        assertEquals(0.5, controller.calculate(15), epsilon);
+        assertEquals(0.5, controller.calculate(0, 0.02), epsilon);
+        assertEquals(0.75, controller.calculate(5, 0.02), epsilon);
+        assertEquals(0.5, controller.calculate(15, 0.02), epsilon);
     }
 
     @Test
-    public void PIDDerivativeControllerWorks() {
+    public void pidDerivativeControllerWorks() {
         PID controller = new PID(0, 0, 0.1, 0, 10);
         assertEquals(0, controller.calculate(0, 1), epsilon);
         assertEquals(-0.5, controller.calculate(5, 1), epsilon);
@@ -60,12 +60,12 @@ public class PIDTests {
 
         controller.resetPreviousMeasurement();
         controller.setkD(2);
-        assertEquals(-100, controller.calculate(1), epsilon);
+        assertEquals(-100, controller.calculate(1, 0.02), epsilon);
         assertEquals(0, controller.calculate(1), epsilon);
     }
 
     @Test
-    public void PIDAtSetpointWorks() {
+    public void pidAtSetpointWorks() {
         PID controller = new PID(0, 0, 0, 0, 100);
 
         controller.calculate(98);

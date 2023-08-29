@@ -16,20 +16,29 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.base.ledStrip;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 /**
  * Wraps around an array of RGBColors (or individual pixel color values), intended for combination
  * into full animations.
  */
 public class LEDAnimationFrame {
-    private final RGBColor[] pixels;
+    private final List<RGBColor> pixelColors;
 
     /**
      * Constructs an LEDAnimationFrame.
      *
      * @param pixelColors Individual pixel colors to form the frame.
      */
-    public LEDAnimationFrame(RGBColor... pixelColors) {
-        this.pixels = pixelColors;
+    public LEDAnimationFrame(List<RGBColor> pixelColors) {
+        this.pixelColors = List.copyOf(pixelColors);
+    }
+
+    /** Constructor for an empty LEDAnimationFrame. */
+    public LEDAnimationFrame() {
+        this(List.of());
     }
 
     /**
@@ -38,7 +47,7 @@ public class LEDAnimationFrame {
      * @return The number of individual colors.
      */
     public int numberOfPixels() {
-        return pixels.length;
+        return pixelColors.size();
     }
 
     /**
@@ -48,8 +57,8 @@ public class LEDAnimationFrame {
      * @return The color at that index. If not a valid index, returns {@code RGBColor.BLACK}.
      */
     public RGBColor getPixel(int index) {
-        if (index < 0 || index >= pixels.length) return RGBColor.BLACK;
-        return pixels[index];
+        if (index < 0 || index >= numberOfPixels()) return RGBColor.BLACK;
+        return pixelColors.get(index);
     }
 
     /**
@@ -61,13 +70,13 @@ public class LEDAnimationFrame {
      *     the new size.
      */
     public LEDAnimationFrame toNewSize(int newSize) {
-        RGBColor[] output = new RGBColor[newSize];
-        if (newSize == pixels.length || newSize <= 0 || numberOfPixels() == 0) {
+        ArrayList<RGBColor> output = new ArrayList<>();
+        if (newSize == numberOfPixels() || newSize <= 0 || numberOfPixels() == 0) {
             return this;
-        } else if (newSize < pixels.length) {
-            for (int i = 0; i < newSize; i++) output[i] = pixels[i];
+        } else if (newSize < numberOfPixels()) {
+            for (int i = 0; i < newSize; i++) output.add(pixelColors.get(i));
         } else {
-            for (int i = 0; i < newSize; i++) output[i] = pixels[i % pixels.length];
+            for (int i = 0; i < newSize; i++) output.add(pixelColors.get(i % numberOfPixels()));
         }
         return new LEDAnimationFrame(output);
     }
@@ -80,17 +89,17 @@ public class LEDAnimationFrame {
      * @return A new LEDAnimationFrame.
      */
     public LEDAnimationFrame offset(int step) {
-        int modStep = step % pixels.length;
+        int modStep = step % numberOfPixels();
 
-        RGBColor[] output = new RGBColor[pixels.length];
+        ArrayList<RGBColor> output = new ArrayList<>(pixelColors);
 
-        for (int i = 0; i < pixels.length; i++) {
+        for (int i = 0; i < numberOfPixels(); i++) {
             int newIndex = i + modStep;
 
-            if (newIndex >= pixels.length) newIndex = newIndex - pixels.length;
-            else if (newIndex < 0) newIndex = newIndex + pixels.length;
+            if (newIndex >= numberOfPixels()) newIndex = newIndex - numberOfPixels();
+            else if (newIndex < 0) newIndex = newIndex + numberOfPixels();
 
-            output[newIndex] = pixels[i];
+            output.set(newIndex, pixelColors.get(i));
         }
 
         return new LEDAnimationFrame(output);
@@ -103,17 +112,13 @@ public class LEDAnimationFrame {
      * @return A new LEDAnimationFrame.
      */
     public LEDAnimationFrame add(LEDAnimationFrame other) {
-        RGBColor[] colors = new RGBColor[this.pixels.length + other.pixels.length];
+        ArrayList<RGBColor> output = new ArrayList<>();
 
-        for (int i = 0; i < this.pixels.length; i++) {
-            colors[i] = this.pixels[i];
-        }
+        for (RGBColor color : this.pixelColors) output.add(color);
 
-        for (int i = 0; i < other.pixels.length; i++) {
-            colors[i + this.pixels.length] = other.pixels[i];
-        }
+        for (RGBColor color : other.pixelColors) output.add(color);
 
-        return new LEDAnimationFrame(colors);
+        return new LEDAnimationFrame(output);
     }
 
     /**
@@ -132,17 +137,17 @@ public class LEDAnimationFrame {
             int numberColorA, int numberColorB, RGBColor colorA, RGBColor colorB) {
         if (numberColorA <= 0 || numberColorB <= 0) return new LEDAnimationFrame();
 
-        RGBColor[] colors = new RGBColor[numberColorA + numberColorB];
+        ArrayList<RGBColor> output = new ArrayList<>();
 
         for (int i = 0; i < numberColorA; i++) {
-            colors[i] = colorA;
+            output.add(colorA);
         }
 
         for (int i = 0; i < numberColorB; i++) {
-            colors[i + numberColorA] = colorB;
+            output.add(colorB);
         }
 
-        return new LEDAnimationFrame(colors);
+        return new LEDAnimationFrame(output);
     }
 
     @Override
@@ -160,5 +165,10 @@ public class LEDAnimationFrame {
             } else return false;
 
         } else return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(pixelColors);
     }
 }

@@ -23,6 +23,7 @@ import org.chsrobotics.lib.math.UtilityMath;
 import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
 import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.telemetry.Logger.LoggerFactory;
+import org.chsrobotics.lib.util.DeltaTimeUtil;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 import org.chsrobotics.lib.util.SizedStack;
 
@@ -65,7 +66,7 @@ import org.chsrobotics.lib.util.SizedStack;
  * to make a velocity PID controller, or something else with a controlled quantity other than
  * position.
  */
-public class PID implements FeedbackController, IntrinsicLoggable {
+public class PID implements IntrinsicLoggable {
 
     /** Data class for holding the gains to a PID controller. */
     public static class PIDConstants {
@@ -160,8 +161,8 @@ public class PID implements FeedbackController, IntrinsicLoggable {
 
     private double velocity = 0;
 
-    private double positionTolerance = FeedbackController.defaultPositionErrorToleranceProportion;
-    private double velocityTolerance = FeedbackController.defaultVelocityErrorToleranceProportion;
+    private double positionTolerance = 0.02;
+    private double velocityTolerance = 0.02;
 
     private double currentValue = 0;
 
@@ -192,6 +193,8 @@ public class PID implements FeedbackController, IntrinsicLoggable {
     private Logger<Boolean> atSetpointLogger;
     private Logger<Double> setpointPositionToleranceLogger;
     private Logger<Double> setpointVelocityToleranceLogger;
+
+    private final DeltaTimeUtil dtUtil = new DeltaTimeUtil();
 
     /**
      * Constructs a PID with given gains and a finite integration window.
@@ -463,15 +466,21 @@ public class PID implements FeedbackController, IntrinsicLoggable {
         this.kD = kD;
     }
 
-    @Override
-    /** {@inheritDoc} */
+    /**
+     * Sets the setpoint (target) of the controller.
+     *
+     * @param value The new target of the controller.
+     */
     public void setSetpoint(double value) {
         if (angular) setpoint = MathUtil.angleModulus(value);
         else setpoint = value;
     }
 
-    @Override
-    /** {@inheritDoc} */
+    /**
+     * Returns the current setpoint (target) of the controller.
+     *
+     * @return The current setpoint.
+     */
     public double getSetpoint() {
         return setpoint;
     }
@@ -504,7 +513,6 @@ public class PID implements FeedbackController, IntrinsicLoggable {
     }
 
     /** Resets all references to past states in the controller, effectively restarting it. */
-    @Override
     public void reset() {
         resetIntegralAccumulation();
         resetPreviousMeasurement();
@@ -518,7 +526,6 @@ public class PID implements FeedbackController, IntrinsicLoggable {
      * @param velocityTolerance The maximum allowed absolute velocity per second, as a proportion of
      *     the setpoint / second.
      */
-    @Override
     public void setSetpointTolerance(double positionTolerance, double velocityTolerance) {
         this.positionTolerance = positionTolerance;
         this.velocityTolerance = velocityTolerance;
@@ -542,8 +549,13 @@ public class PID implements FeedbackController, IntrinsicLoggable {
         return velocityTolerance;
     }
 
-    @Override
-    /** {@inheritDoc} */
+    /**
+     * Returns an output from the controller with a given dt.
+     *
+     * @param measurement The value of the measured feedback.
+     * @param dt The time, in seconds, since the last update of this controller.
+     * @return The output of the controller.
+     */
     public double calculate(double measurement, double dt) {
         if (angular) measurement = MathUtil.angleModulus(measurement);
 
@@ -618,8 +630,11 @@ public class PID implements FeedbackController, IntrinsicLoggable {
         }
     }
 
-    @Override
-    /** {@inheritDoc} */
+    /**
+     * Returns the last output of the controller without updating with a new value.
+     *
+     * @return The last ouptut of the controller.
+     */
     public double getCurrentValue() {
         return currentValue;
     }
@@ -730,14 +745,24 @@ public class PID implements FeedbackController, IntrinsicLoggable {
         return maxAbsDContribution;
     }
 
-    @Override
-    /** {@inheritDoc} */
+    /**
+     * Returns an output from the controller with a given dt.
+     *
+     * <p>Uses the time elapsed since last calling this method as a parameter. If this method is
+     * being called for the first time, uses the time since construction.
+     *
+     * @param measurement The value of the measured feedback.
+     * @return The output of the controller.
+     */
     public double calculate(double measurement) {
-        return calculate(measurement, 0.02);
+        return calculate(measurement, dtUtil.getTimeSecondsSinceLastCall());
     }
 
-    @Override
-    /** {@inheritDoc} */
+    /**
+     * Returns whether the controller has reached the setpoint with minimal velocity.
+     *
+     * @return Whether the controller is within the minimum position and velocity errors.
+     */
     public boolean atSetpoint() {
         return (Math.abs(setpoint - lastMeasurement) < Math.abs(positionTolerance * setpoint)
                 && Math.abs(velocity) < Math.abs(velocityTolerance * setpoint));

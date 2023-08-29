@@ -37,7 +37,10 @@ public class TrapezoidProfile extends AsymmetricTrapezoidProfile {
 
     /** Data class to hold the maximum allowed rates for the output of a TrapezoidProfile. */
     public static class Constraints {
+        /** Maximum absolute velocity the profile can achieve. */
         public final double maxVelocity;
+
+        /** Maximum absolute acceleration the profile can achieve. */
         public final double maxAcceleration;
 
         /**
