@@ -25,7 +25,7 @@ jobs:
         run: ./gradlew test -x spotlessApply -x spotlessCheck
 
       - name: SpotBugs
-        run: ./gradlew spotbugsMain spotbugsTest
+        run: ./gradlew spotbugsMain spotbugsTest -x spotlessApply -x spotlessCheck
 
       - name: Build Javadocs
         run: ./gradlew javadoc -x spotlessApply -x spotlessCheck
