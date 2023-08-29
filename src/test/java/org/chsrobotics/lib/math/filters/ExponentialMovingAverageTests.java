@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -21,10 +21,10 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class ExponentialMovingAverageTests {
-    private final double epsilon = 0.0001;
+    private static final double epsilon = 0.0001;
 
     @Test
-    public void ExponentialMovingAverageWorks() {
+    public void exponentialMovingAverageWorks() {
         ExponentialMovingAverage movingAverage = new ExponentialMovingAverage(0.5);
 
         assertEquals(0.5, movingAverage.calculate(1), epsilon);

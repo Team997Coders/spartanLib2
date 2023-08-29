@@ -1,5 +1,5 @@
 /**
-Copyright 2022 FRC Team 997
+Copyright 2022-2023 FRC Team 997
 
 This program is free software: 
 you can redistribute it and/or modify it under the terms of the 
@@ -40,16 +40,10 @@ public class ExponentialMovingAverage extends Filter {
 
     @Override
     /** {@inheritDoc} */
-    public double calculate(double value) {
+    public double calculate(double value, double dtSeconds) {
         lastOutput = (value * responseConstant) + ((1 - responseConstant) * lastOutput);
 
         return lastOutput;
-    }
-
-    @Override
-    /** {@inheritDoc} */
-    public double calculate(double value, double dtSeconds) {
-        return calculate(value);
     }
 
     @Override

@@ -23,7 +23,7 @@ import org.junit.Test;
 
 public class DoubleJointedArmKinematicsTests {
     @Test
-    public void DoubleJointedInverseKinematicsRejectsImpossible() {
+    public void doubleJointedInverseKinematicsRejectsImpossible() {
         DoubleJointedArmKinematics kinematics = new DoubleJointedArmKinematics(1, 1);
 
         assertEquals(null, kinematics.inverseKinematics(3, 0).firstValue());
@@ -36,61 +36,61 @@ public class DoubleJointedArmKinematicsTests {
     }
 
     @Test
-    public void DoubleJointedInverseKinematicsWorks() {
+    public void doubleJointedInverseKinematicsWorks() {
         DoubleJointedArmKinematics kinematics = new DoubleJointedArmKinematics(2, 1);
 
         assertEquals(
                 -Math.acos(0.875),
-                kinematics.inverseKinematics(2, 0).firstValue().localAngle,
+                kinematics.inverseKinematics(2, 0).firstValue().localAngle(),
                 UtilityMath.defaultAbsoluteEpsilon);
         assertEquals(
                 Math.acos(0.875),
-                kinematics.inverseKinematics(2, 0).secondValue().localAngle,
+                kinematics.inverseKinematics(2, 0).secondValue().localAngle(),
                 UtilityMath.defaultAbsoluteEpsilon);
 
         assertEquals(
                 Math.PI - Math.acos(0.25),
-                kinematics.inverseKinematics(2, 0).firstValue().distalAngle,
+                kinematics.inverseKinematics(2, 0).firstValue().distalAngle(),
                 UtilityMath.defaultAbsoluteEpsilon);
 
         assertEquals(
                 Math.acos(0.25) - Math.PI,
-                kinematics.inverseKinematics(2, 0).secondValue().distalAngle,
+                kinematics.inverseKinematics(2, 0).secondValue().distalAngle(),
                 UtilityMath.defaultAbsoluteEpsilon);
     }
 
     @Test
-    public void DoubleJointedForwardKinematicsWorks() {
+    public void doubleJointedForwardKinematicsWorks() {
         DoubleJointedArmKinematics kinematics = new DoubleJointedArmKinematics(1, 1);
 
         assertEquals(
                 2,
-                kinematics.forwardKinematics(Math.PI / 2, 0).endEffectorY,
+                kinematics.forwardKinematics(Math.PI / 2, 0).endEffectorY(),
                 UtilityMath.defaultAbsoluteEpsilon);
 
         assertEquals(
                 0,
-                kinematics.forwardKinematics(Math.PI / 2, 0).endEffectorX,
+                kinematics.forwardKinematics(Math.PI / 2, 0).endEffectorX(),
                 UtilityMath.defaultAbsoluteEpsilon);
 
         assertEquals(
                 Math.sqrt(2),
-                kinematics.forwardKinematics(Math.PI / 4, 0).endEffectorX,
+                kinematics.forwardKinematics(Math.PI / 4, 0).endEffectorX(),
                 UtilityMath.defaultAbsoluteEpsilon);
 
         assertEquals(
                 Math.sqrt(2),
-                kinematics.forwardKinematics(Math.PI / 4, 0).endEffectorY,
+                kinematics.forwardKinematics(Math.PI / 4, 0).endEffectorY(),
                 UtilityMath.defaultAbsoluteEpsilon);
 
         assertEquals(
                 (Math.sqrt(2) / 2) + 1,
-                kinematics.forwardKinematics(Math.PI / 4, -Math.PI / 4).endEffectorX,
+                kinematics.forwardKinematics(Math.PI / 4, -Math.PI / 4).endEffectorX(),
                 UtilityMath.defaultAbsoluteEpsilon);
 
         assertEquals(
                 Math.sqrt(2) / 2,
-                kinematics.forwardKinematics(Math.PI / 4, -Math.PI / 4).endEffectorY,
+                kinematics.forwardKinematics(Math.PI / 4, -Math.PI / 4).endEffectorY(),
                 UtilityMath.defaultAbsoluteEpsilon);
     }
 }

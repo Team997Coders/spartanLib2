@@ -4,6 +4,7 @@ plugins {
 	id 'com.diffplug.spotless' version '6.11.0'
 	id 'maven-publish'
 	id 'signing'
+	id("com.github.spotbugs") version "5.0.14"
 }
 
 def VERSION = "1.4.1"
@@ -20,6 +21,8 @@ dependencies {
 	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 
 	testImplementation 'junit:junit:4.13.2'
+
+	compileOnly "com.github.spotbugs:spotbugs-annotations:${spotbugs.toolVersion.get()}"
 }
 
 if (hasProperty('buildScan')) {
@@ -58,6 +61,12 @@ javadoc {
 	if(JavaVersion.current().isJava9Compatible()) {
 		options.addBooleanOption('html5', true)
 	}
+
+	options.memberLevel = JavadocMemberLevel.PUBLIC
+}
+
+spotbugs {
+	ignoreFailures = true // don't want spotbugs failing CI, although it should still be run
 }
 
 java {
