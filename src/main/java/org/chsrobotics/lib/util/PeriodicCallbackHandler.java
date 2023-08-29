@@ -86,36 +86,16 @@ public class PeriodicCallbackHandler {
      *     callbacks. This can be useful for debugging.
      */
     public static void executeCallbacks(boolean suppressStackTraces) {
-        ArrayList<CallbackAndTimestamp> outOfScopeTimeCallbacks = new ArrayList<>();
 
         for (CallbackAndTimestamp entry : timeCallbacks.values()) {
-            try {
-                double currentTime = System.currentTimeMillis() / 1000;
+            double currentTime = System.currentTimeMillis() / 1000.0;
 
-                entry.callback.accept(currentTime - entry.timestamp);
-                entry.timestamp = currentTime;
-            } catch (NullPointerException e) {
-                outOfScopeTimeCallbacks.add(entry);
-
-                if (!suppressStackTraces) e.printStackTrace();
-            }
+            entry.callback.accept(currentTime - entry.timestamp);
+            entry.timestamp = currentTime;
         }
-
-        for (CallbackAndTimestamp entry : outOfScopeTimeCallbacks)
-            deregisterCallback(entry.callback);
-
-        ArrayList<Runnable> outOfScopeVoidCallbacks = new ArrayList<>();
 
         for (Runnable runnable : voidCallbacks) {
-            try {
-                runnable.run();
-            } catch (NullPointerException e) {
-                outOfScopeVoidCallbacks.add(runnable);
-
-                if (!suppressStackTraces) e.printStackTrace();
-            }
+            runnable.run();
         }
-
-        for (Runnable runnable : outOfScopeVoidCallbacks) deregisterCallback(runnable);
     }
 }

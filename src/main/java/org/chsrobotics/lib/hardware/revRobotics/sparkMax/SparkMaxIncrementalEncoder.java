@@ -19,6 +19,7 @@ package org.chsrobotics.lib.hardware.revRobotics.sparkMax;
 import com.revrobotics.MotorFeedbackSensor;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxRelativeEncoder.Type;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.chsrobotics.lib.hardware.StalenessWatchable;
 import org.chsrobotics.lib.hardware.base.encoder.AbstractEncoder;
 import org.chsrobotics.lib.hardware.revRobotics.sparkMax.SpartanSparkMAX.SparkMaxRemoteFeedbackDevice;
@@ -95,6 +96,7 @@ public class SparkMaxIncrementalEncoder extends AbstractEncoder
     }
 
     @Override
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public MotorFeedbackSensor getRevSensor() {
         return encoder;
     }

@@ -142,9 +142,9 @@ public class SpartanPDH extends AbstractPowerDistribution {
     }
 
     // indexing of channels is 0-based-- 22 is actual highest channel num (excluding switchable)
-    private final int numChannels = 23;
+    private static final int numChannels = 23;
 
-    private final int switchableChannelIndex = 23;
+    private static final int switchableChannelIndex = 23;
 
     private final PDHConfig config;
 

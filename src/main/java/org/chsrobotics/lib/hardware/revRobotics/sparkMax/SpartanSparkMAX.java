@@ -69,7 +69,7 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
             double currentLimitAmps,
             IdleMode initialIdleMode) {}
 
-    private final double hardCurrentLimitModifier = 1.5;
+    private static final double hardCurrentLimitModifier = 1.5;
     // multiply the "smart" current limit by this to get the secondary current limit.
 
     private final SparkMaxConfig config;
@@ -91,8 +91,8 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
     private boolean encPortEncoderInUse = false;
     private boolean dataPortEncoderInUse = false;
 
-    private final int notInUsePeriodMS = 10000;
-    private final int inUsePeriodMS = 20;
+    private static final int notInUsePeriodMS = 10000;
+    private static final int inUsePeriodMS = 20;
 
     private final PeriodicFrame faultsFrame = PeriodicFrame.kStatus0;
     private final PeriodicFrame coreTLMFrame = PeriodicFrame.kStatus1;
@@ -224,6 +224,9 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
             stickyFaultsLogger =
                     new Logger<>(log, name + "/stickyFaults", subdirName, publishToNT, recordInLog);
 
+            stalenessWatchdogTriggeredLogger =
+                    new Logger<>(log, name + "/isStale", subdirName, publishToNT, recordInLog);
+
             PeriodicCallbackHandler.registerCallback(this::updateLogs);
 
             logsConstructed = true;
@@ -245,7 +248,7 @@ public class SpartanSparkMAX extends AbstractSmartMotorController {
 
             faultsLogger.update(faults.toArray(new FaultID[] {}));
 
-            stickyFaultsLogger.update(faults.toArray(new FaultID[] {}));
+            stickyFaultsLogger.update(stickyFaults.toArray(new FaultID[] {}));
         }
     }
 

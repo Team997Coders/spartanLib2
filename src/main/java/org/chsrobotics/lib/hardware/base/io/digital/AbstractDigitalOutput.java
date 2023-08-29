@@ -16,29 +16,5 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.base.io.digital;
 
-import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
-
-// TODO docs
-public interface AbstractDigitalOutput extends IntrinsicLoggable {
-    public static enum DigitalOutputState {
-        HIGH,
-        LOW,
-        NONE;
-
-        public Boolean asBool() {
-            if (this == DigitalOutputState.NONE) return null;
-            else if (this == DigitalOutputState.HIGH) return true;
-            else return false;
-        }
-
-        public static DigitalOutputState fromBoolean(Boolean bool) {
-            if (bool == null) return DigitalOutputState.NONE;
-            if (bool) return DigitalOutputState.HIGH;
-            else return DigitalOutputState.LOW;
-        }
-    }
-
-    public boolean setOutput(DigitalOutputState state);
-
-    public DigitalOutputState getCurrentOutput();
-}
+// TODO
+public interface AbstractDigitalOutput {}

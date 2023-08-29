@@ -16,6 +16,7 @@ If not, see <https://www.gnu.org/licenses/>.
 */
 package org.chsrobotics.lib.hardware.base.swerve;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.datalog.DataLog;
 import org.chsrobotics.lib.hardware.base.encoder.AbstractAbsoluteEncoder;
@@ -37,6 +38,7 @@ public class CoaxialSwerveModule implements IntrinsicLoggable {
     private final AbstractEncoder driveFeedback;
     private final AbstractAbsoluteEncoder steerFeedback;
 
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
     public CoaxialSwerveModule(
             AbstractMotorController driveMotor,
             AbstractMotorController steerMotor,
@@ -54,10 +56,12 @@ public class CoaxialSwerveModule implements IntrinsicLoggable {
         this.steerFeedback = steerFeedback;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public AbstractMotorController getDriveMotor() {
         return driveMotor;
     }
 
+    @SuppressFBWarnings("EI_EXPOSE_REP")
     public AbstractMotorController getSteerMotor() {
         return steerMotor;
     }

@@ -36,7 +36,7 @@ public class SpartanPDP extends AbstractPowerDistribution {
     }
 
     // indexing of channels is 0-based-- 15 is actual highest channel num
-    private final int numChannels = 16;
+    private static final int numChannels = 16;
 
     private final PDPConfig config;
     private final PowerDistribution pdp;

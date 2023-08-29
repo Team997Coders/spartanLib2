@@ -21,21 +21,14 @@ import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.util.datalog.DataLog;
+import edu.wpi.first.wpilibj.RobotBase;
 import org.chsrobotics.lib.hardware.base.imu.AbstractIMU;
 import org.chsrobotics.lib.telemetry.Logger;
 import org.chsrobotics.lib.util.PeriodicCallbackHandler;
 
 // TODO: docs
 public class SpartanNavX extends AbstractIMU {
-    public static record NavXConfig(Rotation3d offset, boolean isReal) {
-        public NavXConfig setOffset(Rotation3d offset) {
-            return new NavXConfig(offset, isReal);
-        }
-
-        public NavXConfig setIsReal(boolean isReal) {
-            return new NavXConfig(offset, isReal);
-        }
-    }
+    public static record NavXConfig(Rotation3d offset) {}
 
     private final NavXConfig config;
 
@@ -48,6 +41,10 @@ public class SpartanNavX extends AbstractIMU {
 
     public SpartanNavX(NavXConfig config) {
         this.config = config;
+
+        if (RobotBase.isReal()) {
+            navx = new AHRS();
+        }
 
         PeriodicCallbackHandler.registerCallback(this::updateLogs);
     }
@@ -87,7 +84,7 @@ public class SpartanNavX extends AbstractIMU {
 
         // TODO: ensure axes align as expected on physical hardware
 
-        if (config.isReal)
+        if (RobotBase.isReal())
             return new Translation3d(
                     g * navx.getRawAccelX(), g * navx.getRawAccelY(), g * navx.getRawAccelZ());
         else return new Translation3d();
@@ -95,7 +92,7 @@ public class SpartanNavX extends AbstractIMU {
 
     @Override
     public Rotation3d getRawOrientation() {
-        if (config.isReal) {
+        if (RobotBase.isReal()) {
             // navx api is downright psychotic
             double qW = -Math.PI * navx.getQuaternionW();
             double qX = -Math.PI * navx.getQuaternionX();
@@ -108,17 +105,17 @@ public class SpartanNavX extends AbstractIMU {
     }
 
     public boolean isCalibrating() {
-        if (config.isReal) return navx.isCalibrating();
+        if (RobotBase.isReal()) return navx.isCalibrating();
         else return false;
     }
 
     public void startCalibration() {
-        if (config.isReal) navx.calibrate();
+        if (RobotBase.isReal()) navx.calibrate();
     }
 
     private void updateLogs() {
         if (logsConstructed) {
-            if (config.isReal) {
+            if (RobotBase.isReal()) {
                 temperatureLogger.update((double) navx.getTempC());
             }
 
@@ -128,7 +125,7 @@ public class SpartanNavX extends AbstractIMU {
 
     @Override
     public boolean isStale() {
-        if (config.isReal) {
+        if (RobotBase.isReal()) {
             return !navx.isConnected();
         } else return false;
     }

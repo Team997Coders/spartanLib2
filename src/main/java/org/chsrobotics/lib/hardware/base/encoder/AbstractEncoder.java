@@ -17,6 +17,8 @@ If not, see <https://www.gnu.org/licenses/>.
 package org.chsrobotics.lib.hardware.base.encoder;
 
 import edu.wpi.first.util.datalog.DataLog;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 import org.chsrobotics.lib.hardware.StalenessWatchable;
 import org.chsrobotics.lib.math.filters.DifferentiatingFilter;
 import org.chsrobotics.lib.telemetry.IntrinsicLoggable;
@@ -72,35 +74,32 @@ public abstract class AbstractEncoder implements IntrinsicLoggable, StalenessWat
     /**
      * Returned encoder is no longer a true absolute encoder, so it uses the base object
      *
+     * <p>Mention that putting an absolute encoder through this is bad and will cause velocity
+     * discontinuities
+     *
      * @param gearRatio
      * @return
      */
     public AbstractEncoder withGearRatio(GearRatioHelper gearRatio) {
-        return new AbstractEncoder() {
+        BooleanSupplier isStaleLambda = this::isStale;
 
+        DoubleSupplier rawPositionLambda = this::getRawPosition;
+        DoubleSupplier convertedPositionLambda = this::getConvertedPosition;
+
+        return new AbstractEncoder() {
             @Override
             public boolean isStale() {
-                return this.isStale();
+                return isStaleLambda.getAsBoolean();
             }
 
             @Override
             public double getRawPosition() {
-                return this.getRawPosition();
+                return rawPositionLambda.getAsDouble();
             }
 
             @Override
             public double getConvertedPosition() {
-                return gearRatio.outputFromInput(this.getConvertedPosition());
-            }
-
-            @Override
-            public double getConvertedVelocity() {
-                return gearRatio.outputFromInput(this.getConvertedVelocity());
-            }
-
-            @Override
-            public double getConvertedAcceleration() {
-                return gearRatio.outputFromInput(this.getConvertedAcceleration());
+                return gearRatio.outputFromInput(convertedPositionLambda.getAsDouble());
             }
         };
     }
